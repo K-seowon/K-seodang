@@ -1,0 +1,323 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>K-서당 시제품</title>
+<link href="https://fonts.googleapis.com/css2?family=Nanum+Myeongjo:wght@400;700;800&family=Noto+Sans+KR:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --paper:#F3EEE4; --paper-deep:#E8E0CF;
+    --ink:#22302F; --ink-soft:#5A6462;
+    --celadon:#8FB3A3; --celadon-deep:#5E8C7B;
+    --dancheong:#B3372E; --ochre:#C9A56B;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{background:#D9D3C6;font-family:"Noto Sans KR",system-ui,sans-serif;color:var(--ink);display:flex;justify-content:center;min-height:100vh}
+  #app{width:390px;max-width:100%;min-height:100vh;background:var(--paper);display:flex;flex-direction:column;position:relative}
+
+  header{display:flex;justify-content:space-between;align-items:baseline;padding:18px 20px 10px}
+  header h1{font-family:"Nanum Myeongjo",serif;font-weight:800;font-size:22px;letter-spacing:-0.5px}
+  header h1 small{font-size:12px;color:var(--ink-soft);font-weight:400;margin-left:6px}
+  .points{font-family:"Nanum Myeongjo",serif;font-size:18px;font-weight:700}
+  .points span{font-size:12px;color:var(--ink-soft);margin-left:3px;font-weight:400}
+
+  main{flex:1;padding:8px 20px 90px;overflow:auto}
+  .screen{display:none}.screen.active{display:block}
+
+  nav{position:fixed;bottom:0;width:390px;max-width:100%;display:flex;background:var(--ink);border-top:3px solid var(--dancheong)}
+  nav button{flex:1;padding:14px 0 16px;background:none;border:0;color:#A9B3B1;font-size:14px;font-family:"Noto Sans KR",sans-serif;cursor:pointer}
+  nav button.active{color:#fff;font-weight:700}
+
+  /* 서당 */
+  .progress{font-size:13px;color:var(--ink-soft);margin-bottom:14px}
+  .gu-line{font-family:"Nanum Myeongjo",serif;font-size:20px;letter-spacing:8px;text-align:center;margin:6px 0 2px}
+  .gu-line b{color:var(--dancheong)}
+  .gu-line .done{color:var(--celadon-deep)}
+  .gu-meaning{text-align:center;font-size:13px;color:var(--ink-soft);margin-bottom:18px}
+  .card{background:#fff;border:1px solid var(--paper-deep);padding:26px 20px 22px;text-align:center}
+  .hanja{font-family:"Nanum Myeongjo",serif;font-size:128px;line-height:1;font-weight:400}
+  .reading{font-family:"Nanum Myeongjo",serif;font-size:22px;margin-top:14px}
+  .reading em{font-style:normal;font-weight:800}
+  .hint{font-size:12px;color:var(--ink-soft);margin-top:8px}
+  .btn{display:block;width:100%;margin-top:14px;padding:14px;border:0;background:var(--ink);color:#fff;font-size:15px;font-family:"Noto Sans KR",sans-serif;cursor:pointer}
+  .btn.ghost{background:none;border:1px solid var(--ink);color:var(--ink)}
+  .btn:disabled{background:#B8B4AA;cursor:default;border-color:#B8B4AA;color:#fff}
+  .choices{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:16px}
+  .choices button{padding:16px 8px;background:#fff;border:1px solid var(--ink);font-size:17px;font-family:"Nanum Myeongjo",serif;cursor:pointer}
+  .choices button.right{background:var(--celadon);border-color:var(--celadon-deep)}
+  .choices button.wrong{background:#F1D5D2;border-color:var(--dancheong)}
+  .feedback{text-align:center;margin-top:14px;font-size:15px;min-height:22px}
+  .feedback.good{color:var(--celadon-deep);font-weight:700}
+  .feedback.bad{color:var(--dancheong)}
+
+  /* 저잣거리 */
+  .shop-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px}
+  .shop-item{background:#fff;border:1px solid var(--paper-deep);padding:14px 6px 10px;text-align:center}
+  .shop-item .icon{font-size:40px;line-height:1}
+  .shop-item .name{font-size:13px;margin-top:8px}
+  .shop-item .price{font-family:"Nanum Myeongjo",serif;font-weight:700;font-size:15px;margin-top:2px}
+  .shop-item button{margin-top:8px;width:100%;padding:7px;border:0;background:var(--ink);color:#fff;font-size:12px;cursor:pointer}
+  .shop-item button:disabled{background:#B8B4AA}
+  .shop-item .own{font-size:11px;color:var(--celadon-deep);margin-top:4px;min-height:14px}
+
+  /* 정원 */
+  .garden{position:relative;height:320px;border:1px solid var(--paper-deep);overflow:hidden;
+    background:linear-gradient(#DCE8DE 0%, #C7D9C6 55%, #B9C9B0 100%)}
+  .placed{position:absolute;font-size:44px;line-height:1;cursor:grab;user-select:none;touch-action:none;transform:translate(-50%,-90%)}
+  .placed.selected{filter:drop-shadow(0 0 4px var(--dancheong))}
+  .empty{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;color:var(--ink-soft);font-size:14px;text-align:center;line-height:1.7;pointer-events:none}
+  .inv-title{font-size:13px;color:var(--ink-soft);margin:14px 0 8px}
+  .inv{display:flex;gap:8px;flex-wrap:wrap;min-height:48px}
+  .inv button{width:56px;height:56px;background:#fff;border:1px solid var(--paper-deep);font-size:28px;position:relative;cursor:pointer}
+  .inv button i{position:absolute;right:3px;bottom:2px;font-style:normal;font-size:11px;font-family:"Noto Sans KR";font-weight:700}
+  .garden-tools{display:flex;gap:8px;margin-top:12px}
+  .garden-tools .btn{margin-top:0}
+
+  footer{padding:0 20px 8px;font-size:11px;color:var(--ink-soft)}
+  footer button{background:none;border:0;color:var(--ink-soft);text-decoration:underline;cursor:pointer;font-size:11px}
+</style>
+</head>
+<body>
+<div id="app">
+  <header>
+    <h1>K-서당<small>시제품 0.1</small></h1>
+    <div class="points"><span id="pt">0</span><span>엽전</span></div>
+  </header>
+
+  <main>
+    <section id="study" class="screen active"></section>
+    <section id="shop" class="screen"></section>
+    <section id="garden" class="screen"></section>
+  </main>
+
+  <footer>저장은 이 기기에만 됩니다. <button id="reset">처음부터 다시</button></footer>
+
+  <nav>
+    <button data-tab="study" class="active">서당</button>
+    <button data-tab="shop">저잣거리</button>
+    <button data-tab="garden">정원</button>
+  </nav>
+</div>
+
+<script>
+/* ============ 1. 데이터 (마스터) ============ */
+// 천자문: 구(4자) 단위. 학습 단위는 글자 → 구.
+const CHEONJAMUN = [
+  { gu:"天地玄黃", meaning:"하늘은 검고 땅은 누렇다",
+    chars:[{h:"天",hun:"하늘",eum:"천"},{h:"地",hun:"땅",eum:"지"},{h:"玄",hun:"검을",eum:"현"},{h:"黃",hun:"누를",eum:"황"}]},
+  { gu:"宇宙洪荒", meaning:"우주는 넓고 거칠다",
+    chars:[{h:"宇",hun:"집",eum:"우"},{h:"宙",hun:"집",eum:"주"},{h:"洪",hun:"넓을",eum:"홍"},{h:"荒",hun:"거칠",eum:"황"}]},
+  { gu:"日月盈昃", meaning:"해와 달은 차고 기운다",
+    chars:[{h:"日",hun:"날",eum:"일"},{h:"月",hun:"달",eum:"월"},{h:"盈",hun:"찰",eum:"영"},{h:"昃",hun:"기울",eum:"측"}]},
+  { gu:"辰宿列張", meaning:"별자리는 벌여 있다",
+    chars:[{h:"辰",hun:"별",eum:"진"},{h:"宿",hun:"잘",eum:"숙"},{h:"列",hun:"벌릴",eum:"렬"},{h:"張",hun:"베풀",eum:"장"}]},
+];
+const ALL_CHARS = CHEONJAMUN.flatMap(g=>g.chars);
+const REWARD_CHAR = 10, REWARD_GU = 30;
+
+// 아이템 마스터 (정의). 정원에 놓인 것은 인스턴스.
+const ITEMS = [
+  {id:"flower",  name:"들꽃",   icon:"🌼", price:20},
+  {id:"pine",    name:"소나무", icon:"🌲", price:50},
+  {id:"rock",    name:"괴석",   icon:"🪨", price:30},
+  {id:"lantern", name:"석등",   icon:"🏮", price:60},
+  {id:"pond",    name:"연못",   icon:"🪷", price:80},
+  {id:"pavilion",name:"정자",   icon:"⛩️", price:150},
+];
+
+/* ============ 2. 상태 (저장되는 것 전부) ============ */
+const KEY = "k-seodang-v1";
+let mem = null; // localStorage가 막힌 환경 대비
+function load(){
+  try{ const s = localStorage.getItem(KEY); if(s) return JSON.parse(s); }catch(e){}
+  return mem || { points:0, learned:[], passedGu:[], inventory:{}, garden:[], nextUid:1 };
+}
+function save(){
+  mem = state;
+  try{ localStorage.setItem(KEY, JSON.stringify(state)); }catch(e){}
+}
+let state = load();
+
+/* ============ 3. 화면 전환 ============ */
+document.querySelectorAll("nav button").forEach(b=>b.onclick=()=>{
+  document.querySelectorAll("nav button").forEach(x=>x.classList.toggle("active",x===b));
+  document.querySelectorAll(".screen").forEach(s=>s.classList.toggle("active",s.id===b.dataset.tab));
+  render();
+});
+document.getElementById("reset").onclick=()=>{
+  if(confirm("모든 진도와 정원을 지울까요?")){ try{localStorage.removeItem(KEY)}catch(e){} mem=null; quiz=null; state=load(); render(); }
+};
+
+function render(){
+  document.getElementById("pt").textContent = state.points;
+  renderStudy(); renderShop(); renderGarden();
+}
+
+/* ============ 4. 서당: 학습 → 시험 → 엽전 ============ */
+let quiz = null; // 진행 중인 시험 {type:'char'|'gu', ...}
+
+function currentTarget(){
+  for(let gi=0; gi<CHEONJAMUN.length; gi++){
+    const g = CHEONJAMUN[gi];
+    for(const c of g.chars) if(!state.learned.includes(c.h)) return {type:"char", gi, c};
+    if(!state.passedGu.includes(gi)) return {type:"gu", gi};
+  }
+  return {type:"done"};
+}
+function shuffle(a){ return a.map(v=>[Math.random(),v]).sort((x,y)=>x[0]-y[0]).map(v=>v[1]); }
+
+function guLine(gi, blankChar){
+  const g = CHEONJAMUN[gi];
+  return `<div class="gu-line">${g.chars.map(c=>{
+    if(blankChar && c.h===blankChar.h) return "<b>▢</b>";
+    const cls = state.learned.includes(c.h) ? "done" : "";
+    return `<span class="${cls}">${c.h}</span>`;
+  }).join("")}</div><div class="gu-meaning">${g.meaning}</div>`;
+}
+
+function renderStudy(){
+  const el = document.getElementById("study");
+  const t = currentTarget();
+  const prog = `<div class="progress">익힌 글자 ${state.learned.length} / ${ALL_CHARS.length} · 통과한 구 ${state.passedGu.length} / ${CHEONJAMUN.length}</div>`;
+
+  if(t.type==="done"){
+    el.innerHTML = prog + `<div class="card"><div class="hanja" style="font-size:64px">畢</div><div class="reading">시제품에 넣어 둔 네 구를 모두 마쳤습니다</div><div class="hint">저잣거리에서 아이템을 사서 정원을 꾸며 보세요</div></div>`;
+    return;
+  }
+
+  if(quiz && quiz.type==="char"){
+    const c = quiz.c;
+    el.innerHTML = prog + guLine(quiz.gi) + `<div class="card"><div class="hanja">${c.h}</div><div class="hint">이 글자의 훈과 음은?</div></div>
+      <div class="choices">${quiz.options.map(o=>`<button data-ans="${o}">${o}</button>`).join("")}</div>
+      <div class="feedback" id="fb"></div>`;
+    el.querySelectorAll(".choices button").forEach(b=>b.onclick=()=>answerChar(b));
+    return;
+  }
+  if(quiz && quiz.type==="gu"){
+    el.innerHTML = prog + `<div class="card"><div class="hint" style="margin-bottom:10px">빈 자리에 들어갈 글자는?</div>${guLine(quiz.gi, quiz.blank)}</div>
+      <div class="choices">${quiz.options.map(o=>`<button data-ans="${o}">${o}</button>`).join("")}</div>
+      <div class="feedback" id="fb"></div>`;
+    el.querySelectorAll(".choices button").forEach(b=>b.onclick=()=>answerGu(b));
+    return;
+  }
+
+  if(t.type==="char"){
+    const c = t.c;
+    el.innerHTML = prog + guLine(t.gi) + `<div class="card">
+      <div class="hanja">${c.h}</div>
+      <div class="reading">${c.hun} <em>${c.eum}</em></div>
+      <div class="hint">외우면 시험을 보고 엽전 ${REWARD_CHAR}냥을 받습니다</div></div>
+      <button class="btn" id="go">외웠어요, 시험 볼게요</button>`;
+    el.querySelector("#go").onclick=()=>{
+      const right = `${c.hun} ${c.eum}`;
+      const pool = ALL_CHARS.filter(x=>x.h!==c.h).map(x=>`${x.hun} ${x.eum}`);
+      quiz = {type:"char", gi:t.gi, c, right, options:shuffle([right, ...shuffle(pool).slice(0,3)])};
+      renderStudy();
+    };
+  } else {
+    el.innerHTML = prog + guLine(t.gi) + `<div class="card"><div class="reading">네 글자를 모두 익혔습니다</div><div class="hint">구 시험을 통과하면 엽전 ${REWARD_GU}냥을 받습니다</div></div>
+      <button class="btn" id="go">구 시험 보기</button>`;
+    el.querySelector("#go").onclick=()=>{
+      const g = CHEONJAMUN[t.gi];
+      const blank = g.chars[Math.floor(Math.random()*4)];
+      const pool = ALL_CHARS.filter(x=>x.h!==blank.h).map(x=>x.h);
+      quiz = {type:"gu", gi:t.gi, blank, options:shuffle([blank.h, ...shuffle(pool).slice(0,3)])};
+      renderStudy();
+    };
+  }
+}
+
+function answerChar(btn){
+  const fb = document.getElementById("fb");
+  if(btn.dataset.ans===quiz.right){
+    btn.classList.add("right");
+    fb.className="feedback good"; fb.textContent=`맞았습니다. 엽전 ${REWARD_CHAR}냥`;
+    state.learned.push(quiz.c.h); state.points+=REWARD_CHAR; save();
+    document.getElementById("pt").textContent = state.points;
+    setTimeout(()=>{ quiz=null; renderStudy(); }, 900);
+  } else {
+    btn.classList.add("wrong"); btn.disabled=true;
+    fb.className="feedback bad"; fb.textContent="다시 골라 보세요";
+  }
+}
+function answerGu(btn){
+  const fb = document.getElementById("fb");
+  if(btn.dataset.ans===quiz.blank.h){
+    btn.classList.add("right");
+    fb.className="feedback good"; fb.textContent=`통과. 엽전 ${REWARD_GU}냥`;
+    state.passedGu.push(quiz.gi); state.points+=REWARD_GU; save();
+    document.getElementById("pt").textContent = state.points;
+    setTimeout(()=>{ quiz=null; renderStudy(); }, 900);
+  } else {
+    btn.classList.add("wrong"); btn.disabled=true;
+    fb.className="feedback bad"; fb.textContent="다시 골라 보세요";
+  }
+}
+
+/* ============ 5. 저잣거리: 엽전 → 아이템 ============ */
+function renderShop(){
+  const el = document.getElementById("shop");
+  el.innerHTML = `<div class="progress">서당에서 번 엽전으로 정원에 놓을 것을 삽니다</div><div class="shop-grid">` +
+    ITEMS.map(it=>{
+      const own = state.inventory[it.id]||0;
+      const placed = state.garden.filter(p=>p.itemId===it.id).length;
+      return `<div class="shop-item"><div class="icon">${it.icon}</div><div class="name">${it.name}</div><div class="price">${it.price}냥</div>
+        <button data-id="${it.id}" ${state.points<it.price?"disabled":""}>사기</button>
+        <div class="own">${own+placed ? `보유 ${own+placed}` : ""}</div></div>`;
+    }).join("") + `</div>`;
+  el.querySelectorAll("button[data-id]").forEach(b=>b.onclick=()=>{
+    const it = ITEMS.find(x=>x.id===b.dataset.id);
+    if(state.points<it.price) return;
+    state.points-=it.price; state.inventory[it.id]=(state.inventory[it.id]||0)+1; save(); render();
+  });
+}
+
+/* ============ 6. 정원: 아이템 배치 (드래그) ============ */
+let selectedUid = null;
+function renderGarden(){
+  const el = document.getElementById("garden");
+  const invEntries = ITEMS.filter(it=>(state.inventory[it.id]||0)>0);
+  el.innerHTML = `<div class="garden" id="plot">
+      ${state.garden.length? "" : `<div class="empty">아직 빈 마당입니다<br>아래 보관함의 아이템을 누르면 정원에 놓입니다</div>`}
+      ${state.garden.map(p=>{ const it=ITEMS.find(x=>x.id===p.itemId);
+        return `<div class="placed ${p.uid===selectedUid?"selected":""}" data-uid="${p.uid}" style="left:${p.x}%;top:${p.y}%">${it.icon}</div>`; }).join("")}
+    </div>
+    <div class="inv-title">보관함 ${invEntries.length? "" : "— 비어 있음. 저잣거리에서 사 오세요"}</div>
+    <div class="inv">${invEntries.map(it=>`<button data-id="${it.id}" title="${it.name}">${it.icon}<i>${state.inventory[it.id]}</i></button>`).join("")}</div>
+    <div class="garden-tools"><button class="btn ghost" id="remove" ${selectedUid?"":"disabled"}>선택한 것 치우기</button></div>`;
+
+  el.querySelectorAll(".inv button").forEach(b=>b.onclick=()=>{
+    const id=b.dataset.id;
+    state.inventory[id]--; if(state.inventory[id]<=0) delete state.inventory[id];
+    state.garden.push({uid:state.nextUid++, itemId:id, x:30+Math.random()*40, y:45+Math.random()*40});
+    selectedUid = state.nextUid-1; save(); renderGarden();
+  });
+  el.querySelector("#remove").onclick=()=>{
+    const i = state.garden.findIndex(p=>p.uid===selectedUid); if(i<0) return;
+    const id = state.garden[i].itemId; state.garden.splice(i,1);
+    state.inventory[id]=(state.inventory[id]||0)+1; selectedUid=null; save(); renderGarden();
+  };
+  const plot = el.querySelector("#plot");
+  el.querySelectorAll(".placed").forEach(node=>{
+    node.onpointerdown=(e)=>{
+      const uid=+node.dataset.uid; selectedUid=uid;
+      el.querySelectorAll(".placed").forEach(n=>n.classList.toggle("selected", n===node));
+      el.querySelector("#remove").disabled=false;
+      node.setPointerCapture(e.pointerId);
+      const p = state.garden.find(x=>x.uid===uid);
+      const r = plot.getBoundingClientRect();
+      node.onpointermove=(ev)=>{
+        p.x = Math.max(4, Math.min(96, (ev.clientX-r.left)/r.width*100));
+        p.y = Math.max(10, Math.min(98, (ev.clientY-r.top)/r.height*100));
+        node.style.left=p.x+"%"; node.style.top=p.y+"%";
+      };
+      node.onpointerup=()=>{ node.onpointermove=null; save(); };
+    };
+  });
+}
+
+render();
+</script>
+</body>
+</html>
