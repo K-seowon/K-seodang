@@ -1,0 +1,609 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+<title>K-서당</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Gaegu:wght@400;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --ink:#3D3A36;
+  --hanji:#FBF3E4;
+  --hanji-2:#F2E4CB;
+  --maehwa:#F0A8BE;
+  --maehwa-d:#D9718F;
+  --leaf:#6E9A50;
+  --wood:#B08F6A;
+  --wood-d:#7A5F45;
+  --tile:#9C8874;
+  --coin:#E8A33C;
+  --gem:#7FA9C9;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;height:100%;overflow:hidden;background:#2B2620}
+body{
+  font-family:'Gaegu',system-ui,sans-serif;
+  color:var(--ink);
+  -webkit-font-smoothing:antialiased;
+}
+#app{
+  position:relative;width:100%;height:100%;
+  max-width:520px;margin:0 auto;
+  display:flex;flex-direction:column;
+  background:#FDF3E9;overflow:hidden;
+}
+
+/* ── 상단 정보 ───────────────────────────── */
+#hud{
+  position:absolute;top:0;left:0;right:0;z-index:30;
+  display:flex;gap:6px;align-items:flex-start;
+  padding:calc(env(safe-area-inset-top) + 8px) 10px 0;
+  pointer-events:none;
+}
+.plate{
+  background:var(--hanji);
+  border:2.5px solid var(--ink);
+  border-radius:14px;
+  padding:4px 10px;
+  display:flex;align-items:center;gap:6px;
+  font-size:17px;line-height:1.1;
+  box-shadow:0 2px 0 rgba(61,58,54,.25);
+}
+.plate .num{font-weight:700;font-size:19px}
+#who{flex-direction:column;align-items:flex-start;gap:1px;padding:5px 12px}
+#who .name{font-weight:700;font-size:18px}
+#who .rank{font-size:15px;color:#7A6E5E}
+.bar{width:86px;height:8px;background:var(--hanji-2);border:2px solid var(--ink);border-radius:6px;overflow:hidden;margin-top:2px}
+.bar>i{display:block;height:100%;background:var(--maehwa);width:0%}
+.pip{width:16px;height:16px;border-radius:50%;border:2.5px solid var(--ink);flex:0 0 auto}
+.pip.coin{background:var(--coin)}
+.pip.gem{background:var(--gem)}
+
+/* ── 무대 ───────────────────────────────── */
+#stage{flex:1;position:relative;overflow:hidden}
+#scene{position:absolute;inset:0;width:100%;height:100%;display:block}
+.tapzone{cursor:pointer}
+
+.signpost text{font-family:'Gaegu',sans-serif;font-weight:700}
+
+/* 문 위 알림 */
+@keyframes bob{0%,100%{transform:translateY(0)}50%{transform:translateY(-4px)}}
+.badge-bob{animation:bob 1.6s ease-in-out infinite}
+
+/* 꽃비 */
+@keyframes fall{
+  0%{transform:translate(0,-30px) rotate(0deg);opacity:0}
+  10%{opacity:.9}
+  100%{transform:translate(var(--dx),660px) rotate(340deg);opacity:0}
+}
+.petal{animation:fall linear infinite}
+
+@media (prefers-reduced-motion:reduce){
+  .petal,.badge-bob{animation:none}
+}
+
+/* ── 하단 이동 ──────────────────────────── */
+#nav{
+  position:relative;z-index:20;
+  display:flex;
+  background:var(--hanji);
+  border-top:3px solid var(--ink);
+  padding:6px 4px calc(env(safe-area-inset-bottom) + 6px);
+}
+#nav button{
+  flex:1;background:none;border:0;padding:4px 0 2px;
+  font-family:inherit;font-size:16px;color:var(--ink);
+  display:flex;flex-direction:column;align-items:center;gap:2px;
+  cursor:pointer;border-radius:10px;position:relative;
+}
+#nav button:focus-visible{outline:3px solid var(--maehwa-d);outline-offset:-2px}
+#nav button svg{width:26px;height:26px}
+#nav button .dot{
+  position:absolute;top:2px;right:calc(50% - 18px);
+  width:9px;height:9px;border-radius:50%;
+  background:#D9463F;border:2px solid var(--hanji);
+}
+
+/* ── 덮개 화면 ──────────────────────────── */
+#overlay{
+  position:absolute;inset:0;z-index:40;
+  display:none;flex-direction:column;
+  background:var(--hanji);
+}
+#overlay.on{display:flex}
+.sheet-top{
+  display:flex;align-items:center;gap:10px;
+  padding:calc(env(safe-area-inset-top) + 10px) 12px 10px;
+  border-bottom:3px solid var(--ink);
+  background:var(--hanji-2);
+}
+.sheet-top h1{margin:0;font-size:22px;font-weight:700;flex:1}
+.iconbtn{
+  width:38px;height:38px;flex:0 0 auto;
+  border:2.5px solid var(--ink);border-radius:12px;
+  background:var(--hanji);font-family:inherit;font-size:20px;
+  cursor:pointer;line-height:1;
+}
+.sheet-body{flex:1;overflow-y:auto;padding:14px 12px calc(env(safe-area-inset-bottom) + 20px)}
+
+/* 서당 */
+.hanja-card{
+  background:var(--hanji-2);border:3px solid var(--ink);border-radius:18px;
+  padding:22px 16px;text-align:center;
+}
+.hanja{font-size:96px;line-height:1;font-weight:700;letter-spacing:.02em}
+.hunum{font-size:26px;margin-top:10px}
+.hint{font-size:17px;color:#7A6E5E;margin-top:4px}
+.choices{display:grid;gap:10px;margin-top:16px}
+.choice{
+  border:2.5px solid var(--ink);border-radius:14px;background:var(--hanji);
+  padding:12px;font-family:inherit;font-size:20px;cursor:pointer;text-align:left;
+}
+.choice:disabled{cursor:default}
+.choice.right{background:#CFE7BE}
+.choice.wrong{background:#F3CFCF}
+.bigbtn{
+  width:100%;margin-top:16px;padding:14px;
+  border:3px solid var(--ink);border-radius:16px;
+  background:var(--maehwa);font-family:inherit;font-size:22px;font-weight:700;
+  cursor:pointer;box-shadow:0 3px 0 var(--ink);
+}
+.bigbtn:active{transform:translateY(2px);box-shadow:0 1px 0 var(--ink)}
+.bigbtn[disabled]{background:var(--hanji-2);color:#9C917F;box-shadow:none;cursor:default}
+.note{font-size:17px;color:#7A6E5E;margin:10px 2px 0;line-height:1.5}
+
+/* 저잣거리 */
+.packhead{
+  border:3px solid var(--ink);border-radius:16px;overflow:hidden;margin-bottom:14px;
+}
+.packhead .strip{padding:10px 14px;background:var(--maehwa);border-bottom:3px solid var(--ink)}
+.packhead h2{margin:0;font-size:22px;font-weight:700}
+.packhead .sub{padding:8px 14px;font-size:17px;background:var(--hanji-2);color:#6B6154}
+.grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.cell{
+  border:2.5px solid var(--ink);border-radius:14px;background:var(--hanji-2);
+  padding:6px;cursor:pointer;position:relative;font-family:inherit;text-align:center;
+}
+.cell .thumb{width:100%;aspect-ratio:1;display:block;background:#FBF0E6;border-radius:9px}
+.cell .cname{font-size:16px;margin-top:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.cell .cost{font-size:16px;font-weight:700;display:flex;align-items:center;justify-content:center;gap:4px}
+.cell .cost i{width:12px;height:12px;border-radius:50%;border:2px solid var(--ink);display:inline-block}
+.cell.owned{opacity:.55}
+.cell.owned .cost{color:#7A6E5E;font-weight:400}
+.rar{
+  position:absolute;top:3px;right:3px;
+  min-width:22px;height:22px;border-radius:50%;
+  border:2.5px solid var(--ink);color:#fff;font-size:14px;font-weight:700;
+  display:flex;align-items:center;justify-content:center;padding:0 3px;
+}
+#toast{
+  position:absolute;left:50%;bottom:84px;transform:translateX(-50%) translateY(10px);
+  z-index:50;background:var(--ink);color:var(--hanji);
+  padding:9px 18px;border-radius:20px;font-size:18px;
+  opacity:0;transition:opacity .2s,transform .2s;pointer-events:none;white-space:nowrap;
+}
+#toast.on{opacity:1;transform:translateX(-50%) translateY(0)}
+</style>
+</head>
+<body>
+<div id="app">
+
+  <div id="hud">
+    <div class="plate" id="who">
+      <span class="name">푸믹</span>
+      <span class="rank" id="rankTxt">천자문 4자 익힘</span>
+      <span class="bar"><i id="progBar"></i></span>
+    </div>
+    <div class="plate"><span class="pip coin"></span><span class="num" id="coinTxt">0</span></div>
+    <div class="plate"><span class="pip gem"></span><span class="num" id="gemTxt">0</span></div>
+  </div>
+
+  <div id="stage">
+    <svg id="scene" viewBox="0 0 400 600" preserveAspectRatio="xMidYMax slice" aria-label="나의 정원"></svg>
+  </div>
+
+  <nav id="nav">
+    <button data-go="seodang">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 8 12 3l10 5"/><path d="M4 8v12h16V8"/><path d="M9 20v-6h6v6"/></svg>
+      서당<span class="dot" id="navDot"></span>
+    </button>
+    <button data-go="market">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9h18l-2-5H5Z"/><path d="M5 9v11h14V9"/><path d="M9 20v-6h6v6"/></svg>
+      저잣거리
+    </button>
+    <button data-go="garden">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21c5-3 7-6 7-10a7 7 0 1 0-14 0c0 4 2 7 7 10Z"/><circle cx="12" cy="10" r="3"/></svg>
+      나의 정원
+    </button>
+    <button data-go="items">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M3 10h18M12 4v16"/></svg>
+      보따리
+    </button>
+    <button data-go="neighbors">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="8" r="3"/><path d="M3 20c0-3 3-5 6-5s6 2 6 5"/><circle cx="17" cy="9" r="2.5"/><path d="M16 15c3 0 5 2 5 5"/></svg>
+      이웃
+    </button>
+  </nav>
+
+  <div id="overlay" role="dialog" aria-modal="true">
+    <div class="sheet-top">
+      <button class="iconbtn" id="closeSheet" aria-label="정원으로 돌아가기">←</button>
+      <h1 id="sheetTitle"></h1>
+    </div>
+    <div class="sheet-body" id="sheetBody"></div>
+  </div>
+
+  <div id="toast"></div>
+</div>
+
+<script>
+/* =======================================================
+   K-서당 v0.6
+   메인 화면: 나의 정원 / 서당·저잣거리로 나가는 문과 길
+   ======================================================= */
+
+const SAVE_KEY = 'kseodang_v06';
+
+const S = load() || {
+  coin: 2400,          // 엽전 — 공부로 버는 무료 화폐
+  gem: 120,            // 잎새 — 유료 화폐 (가칭)
+  learned: 4,          // 익힌 천자문 글자 수
+  todayLeft: 3,        // 오늘 남은 학습
+  owned: ['mhs_01','mhs_04','mhs_07','mhs_12'],
+  avatar: { x: 200, y: 470 }
+};
+
+/* ── 천자문 ─────────────────────────────── */
+const CHEONJA = [
+  {c:'天',hun:'하늘',um:'천'}, {c:'地',hun:'따',um:'지'},
+  {c:'玄',hun:'검을',um:'현'}, {c:'黃',hun:'누를',um:'황'},
+  {c:'宇',hun:'집',um:'우'},   {c:'宙',hun:'집',um:'주'},
+  {c:'洪',hun:'넓을',um:'홍'}, {c:'荒',hun:'거칠',um:'황'},
+  {c:'日',hun:'날',um:'일'},   {c:'月',hun:'달',um:'월'},
+  {c:'盈',hun:'찰',um:'영'},   {c:'昃',hun:'기울',um:'측'}
+];
+
+/* ── 아이템 (매화 팩 발췌) ──────────────── */
+const ITEMS = {
+  mhs_01:{name:'서당 뒷담',slot:'wall',rar:'SR',cur:'coin',amt:1800,box:[400,64],at:[0,252],
+    svg:`<rect y="14" width="400" height="50" fill="#D9C6B0"/><rect y="4" width="400" height="13" rx="4" fill="#9C8874"/><path d="M0 30h400M0 46h400" stroke="#CDBAA3" stroke-width="1.5"/>`},
+  mhs_04:{name:'디딤돌 길',slot:'ground',rar:'N',cur:'coin',amt:500,box:[400,360],at:[0,600],
+    svg:`<rect y="0" width="400" height="360" fill="#BDD892"/><path d="M0 60 q100 -14 200 4 q100 18 200 -6 v302 H0Z" fill="#AECD82"/><path d="M200 350 V232 M200 250 L104 176 M200 250 L296 176" stroke="#D9C7A6" stroke-width="26" fill="none" stroke-linecap="round" stroke-linejoin="round"/><g fill="#C7B392"><ellipse cx="200" cy="330" rx="15" ry="7"/><ellipse cx="200" cy="296" rx="14" ry="7"/><ellipse cx="200" cy="262" rx="15" ry="7"/><ellipse cx="164" cy="228" rx="13" ry="6"/><ellipse cx="132" cy="200" rx="13" ry="6"/><ellipse cx="236" cy="228" rx="13" ry="6"/><ellipse cx="268" cy="200" rx="13" ry="6"/></g>`},
+  mhs_07:{name:'늙은 매화나무',slot:'mid',rar:'SR',cur:'gem',amt:180,box:[150,170],at:[92,438],anchor:'bc',
+    svg:`<path d="M78 168 q9 -60 -4 -92 q-10 -24 -34 -38" stroke="#7A5F45" stroke-width="12" fill="none" stroke-linecap="round"/><path d="M74 96 q28 -14 42 -44 M70 126 q-24 -10 -36 -30" stroke="#7A5F45" stroke-width="9" fill="none" stroke-linecap="round"/><g fill="#F0A8BE"><circle cx="36" cy="46" r="25"/><circle cx="78" cy="26" r="27"/><circle cx="116" cy="54" r="23"/><circle cx="60" cy="74" r="23"/><circle cx="108" cy="94" r="21"/><circle cx="26" cy="86" r="17"/></g><g fill="#FBD8E2"><circle cx="78" cy="22" r="11"/><circle cx="38" cy="42" r="9"/><circle cx="108" cy="90" r="9"/><circle cx="60" cy="70" r="8"/></g><g fill="#FFFFFF"><circle cx="78" cy="20" r="4"/><circle cx="38" cy="40" r="3.5"/></g>`},
+  mhs_08:{name:'어린 홍매',slot:'mid',rar:'R',cur:'coin',amt:1400,box:[96,120],at:[336,404],anchor:'bc',
+    svg:`<path d="M48 118 q3 -40 0 -56" stroke="#8B6A55" stroke-width="7" fill="none" stroke-linecap="round"/><path d="M48 76 q17 -10 25 -23 M48 88 q-14 -6 -22 -17" stroke="#8B6A55" stroke-width="5" fill="none" stroke-linecap="round"/><g fill="#E2789A"><circle cx="28" cy="44" r="16"/><circle cx="56" cy="32" r="17"/><circle cx="74" cy="52" r="14"/><circle cx="40" cy="64" r="14"/></g><g fill="#F5AFC6"><circle cx="56" cy="29" r="7"/><circle cx="29" cy="41" r="6"/></g>`},
+  mhs_10:{name:'진달래 덤불',slot:'mid',rar:'N',cur:'coin',amt:600,box:[90,60],at:[318,486],anchor:'bc',
+    svg:`<ellipse cx="45" cy="40" rx="42" ry="20" fill="#6E9A50"/><ellipse cx="45" cy="33" rx="37" ry="16" fill="#8AB566"/><g fill="#E4749B"><circle cx="20" cy="28" r="7"/><circle cx="46" cy="19" r="7.5"/><circle cx="70" cy="30" r="7"/><circle cx="32" cy="42" r="6.5"/><circle cx="60" cy="44" r="6.5"/></g><g fill="#F7A9C3"><circle cx="46" cy="19" r="3.4"/><circle cx="20" cy="28" r="3"/></g>`},
+  mhs_11:{name:'개나리 덤불',slot:'mid',rar:'N',cur:'coin',amt:600,box:[90,60],at:[66,520],anchor:'bc',
+    svg:`<ellipse cx="45" cy="42" rx="42" ry="18" fill="#6E9A50"/><ellipse cx="45" cy="35" rx="37" ry="15" fill="#8AB566"/><g fill="#F2C43C"><circle cx="18" cy="30" r="6.5"/><circle cx="42" cy="20" r="7"/><circle cx="66" cy="28" r="6.5"/><circle cx="30" cy="44" r="6"/><circle cx="58" cy="44" r="6"/></g><g fill="#FBE29A"><circle cx="42" cy="20" r="3"/><circle cx="18" cy="30" r="2.8"/></g>`},
+  mhs_12:{name:'싸리 울타리',slot:'mid',rar:'N',cur:'coin',amt:450,box:[140,56],at:[8,300],
+    svg:`<g stroke="#B08F6A" stroke-width="5" stroke-linecap="round"><path d="M14 52 V8"/><path d="M40 54 V6"/><path d="M66 52 V8"/><path d="M92 54 V6"/><path d="M120 52 V10"/></g><g stroke="#96764F" stroke-width="4" stroke-linecap="round"><path d="M4 20 H136"/><path d="M4 40 H136"/></g>`},
+  mhs_13:{name:'돌물확',slot:'front',rar:'R',cur:'gem',amt:80,box:[80,44],at:[128,532],anchor:'bc',
+    svg:`<ellipse cx="40" cy="34" rx="34" ry="15" fill="#A79684"/><ellipse cx="40" cy="27" rx="34" ry="15" fill="#C4B4A0"/><ellipse cx="40" cy="25" rx="26" ry="11" fill="#8FB6C4"/><ellipse cx="40" cy="23" rx="26" ry="11" fill="#A9CDD8"/><g fill="#F0A8BE"><ellipse cx="30" cy="20" rx="4.5" ry="3"/><ellipse cx="49" cy="25" rx="4.5" ry="3"/></g>`},
+  mhs_15:{name:'나무 평상',slot:'front',rar:'R',cur:'gem',amt:90,box:[100,46],at:[286,552],anchor:'bc',
+    svg:`<rect x="4" y="14" width="92" height="12" rx="4" fill="#B08F6A"/><rect x="4" y="9" width="92" height="9" rx="4" fill="#C9A87C"/><rect x="14" y="26" width="8" height="20" rx="3" fill="#96764F"/><rect x="78" y="26" width="8" height="20" rx="3" fill="#96764F"/><g fill="#F0A8BE"><ellipse cx="30" cy="7" rx="4.5" ry="3"/><ellipse cx="68" cy="6" rx="4.5" ry="3"/></g>`},
+  mhs_16:{name:'삿갓 장독',slot:'front',rar:'N',cur:'coin',amt:550,box:[70,60],at:[54,576],anchor:'bc',
+    svg:`<path d="M20 56 q-9 -22 3 -32 q9 -8 18 0 q12 10 3 32 Z" fill="#5C3F2C"/><path d="M20 56 q-7 -22 5 -30 q8 -7 15 0 q12 8 5 30 Z" fill="#7C5942"/><path d="M10 24 q23 -16 46 0 Z" fill="#D9B96A"/><path d="M8 25 q25 -20 50 0 q-13 5 -25 5 q-12 0 -25 -5 Z" fill="#E8CD8A"/>`},
+  mhs_17:{name:'호랑나비',slot:'air',rar:'R',cur:'gem',amt:70,box:[80,70],at:[300,330],
+    svg:`<g stroke="#C9738F" stroke-width="2" fill="#FBD3E0"><path d="M24 34 q-14 -16 -3 -23 q11 -6 6 18"/><path d="M24 34 q14 -16 3 -23 q-11 -6 -6 18"/></g><line x1="24" y1="13" x2="24" y2="34" stroke="#B85A78" stroke-width="2"/><g stroke="#E0A03C" stroke-width="2" fill="#FCE9AF"><path d="M56 60 q-12 -14 -2 -20 q9 -5 5 16"/><path d="M56 60 q12 -14 2 -20 q-9 -5 -5 16"/></g><line x1="56" y1="42" x2="56" y2="60" stroke="#C98A2C" stroke-width="2"/>`},
+  mhs_20:{name:'서안과 붓',slot:'front',rar:'N',cur:'coin',amt:900,box:[80,54],at:[318,566],anchor:'bc',
+    svg:`<rect x="8" y="24" width="64" height="10" rx="4" fill="#96764F"/><rect x="8" y="19" width="64" height="8" rx="4" fill="#B08F6A"/><rect x="16" y="34" width="6" height="20" rx="2" fill="#7A5F45"/><rect x="58" y="34" width="6" height="20" rx="2" fill="#7A5F45"/><path d="M18 19 h26 v-9 h-26 Z" fill="#F2E7D2"/><rect x="50" y="13" width="4.5" height="7" rx="1.6" fill="#3D3A36"/><rect x="50" y="0" width="4.5" height="14" rx="2" fill="#B08F6A"/><ellipse cx="62" cy="18" rx="9" ry="4" fill="#5C6B72"/><ellipse cx="62" cy="16" rx="9" ry="4" fill="#7D8C93"/>`}
+};
+const RAR_COLOR = {SR:'#E8A33C',R:'#6FA8C8',N:'#B3AEA6'};
+
+/* ── 아바타: 학동 ───────────────────────── */
+const A = { jeogori:'#D94A3D', chima:'#2E4A7D', git:'#FFFFFF', beoseon:'#FFFFFF', hair:'#2B2620', skin:'#F7DFC8' };
+function avatarSVG(){
+  return `<g id="hakdong" transform="translate(${S.avatar.x},${S.avatar.y})">
+    <ellipse cx="0" cy="2" rx="17" ry="5" fill="rgba(61,58,54,.16)"/>
+    <g id="hakLegs">
+      <path d="M-9 -14 v10" stroke="${A.chima}" stroke-width="8" stroke-linecap="round"/>
+      <path d="M9 -14 v10" stroke="${A.chima}" stroke-width="8" stroke-linecap="round"/>
+      <ellipse cx="-9" cy="-2" rx="6" ry="3.4" fill="${A.beoseon}" stroke="${A.hair}" stroke-width="1.4"/>
+      <ellipse cx="9" cy="-2" rx="6" ry="3.4" fill="${A.beoseon}" stroke="${A.hair}" stroke-width="1.4"/>
+    </g>
+    <path d="M-16 -14 q0 -22 16 -22 q16 0 16 22 Z" fill="${A.chima}"/>
+    <path d="M-15 -36 q0 -16 15 -16 q15 0 15 16 q-15 7 -30 0 Z" fill="${A.jeogori}"/>
+    <path d="M-9 -52 q9 6 9 14 q0 -8 9 -14" fill="none" stroke="${A.git}" stroke-width="4.5" stroke-linejoin="round"/>
+    <path d="M0 -38 q3 6 -1 12" fill="none" stroke="${A.git}" stroke-width="3" stroke-linecap="round"/>
+    <path d="M-15 -40 v8" stroke="${A.jeogori}" stroke-width="7" stroke-linecap="round"/>
+    <path d="M15 -40 v8" stroke="${A.jeogori}" stroke-width="7" stroke-linecap="round"/>
+    <circle cx="0" cy="-62" r="14" fill="${A.skin}"/>
+    <path d="M-14 -64 q0 -16 14 -16 q14 0 14 16 q-6 -7 -14 -7 q-8 0 -14 7 Z" fill="${A.hair}"/>
+    <circle cx="-5" cy="-60" r="1.9" fill="${A.hair}"/>
+    <circle cx="5" cy="-60" r="1.9" fill="${A.hair}"/>
+    <ellipse cx="-9" cy="-56" rx="3" ry="1.8" fill="#F3A9A0" opacity=".8"/>
+    <ellipse cx="9" cy="-56" rx="3" ry="1.8" fill="#F3A9A0" opacity=".8"/>
+    <path d="M-2.5 -55 q2.5 2 5 0" fill="none" stroke="${A.hair}" stroke-width="1.4" stroke-linecap="round"/>
+  </g>`;
+}
+
+/* ── 정원 그리기 ────────────────────────── */
+const scene = document.getElementById('scene');
+
+function drawGarden(){
+  const placed = S.owned.map(id => ({id, it: ITEMS[id]})).filter(o => o.it);
+  const layerZ = {wall:2, ground:3, mid:4, front:5, air:6};
+  const bg = placed.filter(o => o.it.slot==='wall' || o.it.slot==='ground')
+                   .sort((a,b) => layerZ[a.it.slot] - layerZ[b.it.slot]);
+  const mid = placed.filter(o => o.it.slot==='mid' || o.it.slot==='front');
+  const air = placed.filter(o => o.it.slot==='air');
+
+  // 중경/전경 + 아바타는 y 순서로 함께 정렬한다
+  const pool = mid.map(o => ({y:o.it.at[1], html:place(o)}))
+    .concat([{y:S.avatar.y, html:avatarSVG()}])
+    .sort((a,b) => a.y - b.y);
+
+  scene.innerHTML = `
+    ${sky()}
+    ${farHills()}
+    ${bg.map(place).join('')}
+    ${gateSeodang()}
+    ${gateMarket()}
+    ${pool.map(p => p.html).join('')}
+    ${air.map(place).join('')}
+    ${petals()}
+    <rect id="floor" x="0" y="330" width="400" height="270" fill="transparent" class="tapzone"/>
+  `;
+  scene.appendChild(scene.querySelector('#floor')); // 바닥 탭 영역을 맨 위로
+  bindScene();
+}
+
+function place(o){
+  const it = o.it, [w,h] = it.box;
+  let [x,y] = it.at;
+  if (it.anchor === 'bc'){ x -= w/2; y -= h; }
+  else y -= h;
+  return `<g transform="translate(${x},${y})">${it.svg}</g>`;
+}
+
+function sky(){
+  return `<rect width="400" height="600" fill="#FDF3E9"/>
+    <circle cx="330" cy="52" r="28" fill="#FFF3D8"/>
+    <ellipse cx="80" cy="58" rx="58" ry="17" fill="#FFFAF3"/>
+    <ellipse cx="220" cy="40" rx="44" ry="13" fill="#FFFAF3"/>
+    <ellipse cx="310" cy="112" rx="38" ry="11" fill="#FFFAF3"/>`;
+}
+function farHills(){
+  return `<path d="M0 214 L92 168 L164 206 L246 172 L344 210 L400 190 V266 H0Z" fill="#AEBCA4"/>
+    <path d="M0 232 L112 190 L206 228 L296 194 L400 226 V266 H0Z" fill="#8FA88A"/>`;
+}
+
+/* 서당으로 나가는 일각대문 */
+function gateSeodang(){
+  return `<g class="tapzone" data-gate="seodang" role="button" aria-label="서당으로 가기">
+    <rect x="248" y="150" width="104" height="112" fill="transparent"/>
+    <rect x="262" y="196" width="76" height="60" fill="#8A6A4E"/>
+    <rect x="272" y="206" width="56" height="50" rx="3" fill="#5E4632"/>
+    <path d="M272 206 h56" stroke="#7A5B41" stroke-width="2"/>
+    <rect x="256" y="188" width="88" height="12" rx="3" fill="#B08F6A"/>
+    <path d="M244 186 q56 -34 112 0 Z" fill="#6F6258"/>
+    <path d="M238 188 q62 -42 124 0 q-16 7 -62 7 q-46 0 -62 -7 Z" fill="#8B7D71"/>
+    <path d="M262 176 q38 -20 76 0" stroke="#6F6258" stroke-width="2" fill="none"/>
+    <rect x="278" y="158" width="44" height="20" rx="4" fill="#3D3A36"/>
+    <text x="300" y="174" text-anchor="middle" font-family="Gaegu, serif" font-size="16" font-weight="700" fill="#F2E4CB">書堂</text>
+    <g class="badge-bob"><circle cx="344" cy="158" r="13" fill="#D9463F" stroke="#3D3A36" stroke-width="2.5"/>
+    <text x="344" y="164" text-anchor="middle" font-family="Gaegu, sans-serif" font-size="16" font-weight="700" fill="#FFF">${S.todayLeft}</text></g>
+  </g>`;
+}
+
+/* 저잣거리로 나가는 사립문 */
+function gateMarket(){
+  return `<g class="tapzone" data-gate="market" role="button" aria-label="저잣거리로 가기">
+    <rect x="52" y="176" width="96" height="86" fill="transparent"/>
+    <g stroke="#96764F" stroke-width="5" stroke-linecap="round">
+      <path d="M66 258 V204"/><path d="M82 258 V202"/><path d="M98 258 V204"/><path d="M114 258 V202"/><path d="M130 258 V206"/>
+    </g>
+    <g stroke="#B08F6A" stroke-width="4.5" stroke-linecap="round">
+      <path d="M58 218 H138"/><path d="M58 240 H138"/>
+    </g>
+    <rect x="56" y="192" width="86" height="9" rx="4" fill="#7A5F45"/>
+    <path d="M62 192 v-10 M136 192 v-10" stroke="#7A5F45" stroke-width="6" stroke-linecap="round"/>
+    <rect x="70" y="164" width="58" height="22" rx="5" fill="#C9A87C" stroke="#3D3A36" stroke-width="2.5"/>
+    <text x="99" y="181" text-anchor="middle" font-family="Gaegu, sans-serif" font-size="16" font-weight="700" fill="#3D3A36">저잣거리</text>
+  </g>`;
+}
+
+function petals(){
+  let out = '<g id="petalLayer">';
+  for (let i=0;i<14;i++){
+    const x = Math.round(Math.random()*400);
+    const dur = (7 + Math.random()*6).toFixed(1);
+    const delay = (Math.random()*10).toFixed(1);
+    const dx = Math.round((Math.random()*80)-40);
+    const r = 4 + Math.random()*2.5;
+    out += `<ellipse class="petal" cx="${x}" cy="0" rx="${r.toFixed(1)}" ry="${(r*0.66).toFixed(1)}"
+      fill="${Math.random()>.5?'#F0A8BE':'#FBD8E2'}"
+      style="--dx:${dx}px;animation-duration:${dur}s;animation-delay:-${delay}s"/>`;
+  }
+  return out + '</g>';
+}
+
+/* ── 아바타 이동 ────────────────────────── */
+let walking = false;
+function walkTo(x, y, done){
+  const g = document.getElementById('hakdong');
+  if (!g) return;
+  const dx = x - S.avatar.x;
+  const dist = Math.hypot(dx, y - S.avatar.y);
+  const dur = Math.max(260, dist * 9);
+  const flip = dx < 0 ? -1 : 1;
+  walking = true;
+  g.style.transition = `transform ${dur}ms linear`;
+  g.setAttribute('transform', `translate(${x},${y}) scale(${flip},1)`);
+  const legs = document.getElementById('hakLegs');
+  const t0 = performance.now();
+  const step = (t) => {
+    if (t - t0 > dur){ if(legs) legs.setAttribute('transform',''); walking=false; S.avatar={x,y}; save(); done&&done(); return; }
+    if (legs) legs.setAttribute('transform', `translate(0,${Math.abs(Math.sin((t-t0)/90))*-2.2})`);
+    requestAnimationFrame(step);
+  };
+  requestAnimationFrame(step);
+  // transform 속성은 style transition을 타지 않으므로 직접 보간
+  g.style.transition = '';
+  const sx = S.avatar.x, sy = S.avatar.y;
+  const anim = (t) => {
+    const k = Math.min(1, (t - t0) / dur);
+    g.setAttribute('transform', `translate(${sx+(x-sx)*k},${sy+(y-sy)*k}) scale(${flip},1)`);
+    if (k < 1) requestAnimationFrame(anim);
+  };
+  requestAnimationFrame(anim);
+}
+
+function bindScene(){
+  scene.querySelectorAll('[data-gate]').forEach(g => {
+    g.addEventListener('click', () => {
+      if (walking) return;
+      const which = g.dataset.gate;
+      const target = which === 'seodang' ? {x:300,y:300} : {x:99,y:300};
+      walkTo(target.x, target.y, () => setTimeout(() => openSheet(which), 220));
+    });
+  });
+  const floor = scene.querySelector('#floor');
+  floor.addEventListener('click', (e) => {
+    if (walking) return;
+    const p = svgPoint(e);
+    walkTo(clamp(p.x, 24, 376), clamp(p.y, 340, 588));
+  });
+}
+function svgPoint(e){
+  const pt = scene.createSVGPoint();
+  pt.x = e.clientX; pt.y = e.clientY;
+  return pt.matrixTransform(scene.getScreenCTM().inverse());
+}
+const clamp = (v,a,b) => Math.max(a, Math.min(b, v));
+
+/* ── 화면 전환 ──────────────────────────── */
+const overlay = document.getElementById('overlay');
+const sheetTitle = document.getElementById('sheetTitle');
+const sheetBody = document.getElementById('sheetBody');
+
+function openSheet(which){
+  if (which === 'garden'){ closeSheet(); return; }
+  overlay.classList.add('on');
+  if (which === 'seodang'){ sheetTitle.textContent = '서당'; renderSeodang(); }
+  else if (which === 'market'){ sheetTitle.textContent = '저잣거리 · 꽃전'; renderMarket(); }
+  else if (which === 'items'){ sheetTitle.textContent = '보따리'; renderItems(); }
+  else { sheetTitle.textContent = '이웃'; sheetBody.innerHTML = `<p class="note">아직 이웃이 없습니다. 정원이 어느 정도 꾸며지면 이웃의 정원을 구경하러 갈 수 있습니다.</p>`; }
+}
+function closeSheet(){ overlay.classList.remove('on'); drawGarden(); }
+document.getElementById('closeSheet').addEventListener('click', closeSheet);
+document.querySelectorAll('#nav button').forEach(b => {
+  b.addEventListener('click', () => openSheet(b.dataset.go));
+});
+
+/* ── 서당 ───────────────────────────────── */
+let quizIdx = null;
+function renderSeodang(){
+  if (S.todayLeft <= 0){
+    sheetBody.innerHTML = `<div class="hanja-card"><div class="hunum">오늘 몫은 다 익혔습니다.</div>
+      <div class="hint">내일 다시 오세요.</div></div>
+      <p class="note">진도는 엽전으로도 잎새로도 앞당길 수 없습니다. 익힌 만큼만 나아갑니다.</p>`;
+    return;
+  }
+  quizIdx = S.learned % CHEONJA.length;
+  const q = CHEONJA[quizIdx];
+  const wrongs = CHEONJA.filter((_,i) => i !== quizIdx).sort(() => Math.random()-.5).slice(0,3);
+  const opts = [q, ...wrongs].sort(() => Math.random()-.5);
+  sheetBody.innerHTML = `
+    <div class="hanja-card">
+      <div class="hanja">${q.c}</div>
+      <div class="hunum">${q.hun} ${q.um}</div>
+      <div class="hint">천자문 ${quizIdx+1}번째 글자 · 오늘 ${S.todayLeft}자 남음</div>
+    </div>
+    <p class="note">뜻과 소리를 눈에 익힌 뒤, 아래에서 골라보세요.</p>
+    <div class="choices">
+      ${opts.map(o => `<button class="choice" data-c="${o.c}">${o.hun} ${o.um}</button>`).join('')}
+    </div>`;
+  sheetBody.querySelectorAll('.choice').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const ok = btn.dataset.c === q.c;
+      sheetBody.querySelectorAll('.choice').forEach(b => {
+        b.disabled = true;
+        if (b.dataset.c === q.c) b.classList.add('right');
+      });
+      if (!ok) btn.classList.add('wrong');
+      if (ok){
+        S.learned++; S.todayLeft--; S.coin += 120; save(); syncHUD();
+        sheetBody.insertAdjacentHTML('beforeend',
+          `<button class="bigbtn" id="nextBtn">엽전 120냥 받고 이어하기</button>`);
+      } else {
+        sheetBody.insertAdjacentHTML('beforeend',
+          `<button class="bigbtn" id="nextBtn">다시 익히기</button>`);
+      }
+      document.getElementById('nextBtn').addEventListener('click', renderSeodang);
+    });
+  });
+}
+
+/* ── 저잣거리 ───────────────────────────── */
+function renderMarket(){
+  const ids = Object.keys(ITEMS);
+  sheetBody.innerHTML = `
+    <div class="packhead">
+      <div class="strip"><h2>매화 피는 서당 뒤뜰</h2></div>
+      <div class="sub">봄 · 20종 중 ${ids.length}종 입고 · ${S.owned.length}종 보유</div>
+    </div>
+    <div class="grid">${ids.map(id => cellHTML(id)).join('')}</div>
+    <p class="note">산 물건은 곧바로 정원에 놓입니다. 자리 옮기기는 다음 판에 붙일 예정입니다.</p>`;
+  sheetBody.querySelectorAll('.cell').forEach(c => {
+    c.addEventListener('click', () => buy(c.dataset.id));
+  });
+}
+function cellHTML(id){
+  const it = ITEMS[id], has = S.owned.includes(id);
+  const [w,h] = it.box, m = Math.max(w,h);
+  return `<button class="cell ${has?'owned':''}" data-id="${id}">
+    <span class="rar" style="background:${RAR_COLOR[it.rar]}">${it.rar}</span>
+    <svg class="thumb" viewBox="${(w-m)/2} ${(h-m)/2} ${m} ${m}">${it.svg}</svg>
+    <div class="cname">${it.name}</div>
+    <div class="cost">${has ? '보유 중' : `<i style="background:${it.cur==='coin'?'#E8A33C':'#7FA9C9'}"></i>${it.amt}`}</div>
+  </button>`;
+}
+function buy(id){
+  const it = ITEMS[id];
+  if (S.owned.includes(id)) return toast('이미 정원에 놓여 있습니다');
+  const bag = it.cur === 'coin' ? S.coin : S.gem;
+  if (bag < it.amt) return toast(it.cur==='coin' ? '엽전이 모자랍니다' : '잎새가 모자랍니다');
+  if (it.cur === 'coin') S.coin -= it.amt; else S.gem -= it.amt;
+  S.owned.push(id); save(); syncHUD(); renderMarket();
+  toast(`${it.name}을(를) 정원에 놓았습니다`);
+}
+
+/* ── 보따리 ─────────────────────────────── */
+function renderItems(){
+  if (!S.owned.length){
+    sheetBody.innerHTML = `<p class="note">아직 가진 물건이 없습니다. 저잣거리에서 하나 골라보세요.</p>`;
+    return;
+  }
+  sheetBody.innerHTML = `<div class="grid">${S.owned.map(id => cellHTML(id)).join('')}</div>
+    <p class="note">보유한 물건은 모두 정원에 놓여 있습니다.</p>`;
+}
+
+/* ── 공용 ───────────────────────────────── */
+function syncHUD(){
+  document.getElementById('coinTxt').textContent = S.coin.toLocaleString();
+  document.getElementById('gemTxt').textContent = S.gem.toLocaleString();
+  document.getElementById('rankTxt').textContent = `천자문 ${S.learned}자 익힘`;
+  document.getElementById('progBar').style.width = Math.min(100, (S.learned/1000)*100*20) + '%';
+  const dot = document.getElementById('navDot');
+  dot.style.display = S.todayLeft > 0 ? 'block' : 'none';
+}
+let toastTimer;
+function toast(msg){
+  const t = document.getElementById('toast');
+  t.textContent = msg; t.classList.add('on');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => t.classList.remove('on'), 1800);
+}
+function save(){ try{ localStorage.setItem(SAVE_KEY, JSON.stringify(S)); }catch(e){} }
+function load(){ try{ return JSON.parse(localStorage.getItem(SAVE_KEY)); }catch(e){ return null; } }
+
+syncHUD();
+drawGarden();
+</script>
+</body>
+</html>
