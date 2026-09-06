@@ -112,6 +112,10 @@ body{font-family:'Gaegu',system-ui,sans-serif;color:var(--ink);-webkit-font-smoo
   display:flex;align-items:center;justify-content:center;padding:0 3px}
 .tag{position:absolute;top:3px;left:3px;background:var(--leaf);color:#fff;border:2.5px solid var(--ink);
   border-radius:9px;font-size:13px;padding:0 5px;height:20px;display:flex;align-items:center}
+.tabs{display:flex;gap:6px;margin:0 0 14px;flex-wrap:wrap}
+.tabs button{border:2.5px solid var(--ink);border-radius:12px;background:var(--hanji);
+  font-family:inherit;font-size:17px;padding:5px 13px;cursor:pointer;color:var(--ink)}
+.tabs button.on{background:var(--maehwa);font-weight:700}
 #toast{position:absolute;left:50%;bottom:84px;transform:translateX(-50%) translateY(10px);z-index:50;
   background:var(--ink);color:var(--hanji);padding:9px 18px;border-radius:20px;font-size:18px;
   opacity:0;transition:opacity .2s,transform .2s;pointer-events:none;white-space:nowrap}
@@ -379,7 +383,96 @@ const ITEMS = {
     svg:`<g stroke="#C9738F" stroke-width="2" fill="#FBD3E0"><path d="M24 34 q-14 -16 -3 -23 q11 -6 6 18"/><path d="M24 34 q14 -16 3 -23 q-11 -6 -6 18"/></g><line x1="24" y1="13" x2="24" y2="34" stroke="#B85A78" stroke-width="2"/><g stroke="#E0A03C" stroke-width="2" fill="#FCE9AF"><path d="M56 60 q-12 -14 -2 -20 q9 -5 5 16"/><path d="M56 60 q12 -14 2 -20 q-9 -5 -5 16"/></g><line x1="56" y1="42" x2="56" y2="60" stroke="#C98A2C" stroke-width="2"/>`}
 };
 const RAR_COLOR = {SR:'#E8A33C',R:'#6FA8C8',N:'#B3AEA6'};
-const SAMPLE_PLACED = ['mhs_04','mhs_12','mhs_23','mhs_07','mhs_08','mhs_10','mhs_21','mhs_15'];
+
+/* ── 계절 ───────────────────────────────
+   all(사철) / spring / summer / autumn / winter
+   gkind  바닥 아이템 종류. cover(땅) 와 path(길) 는 각각 하나씩만
+   fall   공중에서 흩날리는 것. petal / leaf / snow
+   ------------------------------------- */
+const SEASON = {
+  mhs_04:'all', mhs_12:'all', mhs_23:'all', mhs_24:'all',
+  mhs_22:'all', mhs_15:'all', mhs_13:'all', mhs_16:'all', mhs_20:'all',
+  mhs_07:'spring', mhs_08:'spring', mhs_09:'spring',
+  mhs_10:'spring', mhs_11:'spring', mhs_21:'spring', mhs_17:'spring'
+};
+const SEASON_TABS = [['all','사철'],['spring','봄'],['summer','여름'],['autumn','가을'],['winter','겨울']];
+const SEASON_NAME = {all:'사철', spring:'봄', summer:'여름', autumn:'가을', winter:'겨울'};
+ITEMS.mhs_04.gkind = 'path';
+
+Object.assign(ITEMS, {
+/* ── 봄 ─────────────────────────────── */
+spr_08:{name:'흩날리는 꽃비',slot:'air',rar:'SR',cur:'gem',amt:200,box:[80,80],at:[0,0],fall:'petal',
+  svg:`<g fill="#F0A8BE"><ellipse cx="18" cy="16" rx="6" ry="4" transform="rotate(-30 18 16)"/><ellipse cx="52" cy="12" rx="6.5" ry="4.2" transform="rotate(20 52 12)"/><ellipse cx="30" cy="42" rx="6" ry="4" transform="rotate(35 30 42)"/><ellipse cx="62" cy="48" rx="6" ry="4" transform="rotate(-25 62 48)"/><ellipse cx="20" cy="68" rx="6" ry="4" transform="rotate(15 20 68)"/><ellipse cx="52" cy="72" rx="5.5" ry="3.6" transform="rotate(-35 52 72)"/></g><g fill="#FBD8E2"><ellipse cx="40" cy="28" rx="5" ry="3.4"/><ellipse cx="68" cy="30" rx="4.5" ry="3"/><ellipse cx="12" cy="46" rx="4.5" ry="3"/></g>`},
+
+/* ── 여름 ───────────────────────────── */
+sum_06:{name:'여름 풀밭',slot:'ground',rar:'N',cur:'coin',amt:600,box:[400,300],at:[0,600],fixed:true,gkind:'cover',
+  svg:`<rect width="400" height="300" fill="#8FBF6A"/><path d="M0 46 q110 -16 210 4 q90 18 190 -6 v256 H0Z" fill="#7FB25C"/><g fill="#71A551"><ellipse cx="70" cy="120" rx="46" ry="13"/><ellipse cx="300" cy="92" rx="40" ry="11"/><ellipse cx="180" cy="252" rx="52" ry="14"/></g><g stroke="#5E9145" stroke-width="2.5" fill="none" stroke-linecap="round"><path d="M40 180 q-4 -14 2 -20"/><path d="M120 240 q4 -14 -2 -18"/><path d="M280 200 q-4 -12 2 -16"/><path d="M340 268 q4 -14 -2 -18"/></g><g fill="#F5F1E0"><circle cx="96" cy="196" r="3.5"/><circle cx="248" cy="164" r="3.5"/><circle cx="322" cy="240" r="3.5"/></g>`},
+
+sum_01:{name:'파초',slot:'mid',rar:'R',cur:'coin',amt:1500,box:[120,152],at:[300,470],anchor:'bc',
+  svg:`<path d="M60 150 v-48" stroke="#4A7D3E" stroke-width="10" fill="none" stroke-linecap="round"/><path d="M60 104 q-38 -8 -56 -38 q34 -6 56 28 Z" fill="#4E9A4A"/><path d="M60 108 q38 -12 54 -42 q-34 -4 -54 32 Z" fill="#5CAC55"/><path d="M60 80 q-40 4 -56 -20 q34 -10 56 4 Z" fill="#3F8A3E"/><path d="M60 84 q40 0 54 -26 q-34 -8 -54 12 Z" fill="#4E9A4A"/><path d="M60 58 q-18 -20 -14 -44 q18 14 18 42 Z" fill="#5CAC55"/><path d="M60 60 q20 -18 20 -40 q-16 10 -20 38 Z" fill="#6ABA60"/>`},
+
+sum_02:{name:'대숲',slot:'mid',rar:'N',cur:'coin',amt:800,box:[140,186],at:[60,440],anchor:'bc',
+  svg:`<g stroke="#5C9A6B" stroke-width="6" fill="none" stroke-linecap="round"><path d="M22 184 q4 -84 -2 -126"/><path d="M52 184 q6 -74 0 -110"/><path d="M84 184 q4 -88 -2 -130"/><path d="M116 184 q6 -70 2 -102"/></g><g stroke="#4A8558" stroke-width="2"><path d="M15 130h12M15 96h12M45 138h12M45 104h12M77 126h12M77 92h12M109 134h12"/></g><g fill="#4E8F62"><ellipse cx="8" cy="60" rx="16" ry="4.5" transform="rotate(-24 8 60)"/><ellipse cx="34" cy="74" rx="16" ry="4.5" transform="rotate(18 34 74)"/><ellipse cx="24" cy="98" rx="15" ry="4" transform="rotate(-16 24 98)"/><ellipse cx="68" cy="52" rx="16" ry="4.5" transform="rotate(22 68 52)"/><ellipse cx="62" cy="84" rx="15" ry="4" transform="rotate(-20 62 84)"/><ellipse cx="104" cy="70" rx="15" ry="4" transform="rotate(26 104 70)"/><ellipse cx="128" cy="96" rx="14" ry="4" transform="rotate(-14 128 96)"/></g>`},
+
+sum_03:{name:'연꽃 못',slot:'front',rar:'SR',cur:'gem',amt:200,box:[170,84],at:[196,530],anchor:'bc',
+  svg:`<ellipse cx="85" cy="60" rx="84" ry="23" fill="#94A86E"/><ellipse cx="85" cy="55" rx="74" ry="20" fill="#4E8F8A"/><ellipse cx="85" cy="52" rx="70" ry="18" fill="#79BFB6"/><g fill="#A79684"><ellipse cx="14" cy="58" rx="10" ry="5"/><ellipse cx="44" cy="70" rx="11" ry="5"/><ellipse cx="128" cy="68" rx="11" ry="5"/><ellipse cx="156" cy="56" rx="10" ry="5"/></g><g fill="#3E8461"><ellipse cx="46" cy="50" rx="18" ry="7"/><ellipse cx="112" cy="58" rx="17" ry="6.5"/><ellipse cx="80" cy="66" rx="16" ry="6"/></g><g fill="#4E9A6E"><ellipse cx="46" cy="48" rx="18" ry="7"/><ellipse cx="112" cy="56" rx="17" ry="6.5"/><ellipse cx="80" cy="64" rx="16" ry="6"/></g><g><path d="M66 44 q0 -12 1 -18" stroke="#5FA05F" stroke-width="3" fill="none"/><g fill="#F0A9C4"><ellipse cx="67" cy="22" rx="5" ry="12"/><ellipse cx="58" cy="26" rx="4" ry="11" transform="rotate(-26 58 26)"/><ellipse cx="76" cy="26" rx="4" ry="11" transform="rotate(26 76 26)"/></g><ellipse cx="67" cy="24" rx="3" ry="8" fill="#FDE4EC"/></g><g><path d="M124 48 q0 -10 1 -14" stroke="#5FA05F" stroke-width="2.5" fill="none"/><g fill="#F6C0D4"><ellipse cx="125" cy="32" rx="4" ry="9"/><ellipse cx="118" cy="35" rx="3.4" ry="8" transform="rotate(-26 118 35)"/><ellipse cx="132" cy="35" rx="3.4" ry="8" transform="rotate(26 132 35)"/></g></g>`},
+
+sum_04:{name:'수국 덤불',slot:'mid',rar:'N',cur:'coin',amt:700,box:[104,78],at:[352,506],anchor:'bc',
+  svg:`<ellipse cx="52" cy="56" rx="48" ry="21" fill="#4A7D3E"/><ellipse cx="52" cy="48" rx="42" ry="17" fill="#63A052"/><g fill="#7E93C9"><circle cx="24" cy="36" r="12"/><circle cx="54" cy="24" r="14"/><circle cx="82" cy="38" r="12"/></g><g fill="#A3B4DD"><circle cx="20" cy="32" r="4"/><circle cx="28" cy="40" r="4"/><circle cx="49" cy="20" r="4.5"/><circle cx="59" cy="28" r="4.5"/><circle cx="78" cy="34" r="4"/><circle cx="86" cy="42" r="4"/></g><g fill="#D8B7D9"><circle cx="24" cy="42" r="3.6"/><circle cx="58" cy="18" r="4"/><circle cx="80" cy="44" r="3.6"/></g>`},
+
+sum_05:{name:'못가 정자',slot:'mid',rar:'SR',cur:'gem',amt:260,box:[160,150],at:[96,462],anchor:'bc',
+  svg:`<rect x="24" y="118" width="112" height="18" rx="3" fill="#C9B79A"/><rect x="24" y="112" width="112" height="9" rx="3" fill="#8E7A5E"/><rect x="34" y="136" width="9" height="14" fill="#7A5F45"/><rect x="117" y="136" width="9" height="14" fill="#7A5F45"/><rect x="36" y="56" width="8" height="58" fill="#A88C6A"/><rect x="116" y="56" width="8" height="58" fill="#A88C6A"/><rect x="76" y="56" width="8" height="58" fill="#B99C79"/><path d="M12 58 q68 -42 136 0 Z" fill="#5D6B75"/><path d="M4 60 q76 -52 152 0 q-18 9 -76 9 q-58 0 -76 -9 Z" fill="#6E7E8A"/><path d="M80 14 q-38 14 -66 42 M80 14 q38 14 66 42" stroke="#5D6B75" stroke-width="2.5" fill="none"/><circle cx="80" cy="12" r="5" fill="#5D6B75"/><path d="M36 76 h88" stroke="#B99C79" stroke-width="4"/>`},
+
+sum_07:{name:'고추잠자리',slot:'air',rar:'R',cur:'coin',amt:900,box:[86,60],at:[276,410],
+  svg:`<g stroke="#8FC6C6" stroke-width="1.6" fill="#CDECEC"><ellipse cx="34" cy="20" rx="15" ry="4.5" transform="rotate(-14 34 20)"/><ellipse cx="34" cy="27" rx="13" ry="4" transform="rotate(12 34 27)"/></g><line x1="34" y1="23" x2="58" y2="28" stroke="#D9553F" stroke-width="2.5" stroke-linecap="round"/><circle cx="32" cy="23" r="4" fill="#D9553F"/><g stroke="#A9CDD8" stroke-width="1.4" fill="#DDF0F2"><ellipse cx="60" cy="46" rx="11" ry="3.4" transform="rotate(-16 60 46)"/><ellipse cx="60" cy="51" rx="10" ry="3" transform="rotate(14 60 51)"/></g><line x1="60" y1="48" x2="78" y2="52" stroke="#E08A4C" stroke-width="2" stroke-linecap="round"/><circle cx="59" cy="48" r="3" fill="#E08A4C"/>`},
+
+/* ── 가을 ───────────────────────────── */
+aut_06:{name:'낙엽 바닥',slot:'ground',rar:'N',cur:'coin',amt:600,box:[400,300],at:[0,600],fixed:true,gkind:'cover',
+  svg:`<rect width="400" height="300" fill="#DCC894"/><path d="M0 48 q100 -14 190 6 q90 20 210 -4 v250 H0Z" fill="#CEB77E"/><path d="M0 150 q120 -12 220 8 q80 16 180 2 v140 H0Z" fill="#C0A76C"/><g fill="#D9541F"><path d="M46 96 l7 -6 l6 7 l-7 6 Z"/><path d="M186 186 l7 -6 l6 7 l-7 6 Z"/><path d="M290 132 l7 -6 l6 7 l-7 6 Z"/></g><g fill="#F0873A"><path d="M104 214 l7 -6 l6 7 l-7 6 Z"/><path d="M254 66 l7 -6 l6 7 l-7 6 Z"/><path d="M340 240 l7 -6 l6 7 l-7 6 Z"/></g><g fill="#F7BE4C"><path d="M62 268 l6 -5 l5 6 l-6 5 Z"/><path d="M162 118 l6 -5 l5 6 l-6 5 Z"/><path d="M348 160 l6 -5 l5 6 l-6 5 Z"/></g>`},
+
+aut_01:{name:'단풍나무',slot:'mid',rar:'SR',cur:'gem',amt:190,box:[156,168],at:[96,466],anchor:'bc',
+  svg:`<path d="M82 166 q7 -56 -2 -84 q-8 -22 -28 -36" stroke="#7A5540" stroke-width="12" fill="none" stroke-linecap="round"/><path d="M78 96 q26 -14 42 -40 M76 124 q-22 -8 -34 -24" stroke="#7A5540" stroke-width="8" fill="none" stroke-linecap="round"/><g fill="#D9541F"><circle cx="40" cy="52" r="24"/><circle cx="82" cy="30" r="26"/><circle cx="122" cy="52" r="22"/><circle cx="58" cy="80" r="22"/><circle cx="108" cy="88" r="21"/><circle cx="30" cy="88" r="16"/></g><g fill="#F0873A"><circle cx="82" cy="26" r="12"/><circle cx="42" cy="48" r="10"/><circle cx="108" cy="84" r="10"/><circle cx="58" cy="76" r="9"/><circle cx="122" cy="48" r="8"/></g><g fill="#F7BE4C"><circle cx="82" cy="22" r="5"/><circle cx="42" cy="44" r="4.5"/><circle cx="108" cy="80" r="4.5"/></g>`},
+
+aut_02:{name:'감나무',slot:'mid',rar:'R',cur:'coin',amt:1600,box:[130,142],at:[334,442],anchor:'bc',
+  svg:`<path d="M66 140 q-5 -42 2 -62 q5 -18 20 -28" stroke="#6F5A3E" stroke-width="8" fill="none" stroke-linecap="round"/><path d="M68 88 q20 -8 32 -22 M66 102 q-18 -6 -28 -20" stroke="#6F5A3E" stroke-width="6" fill="none" stroke-linecap="round"/><g fill="#5E8A3C"><circle cx="34" cy="52" r="20"/><circle cx="66" cy="34" r="22"/><circle cx="98" cy="52" r="19"/><circle cx="46" cy="76" r="19"/><circle cx="88" cy="76" r="19"/></g><g fill="#6F9E45"><circle cx="66" cy="30" r="11"/><circle cx="38" cy="70" r="9"/><circle cx="94" cy="70" r="9"/></g><g fill="#EE8C22"><circle cx="38" cy="58" r="9"/><circle cx="80" cy="44" r="9.5"/><circle cx="62" cy="80" r="9"/><circle cx="104" cy="60" r="8"/></g><g fill="#F5A93F"><circle cx="36" cy="56" r="3.6"/><circle cx="78" cy="42" r="3.8"/><circle cx="60" cy="78" r="3.6"/></g><g fill="#4A7030"><rect x="34" y="50" width="8" height="2.6" rx="1.3"/><rect x="76" y="36" width="8" height="2.6" rx="1.3"/><rect x="58" y="72" width="8" height="2.6" rx="1.3"/></g>`},
+
+aut_03:{name:'억새',slot:'mid',rar:'N',cur:'coin',amt:550,box:[110,96],at:[54,514],anchor:'bc',
+  svg:`<g stroke="#C0A76C" stroke-width="3" fill="none" stroke-linecap="round"><path d="M32 94 q-3 -42 -8 -60"/><path d="M50 94 q3 -44 5 -62"/><path d="M70 96 q8 -38 16 -56"/><path d="M18 96 q-10 -32 -16 -48"/></g><g fill="#E8D7B0"><ellipse cx="24" cy="28" rx="7" ry="17" transform="rotate(-8 24 28)"/><ellipse cx="55" cy="24" rx="7" ry="18" transform="rotate(6 55 24)"/><ellipse cx="86" cy="36" rx="6.5" ry="16" transform="rotate(18 86 36)"/><ellipse cx="2" cy="44" rx="6" ry="14" transform="rotate(-20 2 44)"/></g><g fill="#F5EBD4"><ellipse cx="24" cy="22" rx="4" ry="9"/><ellipse cx="55" cy="18" rx="4" ry="9"/></g>`},
+
+aut_04:{name:'국화 화분',slot:'front',rar:'N',cur:'coin',amt:650,box:[86,74],at:[136,576],anchor:'bc',
+  svg:`<ellipse cx="43" cy="70" rx="24" ry="7" fill="#A88650"/><path d="M23 70 l4 -22 h32 l4 22 Z" fill="#B5744A"/><path d="M23 70 l3 -20 h30 l3 20 Z" fill="#C98B5C"/><rect x="19" y="44" width="48" height="8" rx="3" fill="#A85F3C"/><g fill="#F2C43C"><circle cx="30" cy="30" r="9"/><circle cx="50" cy="24" r="9.5"/><circle cx="42" cy="40" r="8.5"/><circle cx="62" cy="36" r="7.5"/></g><g fill="#FBE29A"><circle cx="30" cy="30" r="4"/><circle cx="50" cy="24" r="4.2"/><circle cx="42" cy="40" r="3.8"/></g><path d="M24 42 q-7 -7 -9 -16 M64 44 q7 -6 9 -14" stroke="#6F9E45" stroke-width="3" fill="none" stroke-linecap="round"/>`},
+
+aut_05:{name:'장독대',slot:'front',rar:'R',cur:'coin',amt:1500,box:[140,86],at:[292,586],anchor:'bc',
+  svg:`<ellipse cx="70" cy="80" rx="68" ry="12" fill="#C4B4A0"/><rect x="8" y="66" width="124" height="12" rx="4" fill="#A79684"/><g><path d="M22 68 q-8 -22 2 -32 q8 -8 17 -8 q9 0 17 8 q10 10 2 32 Z" fill="#4E3628"/><path d="M22 68 q-6 -22 4 -30 q7 -7 15 -7 q8 0 15 7 q10 8 4 30 Z" fill="#7C5942"/><ellipse cx="41" cy="28" rx="15" ry="5" fill="#3D2A20"/></g><g><path d="M74 68 q-7 -18 1 -26 q6 -6 13 -6 q7 0 13 6 q8 8 1 26 Z" fill="#4E3628"/><path d="M74 68 q-5 -18 3 -24 q5 -5 11 -5 q6 0 11 5 q8 6 3 24 Z" fill="#95704F"/><ellipse cx="88" cy="36" rx="12" ry="4" fill="#3D2A20"/></g><g><path d="M110 68 q-5 -14 1 -20 q5 -5 10 -5 q5 0 10 5 q6 6 1 20 Z" fill="#4E3628"/><ellipse cx="121" cy="43" rx="10" ry="3.4" fill="#3D2A20"/></g>`},
+
+aut_07:{name:'지는 낙엽',slot:'air',rar:'R',cur:'gem',amt:180,box:[80,80],at:[0,0],fall:'leaf',
+  svg:`<g fill="#D9541F"><path d="M16 18 l8 -7 l7 8 l-8 7 Z"/><path d="M56 30 l8 -7 l7 8 l-8 7 Z"/><path d="M28 58 l8 -7 l7 8 l-8 7 Z"/></g><g fill="#F0873A"><path d="M46 12 l7 -6 l6 7 l-7 6 Z"/><path d="M14 44 l7 -6 l6 7 l-7 6 Z"/><path d="M62 62 l7 -6 l6 7 l-7 6 Z"/></g><g fill="#F7BE4C"><path d="M38 38 l6 -5 l5 6 l-6 5 Z"/><path d="M66 46 l6 -5 l5 6 l-6 5 Z"/></g>`},
+
+/* ── 겨울 ───────────────────────────── */
+win_06:{name:'눈밭',slot:'ground',rar:'N',cur:'coin',amt:600,box:[400,300],at:[0,600],fixed:true,gkind:'cover',
+  svg:`<rect width="400" height="300" fill="#F4F8FC"/><path d="M0 46 q110 -16 210 6 q90 18 190 -4 v252 H0Z" fill="#FFFFFF"/><path d="M0 156 q120 -14 230 8 q70 14 170 0 v136 H0Z" fill="#E7EEF6"/><g fill="#DAE4EF"><ellipse cx="70" cy="112" rx="42" ry="11"/><ellipse cx="300" cy="88" rx="36" ry="9"/><ellipse cx="180" cy="248" rx="48" ry="12"/></g><g stroke="#C9D6E4" stroke-width="2" fill="none" stroke-linecap="round"><path d="M40 200 q22 -6 44 2"/><path d="M240 168 q26 -6 50 2"/><path d="M120 262 q26 -6 50 2"/></g>`},
+
+win_01:{name:'눈 덮인 소나무',slot:'mid',rar:'SR',cur:'gem',amt:190,box:[156,180],at:[96,472],anchor:'bc',
+  svg:`<path d="M78 178 q5 -54 -2 -86" stroke="#6B5040" stroke-width="10" fill="none" stroke-linecap="round"/><path d="M76 122 q-24 -8 -40 -24 M78 102 q26 -12 42 -30 M74 148 q-22 -4 -34 -18" stroke="#6B5040" stroke-width="7" fill="none" stroke-linecap="round"/><g fill="#2F5B45"><ellipse cx="34" cy="94" rx="28" ry="13"/><ellipse cx="120" cy="70" rx="30" ry="14"/><ellipse cx="40" cy="132" rx="26" ry="12"/><ellipse cx="78" cy="48" rx="32" ry="15"/><ellipse cx="112" cy="116" rx="24" ry="11"/></g><g fill="#3E7357"><ellipse cx="34" cy="92" rx="28" ry="12"/><ellipse cx="120" cy="68" rx="30" ry="13"/><ellipse cx="40" cy="130" rx="26" ry="11"/><ellipse cx="78" cy="46" rx="32" ry="14"/><ellipse cx="112" cy="114" rx="24" ry="10"/></g><g fill="#FFFFFF"><ellipse cx="34" cy="84" rx="24" ry="7"/><ellipse cx="120" cy="60" rx="26" ry="7"/><ellipse cx="40" cy="122" rx="22" ry="6"/><ellipse cx="78" cy="37" rx="28" ry="8"/><ellipse cx="112" cy="106" rx="20" ry="6"/></g>`},
+
+win_02:{name:'동백나무',slot:'mid',rar:'R',cur:'coin',amt:1500,box:[116,126],at:[336,450],anchor:'bc',
+  svg:`<path d="M58 124 q-4 -34 0 -50 M58 96 q16 -8 24 -18 M58 108 q-14 -8 -22 -16" stroke="#6B5040" stroke-width="6" fill="none" stroke-linecap="round"/><g fill="#2F5B45"><ellipse cx="30" cy="66" rx="22" ry="14"/><ellipse cx="80" cy="58" rx="24" ry="15"/><ellipse cx="56" cy="42" rx="24" ry="14"/><ellipse cx="54" cy="84" rx="24" ry="13"/></g><g fill="#3E7357"><ellipse cx="30" cy="64" rx="22" ry="13"/><ellipse cx="80" cy="56" rx="24" ry="14"/><ellipse cx="56" cy="40" rx="24" ry="13"/><ellipse cx="54" cy="82" rx="24" ry="12"/></g><g fill="#C8384A"><circle cx="34" cy="52" r="8"/><circle cx="76" cy="42" r="8.5"/><circle cx="68" cy="76" r="8"/><circle cx="28" cy="82" r="7"/><circle cx="92" cy="70" r="6.5"/></g><g fill="#E8626F"><circle cx="34" cy="52" r="3.6"/><circle cx="76" cy="42" r="3.8"/><circle cx="68" cy="76" r="3.6"/></g><g fill="#F5D356"><circle cx="34" cy="52" r="1.7"/><circle cx="76" cy="42" r="1.8"/><circle cx="68" cy="76" r="1.7"/></g><g fill="#FFFFFF"><ellipse cx="56" cy="32" rx="20" ry="6"/><ellipse cx="84" cy="48" rx="16" ry="5"/></g>`},
+
+win_03:{name:'석등',slot:'front',rar:'R',cur:'coin',amt:1400,box:[76,116],at:[136,576],anchor:'bc',
+  svg:`<ellipse cx="38" cy="112" rx="28" ry="8" fill="#C6CEDA"/><rect x="26" y="80" width="24" height="30" rx="2" fill="#9AA3B0"/><rect x="18" y="70" width="40" height="12" rx="3" fill="#AEB7C3"/><rect x="20" y="40" width="36" height="30" rx="3" fill="#AEB7C3"/><rect x="26" y="46" width="24" height="20" rx="2" fill="#F5D356"/><path d="M12 40 q26 -16 52 0 Z" fill="#7C8492"/><path d="M10 38 q28 -20 56 0 q-15 5 -28 5 q-13 0 -28 -5 Z" fill="#FFFFFF"/><rect x="31" y="26" width="14" height="7" rx="2" fill="#9AA3B0"/><ellipse cx="38" cy="25" rx="10" ry="4" fill="#FFFFFF"/>`},
+
+win_04:{name:'눈사람',slot:'front',rar:'N',cur:'coin',amt:500,box:[74,84],at:[252,588],anchor:'bc',
+  svg:`<ellipse cx="37" cy="80" rx="22" ry="7" fill="#DCE5EE"/><circle cx="37" cy="62" r="17" fill="#FFFFFF" stroke="#DCE5EE" stroke-width="1.5"/><circle cx="37" cy="34" r="12" fill="#FFFFFF" stroke="#DCE5EE" stroke-width="1.5"/><circle cx="33" cy="32" r="2" fill="#4A5462"/><circle cx="41" cy="32" r="2" fill="#4A5462"/><path d="M37 36 l7 3 l-7 2 Z" fill="#EE8C22"/><path d="M23 34 q14 -9 28 0 Z" fill="#C8384A"/><path d="M22 20 q15 -6 30 0 l-4 -9 h-22 Z" fill="#3D3A36"/><path d="M18 60 q-10 -5 -15 -13 M56 60 q10 -5 15 -13" stroke="#6B5040" stroke-width="2.5" fill="none" stroke-linecap="round"/><g fill="#4A5462"><circle cx="37" cy="56" r="2"/><circle cx="37" cy="66" r="2"/></g>`},
+
+win_05:{name:'눈 쌓인 장독대',slot:'front',rar:'N',cur:'coin',amt:900,box:[140,92],at:[292,588],anchor:'bc',
+  svg:`<ellipse cx="70" cy="86" rx="68" ry="12" fill="#C6CEDA"/><rect x="8" y="70" width="124" height="12" rx="4" fill="#AEB7C3"/><g><path d="M22 72 q-8 -22 2 -32 q8 -8 17 -8 q9 0 17 8 q10 10 2 32 Z" fill="#4E3628"/><path d="M22 72 q-6 -22 4 -30 q7 -7 15 -7 q8 0 15 7 q10 8 4 30 Z" fill="#7C5942"/><ellipse cx="41" cy="32" rx="15" ry="5" fill="#3D2A20"/><ellipse cx="41" cy="28" rx="16" ry="6" fill="#FFFFFF"/></g><g><path d="M74 72 q-7 -18 1 -26 q6 -6 13 -6 q7 0 13 6 q8 8 1 26 Z" fill="#4E3628"/><path d="M74 72 q-5 -18 3 -24 q5 -5 11 -5 q6 0 11 5 q8 6 3 24 Z" fill="#95704F"/><ellipse cx="88" cy="40" rx="12" ry="4" fill="#3D2A20"/><ellipse cx="88" cy="36" rx="13" ry="5" fill="#FFFFFF"/></g><g><path d="M110 72 q-5 -14 1 -20 q5 -5 10 -5 q5 0 10 5 q6 6 1 20 Z" fill="#4E3628"/><ellipse cx="121" cy="43" rx="11" ry="4" fill="#FFFFFF"/></g><rect x="8" y="66" width="124" height="7" rx="3" fill="#FFFFFF"/>`},
+
+win_07:{name:'내리는 눈',slot:'air',rar:'R',cur:'gem',amt:180,box:[80,80],at:[0,0],fall:'snow',
+  svg:`<g fill="#FFFFFF" stroke="#D8E4EF" stroke-width="1"><circle cx="18" cy="16" r="5"/><circle cx="52" cy="12" r="4"/><circle cx="34" cy="36" r="5.5"/><circle cx="66" cy="34" r="4"/><circle cx="16" cy="52" r="4.5"/><circle cx="48" cy="58" r="5"/><circle cx="70" cy="66" r="3.6"/><circle cx="28" cy="70" r="4"/></g>`}
+});
+Object.keys(ITEMS).forEach(id=>{ if(!ITEMS[id].season) ITEMS[id].season = SEASON[id] || (id.slice(0,3)==='sum'?'summer':id.slice(0,3)==='aut'?'autumn':id.slice(0,3)==='win'?'winter':'spring'); });
+
+const SAMPLE_PLACED = ['mhs_04','mhs_12','mhs_23','mhs_07','mhs_08','mhs_10','mhs_21','mhs_15','spr_08'];
 
 /* ── 옷 ─────────────────────────────────
    slot   top(저고리) / bottom(치마·바지) / outer(두루마기) / shoes(신)
@@ -508,13 +601,22 @@ function sky(){return `<rect width="400" height="600" fill="#FDF3E9"/>
   <ellipse cx="222" cy="36" rx="44" ry="13" fill="#FFFAF3"/>`;}
 function hills(){return `<path d="M0 196 L94 152 L166 190 L248 156 L346 194 L400 174 V262 H0Z" fill="#AEBCA4"/>
   <path d="M0 216 L114 176 L208 214 L298 180 L400 212 V262 H0Z" fill="#8FA88A"/>`;}
-function petals(){
-  let out='<g>';
-  for(let i=0;i<14;i++){
-    const x=Math.round(Math.random()*400), dur=(7+Math.random()*6).toFixed(1);
-    const delay=(Math.random()*10).toFixed(1), dx=Math.round(Math.random()*80-40), r=4+Math.random()*2.5;
-    out+=`<ellipse class="petal" cx="${x}" cy="0" rx="${r.toFixed(1)}" ry="${(r*.66).toFixed(1)}"
-      fill="${Math.random()>.5?'#F0A8BE':'#FBD8E2'}"
+const FALL = {
+  petal:{ cols:['#F0A8BE','#FBD8E2'], rmin:4,   rmax:6.5, n:14, dur:[7,13] },
+  leaf :{ cols:['#D9541F','#F0873A','#F7BE4C'], rmin:4, rmax:6, n:13, dur:[6,12] },
+  snow :{ cols:['#FFFFFF','#EAF2F8'], rmin:2.5, rmax:4.5, n:20, dur:[9,16] }
+};
+function fallSVG(kind){
+  const f=FALL[kind]||FALL.petal; let out='<g>';
+  for(let i=0;i<f.n;i++){
+    const x=Math.round(Math.random()*400);
+    const dur=(f.dur[0]+Math.random()*(f.dur[1]-f.dur[0])).toFixed(1);
+    const delay=(Math.random()*16).toFixed(1);
+    const dx=Math.round(Math.random()*80-40);
+    const r=f.rmin+Math.random()*(f.rmax-f.rmin);
+    const c=f.cols[Math.floor(Math.random()*f.cols.length)];
+    const ry=kind==='snow'?r:r*0.66;
+    out+=`<ellipse class="petal" cx="${x}" cy="0" rx="${r.toFixed(1)}" ry="${ry.toFixed(1)}" fill="${c}"
       style="--dx:${dx}px;animation-duration:${dur}s;animation-delay:-${delay}s"/>`;
   }
   return out+'</g>';
@@ -564,7 +666,8 @@ function emptyLand(){
 }
 function drawGarden(){
   const list = S.placed.map(id=>({id,it:ITEMS[id]})).filter(o=>o.it);
-  const ground = list.filter(o=>o.it.slot==='ground');
+  const ground = list.filter(o=>o.it.slot==='ground')
+    .sort((a,b)=>(a.it.gkind==='cover'?0:1)-(b.it.gkind==='cover'?0:1));
   const mid    = list.filter(o=>o.it.slot==='mid'||o.it.slot==='front');
   const air    = list.filter(o=>o.it.slot==='air');
   const p = S.pos.garden;
@@ -574,7 +677,7 @@ function drawGarden(){
   scene.innerHTML = sky() + hills() + village() + emptyLand()
     + ground.map(place).join('')
     + pool.map(o=>o.html).join('')
-    + air.map(place).join('') + petals();
+    + air.map(o=> o.it.fall ? fallSVG(o.it.fall) : place(o)).join('');
 }
 function spotOf(id){ return S.spot[id] || ITEMS[id].at; }
 function xyOf(id){
@@ -692,7 +795,7 @@ function drawMarket(){
     <rect y="262" width="400" height="338" fill="#D0BE9C"/>
     <path d="M0 440 q200 -16 400 6 v154 H0Z" fill="#C2AE8A"/>
     <g fill="#B7A17B"><ellipse cx="60" cy="510" rx="26" ry="8"/><ellipse cx="200" cy="540" rx="30" ry="9"/><ellipse cx="330" cy="506" rx="24" ry="8"/></g>
-    ${stall(4,  'shop-flower', 51,'#E48AA6','꽃전', '16종',  true)}
+    ${stall(4,  'shop-flower', 51,'#E48AA6','꽃전', '38종',  true)}
     ${stall(102,'shop-clothes',149,'#7FA9C9','옷전', '14벌',  true)}
     ${stall(200,'shop-stone',  247,'#8FA8B8','석물전','준비 중',false)}
     ${stall(298,'shop-goods',  345,'#C9A24A','물목전','준비 중',false)}
@@ -820,6 +923,7 @@ function startPlacing(id){
   overlay.classList.remove('on');
   where='garden'; drawScene();
   if(it.fixed){
+    if(it.gkind) S.placed = S.placed.filter(x=>!(ITEMS[x] && ITEMS[x].gkind===it.gkind));
     if(!S.placed.includes(id)) S.placed.push(id);
     save(); drawScene(); toast(`${it.name}을(를) 깔았습니다`); return;
   }
@@ -901,16 +1005,27 @@ function renderStudy(){
 }
 
 /* ── 상점 ───────────────────────────────── */
+const PACK_NAME = { all:'사철 두는 것', spring:'매화 핀 언덕', summer:'연꽃 뜬 못',
+                    autumn:'단풍 드는 뜰', winter:'눈 내린 뜰' };
+let shopTab='spring';
 function openShop(){
   openSheetRaw('꽃전');
-  const ids=Object.keys(ITEMS);
+  renderShop();
+}
+function renderShop(){
+  const ids=Object.keys(ITEMS).filter(id=>ITEMS[id].season===shopTab);
+  const mine=ids.filter(id=>S.owned.includes(id)).length;
   sheetBody.innerHTML=`
+    <div class="tabs">${SEASON_TABS.map(([k,label])=>
+      `<button data-tab="${k}" class="${k===shopTab?'on':''}">${label}</button>`).join('')}</div>
     <div class="packhead">
-      <div class="strip"><h2>매화 핀 언덕</h2></div>
-      <div class="sub">봄 · ${ids.length}종 입고 · 보따리에 ${S.owned.length}종</div>
+      <div class="strip"><h2>${PACK_NAME[shopTab]}</h2></div>
+      <div class="sub">${SEASON_NAME[shopTab]} · ${ids.length}종 입고 · ${mine}종 보유</div>
     </div>
     <div class="grid">${ids.map(id=>cellHTML(id,'shop')).join('')}</div>
-    <p class="note">산 물건은 보따리에 들어갑니다. 정원에 놓는 것은 보따리에서 고르세요.</p>`;
+    <p class="note">산 물건은 정원보따리에 들어갑니다. 정원에 놓는 것은 보따리에서 고르세요.</p>`;
+  sheetBody.querySelectorAll('.tabs button').forEach(b=>
+    b.addEventListener('click',()=>{ shopTab=b.dataset.tab; renderShop(); sheetBody.scrollTop=0; }));
   sheetBody.querySelectorAll('.cell').forEach(c=>c.addEventListener('click',()=>buy(c.dataset.id)));
 }
 function cellHTML(id,mode){
@@ -932,8 +1047,8 @@ function buy(id){
   const bag=it.cur==='coin'?S.coin:S.gem;
   if(bag<it.amt) return toast(it.cur==='coin'?'엽전이 모자랍니다':'잎새가 모자랍니다');
   if(it.cur==='coin') S.coin-=it.amt; else S.gem-=it.amt;
-  S.owned.push(id); save(); syncHUD(); openShop();
-  toast(`${it.name} — 보따리에 넣었습니다`);
+  S.owned.push(id); save(); syncHUD(); renderShop();
+  toast(`${it.name} — 정원보따리에 넣었습니다`);
 }
 
 /* ── 옷 미리보기 ────────────────────────── */
@@ -976,7 +1091,7 @@ function openClothes(){
     ${WEAR_SLOTS.map(([s,label])=>`
       <p class="note" style="margin:14px 2px 8px;font-weight:700;color:#5C5346">${label}</p>
       <div class="grid">${Object.keys(WEAR[s]).map(id=>wearCell(s,id,'shop')).join('')}</div>`).join('')}
-    <p class="note">산 옷은 옷장에 들어갑니다. 입는 것은 보따리에서 고르세요.</p>`;
+    <p class="note">산 옷은 학동보따리에 들어갑니다. 입는 것은 학동보따리에서 고르세요.</p>`;
   sheetBody.querySelectorAll('.cell').forEach(c=>c.addEventListener('click',()=>buyWear(c.dataset.w)));
 }
 function buyWear(id){
@@ -986,51 +1101,74 @@ function buyWear(id){
   if(bag<g.amt) return toast(g.cur==='coin'?'엽전이 모자랍니다':'잎새가 모자랍니다');
   if(g.cur==='coin') S.coin-=g.amt; else S.gem-=g.amt;
   S.closet.push(id); save(); syncHUD(); openClothes();
-  toast(`${g.name} — 옷장에 넣었습니다`);
+  toast(`${g.name} — 학동보따리에 넣었습니다`);
 }
 function equip(id){
   const g=findWear(id);
   if(g.slot==='outer' && S.wear.outer===id) S.wear.outer=null;
   else S.wear[g.slot]=id;
-  save(); openBag();
+  save(); renderBag();
   toast(S.wear[g.slot]===id ? `${g.name}를 입었습니다` : `${g.name}를 벗었습니다`);
 }
 
 /* ── 보따리 ─────────────────────────────── */
+let bagTab='garden';
 function openBag(){
   openSheetRaw('보따리');
-  if(!S.owned.length && !S.closet.length){
-    sheetBody.innerHTML=`<p class="note">아직 가진 것이 없습니다. 저잣거리에서 하나 골라보세요.</p>`; return;
+  renderBag();
+}
+function renderBag(){
+  const tabs=`<div class="tabs">
+    <button data-bag="garden" class="${bagTab==='garden'?'on':''}">정원보따리 ${S.owned.length}</button>
+    <button data-bag="hakdong" class="${bagTab==='hakdong'?'on':''}">학동보따리 ${S.closet.length}</button></div>`;
+
+  if(bagTab==='hakdong'){
+    const body = S.closet.length
+      ? WEAR_SLOTS.map(([s,label])=>{
+          const ids=Object.keys(WEAR[s]).filter(id=>S.closet.includes(id));
+          if(!ids.length) return '';
+          return `<p class="note" style="margin:14px 2px 8px;font-weight:700;color:#5C5346">${label}</p>
+            <div class="grid">${ids.map(id=>wearCell(s,id,'closet')).join('')}</div>`;
+        }).join('')
+      : `<p class="note">아직 가진 옷이 없습니다. 저잣거리 옷전에서 골라보세요.</p>`;
+    sheetBody.innerHTML = tabs + body +
+      `<p class="note">학동이 입을 것들입니다. 두루마기는 다시 누르면 벗습니다.</p>`;
+  } else {
+    let body='';
+    if(!S.owned.length){
+      body=`<p class="note">아직 가진 물건이 없습니다. 저잣거리 꽃전에서 골라보세요.</p>`;
+    } else {
+      body = SEASON_TABS.map(([k,label])=>{
+        const ids=S.owned.filter(id=>ITEMS[id] && ITEMS[id].season===k);
+        if(!ids.length) return '';
+        return `<p class="note" style="margin:14px 2px 8px;font-weight:700;color:#5C5346">${label} · ${ids.length}종</p>
+          <div class="grid">${ids.map(id=>cellHTML(id,'bag')).join('')}</div>`;
+      }).join('') +
+      `<button class="subbtn" id="sampleBtn">「매화 핀 언덕」 샘플 배치로 되돌리기</button>
+       <p class="note">봄 물건을 샘플 자리에 다시 놓습니다. 옮겨둔 자리는 지워집니다.</p>`;
+    }
+    sheetBody.innerHTML = tabs +
+      `<p class="note" style="margin:0 2px 4px">${S.owned.length}종 보유 · ${S.placed.length}종 정원에 놓임</p>` + body;
   }
-  const closetBySlot = WEAR_SLOTS
-    .map(([s,label])=>{
-      const ids=Object.keys(WEAR[s]).filter(id=>S.closet.includes(id));
-      if(!ids.length) return '';
-      return `<p class="note" style="margin:14px 2px 8px;font-weight:700;color:#5C5346">${label}</p>
-        <div class="grid">${ids.map(id=>wearCell(s,id,'closet')).join('')}</div>`;
-    }).join('');
-  sheetBody.innerHTML=`
-    <p class="note" style="margin:0 2px 4px;font-weight:700;color:#5C5346">옷장 · ${S.closet.length}벌</p>
-    ${closetBySlot}
-    <p class="note" style="margin:22px 2px 4px;font-weight:700;color:#5C5346">정원 물건 · ${S.owned.length}종 중 ${S.placed.length}종 놓임</p>
-    <div class="grid">${S.owned.map(id=>cellHTML(id,'bag')).join('')}</div>
-    <button class="subbtn" id="sampleBtn">「매화 핀 언덕」 샘플 배치로 되돌리기</button>
-    <p class="note">가진 물건을 샘플 자리에 다시 놓습니다. 옮겨둔 자리는 지워집니다.</p>`;
-  sheetBody.querySelectorAll('.cell[data-w]').forEach(c=>{
-    c.addEventListener('click',()=>equip(c.dataset.w));
-  });
+
+  sheetBody.querySelectorAll('.tabs button').forEach(b=>
+    b.addEventListener('click',()=>{ bagTab=b.dataset.bag; renderBag(); sheetBody.scrollTop=0; }));
+  sheetBody.querySelectorAll('.cell[data-w]').forEach(c=>
+    c.addEventListener('click',()=>equip(c.dataset.w)));
   sheetBody.querySelectorAll('.cell[data-id]').forEach(c=>{
     c.addEventListener('click',()=>{
       const id=c.dataset.id;
       if(S.placed.includes(id)){
-        S.placed=S.placed.filter(x=>x!==id); save(); openBag();
+        S.placed=S.placed.filter(x=>x!==id); save(); renderBag();
         toast(`${ITEMS[id].name}을(를) 거두었습니다`);
       } else startPlacing(id);
     });
   });
-  document.getElementById('sampleBtn').addEventListener('click',()=>{
-    S.spot={}; S.placed=S.owned.slice(); save(); openBag();
-    toast('샘플 배치로 되돌렸습니다');
+  const sb=document.getElementById('sampleBtn');
+  if(sb) sb.addEventListener('click',()=>{
+    S.spot={};
+    S.placed=S.owned.filter(id=>SAMPLE_PLACED.includes(id));
+    save(); renderBag(); toast('샘플 배치로 되돌렸습니다');
   });
 }
 
