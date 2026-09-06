@@ -93,11 +93,52 @@ body{font-family:'Gaegu',system-ui,sans-serif;color:var(--ink);-webkit-font-smoo
 .subbtn{width:100%;margin-top:12px;padding:11px;border:2.5px solid var(--ink);border-radius:14px;
   background:var(--hanji-2);font-family:inherit;font-size:18px;cursor:pointer}
 .note{font-size:17px;color:#7A6E5E;margin:10px 2px 0;line-height:1.5}
+.steps{display:flex;gap:4px;margin-bottom:12px}
+.steps span{flex:1;text-align:center;font-size:15px;padding:5px 0;border-radius:10px;
+  border:2px solid #D6C7AC;color:#A99E8B;background:var(--hanji)}
+.steps span.past{background:#DCEAC8;border-color:var(--ink);color:#5C5346}
+.steps span.now{background:var(--maehwa);border-color:var(--ink);color:var(--ink);font-weight:700}
+.grid8{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin:14px 0 6px}
+.grid8 .ja{background:var(--hanji);border:2px solid var(--ink);border-radius:10px;padding:6px 2px}
+.grid8 .ja b{display:block;font-size:32px;line-height:1.1;font-weight:700}
+.grid8 .ja span{display:block;font-size:14px;color:#7A6E5E;white-space:nowrap;overflow:hidden}
+.grid8.small .ja b{font-size:26px}
+.mean{font-size:19px;margin-top:10px;line-height:1.5}
+.cloze{font-size:52px;font-weight:700;letter-spacing:.06em;margin:8px 0}
+.cloze i{font-style:normal;color:var(--maehwa-d)}
+.answer{display:flex;gap:8px;align-items:stretch;margin-top:12px}
+.answer input{flex:1;min-width:0;border:3px solid var(--ink);border-radius:16px;background:var(--hanji);
+  font-family:inherit;font-size:30px;text-align:center;padding:8px}
+.verdict{font-size:20px;font-weight:700;margin-top:14px;padding:10px 14px;border-radius:14px;
+  border:2.5px solid var(--ink)}
+.verdict.right{background:#CFE7BE} .verdict.wrong{background:#F3CFCF}
+.ja-opt{font-size:34px;font-weight:700;text-align:center;padding:10px 0}
+.pick{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-top:14px}
+.pick button{border:2.5px solid var(--ink);border-radius:14px;background:var(--hanji);
+  font-family:inherit;font-size:32px;font-weight:700;padding:8px 0;cursor:pointer}
+.pick button:disabled{background:var(--hanji-2);color:#C4B8A2}
+.slots{display:flex;align-items:center;justify-content:center;gap:3px;flex-wrap:wrap;margin:10px 0}
+.slots span{width:36px;font-size:30px;font-weight:700;color:#C4B8A2}
+.slots span.on{color:var(--ink)}
+.slots em{width:12px}
+.jokrow{border:2.5px solid var(--ink);border-radius:14px;background:var(--hanji-2);padding:9px 11px;margin-top:10px}
+.jokhead{display:flex;justify-content:space-between;font-size:18px}
+.jokhead span{color:#7A6E5E}
+.jokbar{height:7px;background:var(--hanji);border:2px solid var(--ink);border-radius:5px;overflow:hidden;margin:5px 0 6px}
+.jokbar>i{display:block;height:100%;background:var(--leaf)}
+.jokchars{font-size:22px;letter-spacing:.08em;color:#C4B8A2;word-break:break-all}
+.jokchars .met{color:var(--ink);font-weight:700}
 
-.packhead{border:3px solid var(--ink);border-radius:16px;overflow:hidden;margin-bottom:14px}
+.packhead{border:3px solid var(--ink);border-radius:16px;overflow:hidden;margin-bottom:14px;position:relative}
 .packhead .strip{padding:10px 14px;background:var(--maehwa);border-bottom:3px solid var(--ink)}
 .packhead h2{margin:0;font-size:22px;font-weight:700}
 .packhead .sub{padding:8px 14px;font-size:17px;background:var(--hanji-2);color:#6B6154}
+.packhead .preview{display:block;width:100%;background:#FDF3E9}
+.packhead .art{position:relative;line-height:0}
+.packhead.banner .strip{position:absolute;left:0;right:0;bottom:0;border:0;
+  background:linear-gradient(to top, rgba(61,58,54,.85), rgba(61,58,54,0));padding:20px 14px 12px}
+.packhead.banner .strip h2{color:var(--hanji);text-shadow:0 2px 3px rgba(0,0,0,.4)}
+.packhead.banner .sub{border-top:3px solid var(--ink)}
 .grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
 .cell{border:2.5px solid var(--ink);border-radius:14px;background:var(--hanji-2);padding:6px;
   cursor:pointer;position:relative;font-family:inherit;text-align:center}
@@ -189,7 +230,7 @@ body{font-family:'Gaegu',system-ui,sans-serif;color:var(--ink);-webkit-font-smoo
      3. 학습은 서당 마당이 아니라 서당 안으로 들어가야 나옴
    ========================================================= */
 
-const SAVE_KEY = 'kseodang_v09';
+const SAVE_KEY = 'kseodang_v10';
 
 /* ── 천자문 1000자 ────────────────────────
    토큰 = 한자 + 훈 + 음   (예: 天하늘천)
@@ -321,8 +362,265 @@ const CJ_RAW = [
 "孤외로울고 陋더러울루 寡적을과 聞들을문 愚어리석을우 蒙어릴몽 等무리등 誚꾸짖을초",
 "謂이를위 語말씀어 助도울조 者놈자 焉어찌언 哉어조사재 乎어조사호 也어조사야"
 ];
+/* ── 구절 풀이 125마디 ────────────────────
+   여덟 자 한 마디의 뜻. 4단계 「뜻 새기기」의 정답이 된다.
+   ---------------------------------------- */
+const GU_MEAN = [
+"하늘은 검고 땅은 누르며, 우주는 넓고 거칠다.",
+"해와 달은 차고 기울며, 별과 별자리는 벌여 펼쳐져 있다.",
+"추위가 오면 더위가 물러가고, 가을에 거두어 겨울에 갈무리한다.",
+"남는 날을 모아 윤달로 한 해를 이루고, 율려로 음양을 고른다.",
+"구름이 올라 비를 이루고, 이슬이 맺혀 서리가 된다.",
+"금은 여수에서 나고, 옥은 곤륜산에서 난다.",
+"이름난 칼은 거궐이라 하고, 이름난 구슬은 야광이라 일컫는다.",
+"과일은 오얏과 능금을 귀히 여기고, 나물은 겨자와 생강을 중히 여긴다.",
+"바닷물은 짜고 냇물은 싱거우며, 비늘 있는 것은 물에 잠기고 깃 있는 것은 하늘을 난다.",
+"용사와 화제, 조관과 인황이 있었다.",
+"비로소 문자를 만들고, 이에 옷을 지어 입었다.",
+"자리를 물려 나라를 넘겨준 이는 유우씨 순임금과 도당씨 요임금이다.",
+"백성을 위로하고 죄를 친 이는 주나라 무왕 발과 은나라 탕왕이다.",
+"조정에 앉아 도를 물으니, 옷자락 드리우고 팔짱 낀 채로도 고루 다스려진다.",
+"백성을 사랑으로 기르니, 멀리 오랑캐까지 신하로 엎드린다.",
+"멀고 가까운 곳이 한 몸이 되어, 모두 이끌려 임금에게 돌아온다.",
+"우는 봉황은 나무에 깃들고, 흰 망아지는 마당에서 풀을 뜯는다.",
+"교화가 풀과 나무에까지 입혀지고, 그 힘입음이 온 세상에 미친다.",
+"무릇 이 몸과 터럭은, 사대와 오상으로 이루어졌다.",
+"길러주신 은혜를 공손히 생각하면, 어찌 감히 헐고 상하게 하랴.",
+"여자는 곧고 매운 지조를 사모하고, 남자는 재주와 어짊을 본받는다.",
+"허물을 알면 반드시 고치고, 능함을 얻었거든 잊지 말라.",
+"남의 모자람을 말하지 말고, 제 나은 점을 믿지 말라.",
+"믿음은 되풀이해 지킬 수 있게 하고, 그릇은 헤아리기 어렵도록 크게 하라.",
+"묵자는 실이 물드는 것을 슬퍼했고, 시경은 고양편의 깨끗함을 기렸다.",
+"큰 길을 걸으면 어진 이가 되고, 생각을 이겨내면 성인이 된다.",
+"덕이 서면 이름이 서고, 모습이 단정하면 겉으로 드러남도 바르다.",
+"빈 골짜기는 소리를 전하고, 빈 집은 들림이 겹쳐 울린다.",
+"재앙은 악이 쌓인 데서 오고, 복은 착한 일의 경사에서 온다.",
+"한 자 되는 구슬이 보배가 아니라, 짧은 시간을 다투어야 한다.",
+"아버지 섬김을 바탕으로 임금을 섬기니, 엄함과 공경이라 한다.",
+"효도는 마땅히 힘을 다할 것이요, 충성은 곧 목숨을 다하는 것이다.",
+"깊은 물에 임한 듯 얇은 얼음 밟듯 하고, 일찍 일어나 여름엔 서늘히 겨울엔 따뜻이 해 드린다.",
+"난초처럼 향기롭고, 소나무처럼 무성하다.",
+"냇물은 흘러 쉬지 않고, 못은 맑아 비침을 얻는다.",
+"몸가짐은 무엇을 생각하는 듯하고, 말은 차분하고 안정되게 한다.",
+"처음을 도탑게 함이 참으로 아름답고, 끝을 삼감이 마땅히 좋다.",
+"영화로운 일의 터전이 되니, 그 이름이 자자하여 끝이 없다.",
+"배움이 넉넉하면 벼슬에 오르고, 직책을 맡아 정사를 좇는다.",
+"소공이 쉬던 감당나무를 남겨 두니, 떠난 뒤에 더욱 기려 노래한다.",
+"음악은 귀천에 따라 다르고, 예는 높고 낮음을 가른다.",
+"위가 화하면 아래가 화목하고, 지아비가 이끌면 지어미가 따른다.",
+"밖에서는 스승의 가르침을 받고, 안에서는 어머니의 거동을 받든다.",
+"고모와 백부 숙부는, 조카를 제 아이처럼 여긴다.",
+"형제를 몹시 그리워함은, 한 기운에 이어진 가지이기 때문이다.",
+"벗을 사귐에 정분을 나누고, 끊고 갈듯 서로 경계하고 바로잡는다.",
+"어질고 사랑하고 측은히 여기는 마음을, 잠시도 떠나지 말라.",
+"절의와 청렴과 물러남은, 엎어지고 자빠지는 때에도 이지러지지 않는다.",
+"성품이 고요하면 마음이 편안하고, 마음이 흔들리면 정신이 지친다.",
+"참됨을 지키면 뜻이 가득 차고, 물욕을 좇으면 뜻이 옮겨간다.",
+"바른 지조를 굳게 지니면, 좋은 벼슬이 절로 얽혀 온다.",
+"화하의 도읍은, 동경과 서경 두 곳이다.",
+"북망산을 등지고 낙수를 마주하며, 위수에 뜨고 경수를 의지한다.",
+"궁전은 빽빽하게 들어차고, 누각은 날아오를 듯하여 놀랍다.",
+"새와 짐승을 그려 놓고, 신선과 신령을 채색해 그렸다.",
+"병사는 정전 곁으로 열려 있고, 갑장은 기둥을 마주 보고 있다.",
+"자리를 펴고 방석을 놓아, 비파를 타고 생황을 분다.",
+"섬돌을 올라 궁전에 드니, 관의 구슬이 굴러 별인가 의심한다.",
+"오른쪽으로는 광내전에 통하고, 왼쪽으로는 승명려에 이른다.",
+"이미 삼분오전을 모으고, 또한 뭇 영재를 모았다.",
+"두조의 초서와 종요의 예서, 옻으로 쓴 글과 벽에서 나온 경서가 있다.",
+"관부에는 장수와 재상이 벌여 있고, 길에는 삼공구경의 집이 늘어섰다.",
+"공신에게 여덟 고을을 봉해 주고, 집마다 천 명의 군사를 딸려 주었다.",
+"높은 관을 쓰고 임금의 수레를 모시니, 바퀴를 몰 때 갓끈이 흔들린다.",
+"대대로 받은 녹이 사치롭고 넉넉하니, 수레의 말은 살찌고 옷은 가볍다.",
+"공을 세워 실적이 무성하니, 비석에 새기고 그 공을 명문으로 남긴다.",
+"반계의 여상과 신야의 이윤은, 때를 도와 재상 아형이 되었다.",
+"곡부에 크게 자리 잡았으니, 주공 단이 아니면 누가 다스렸으랴.",
+"제나라 환공은 천하를 바로잡아 모으고, 약한 나라를 구하고 기우는 나라를 붙들었다.",
+"기리계는 한나라 혜제의 자리를 돌려세웠고, 부열은 무정을 꿈으로 감동시켰다.",
+"뛰어난 이들이 부지런히 힘쓰니, 선비가 많아 나라가 이에 편안하다.",
+"진나라와 초나라가 번갈아 패자가 되고, 조나라와 위나라는 연횡책에 시달렸다.",
+"길을 빌려 괵나라를 멸하고, 천토에 모여 맹세하였다.",
+"소하는 간략한 법을 좇았고, 한비는 번거로운 형벌로 해를 입었다.",
+"백기 왕전 염파 이목은, 군사를 씀이 가장 정밀하였다.",
+"위엄을 사막에까지 떨치니, 그 기림이 그림으로 전해 달린다.",
+"구주는 우임금이 다닌 자취요, 백군은 진나라가 아울러 둔 것이다.",
+"오악은 항산과 대산을 으뜸으로 삼고, 봉선은 운운산과 정정산에서 지낸다.",
+"안문과 자새, 계전과 적성이 있다.",
+"곤명지와 갈석산, 거야벌과 동정호가 있다.",
+"넓고 멀어 아득히 이어지고, 바위와 산굴은 그윽하고 어둡다.",
+"다스림은 농사를 근본으로 하니, 이 심고 거두는 일에 힘쓴다.",
+"비로소 남쪽 이랑에서 일을 시작하여, 나는 기장과 피를 심는다.",
+"익은 곡식으로 세를 내고 햇것을 바치니, 권하여 상 주고 내치거나 올린다.",
+"맹자는 본바탕을 도탑게 하였고, 사어는 곧음을 굳게 지녔다.",
+"중용에 가까워지려면, 힘쓰고 겸손하며 삼가고 스스로 경계해야 한다.",
+"소리를 들어 이치를 살피고, 모습을 살펴 기색을 분별한다.",
+"그 아름다운 계책을 자손에게 남기고, 공경히 심어 세우기를 힘쓴다.",
+"제 몸을 살펴 나무람과 경계로 삼고, 총애가 더할수록 겨룸이 극에 이름을 조심한다.",
+"위태로움과 욕됨은 부끄러움에 가까우니, 수풀과 언덕으로 물러남이 다행이다.",
+"소광과 소수 두 사람은 기미를 보고, 인끈을 풀었으니 누가 핍박하랴.",
+"홀로 떨어져 한가로이 지내며, 말없이 고요하고 쓸쓸하다.",
+"옛것을 구하고 찾아 논하며, 생각을 흩어 거닐며 노닌다.",
+"기쁨은 모여들고 번거로움은 보내며, 슬픔은 물러가고 즐거움이 부른 듯 온다.",
+"도랑의 연꽃은 또렷이 빛나고, 동산의 풀은 가지를 뻗는다.",
+"비파나무는 늦도록 푸르고, 오동나무는 일찍 시든다.",
+"묵은 뿌리는 시들어 덮이고, 지는 잎은 나부껴 흩날린다.",
+"노니는 곤새는 홀로 날아, 붉은 하늘을 스치며 오른다.",
+"저잣거리에서 책 읽기를 즐기니, 눈길 닿는 곳이 곧 책 주머니요 상자다.",
+"가벼이 여김을 두려워할 바이니, 담장에도 귀가 붙어 있다.",
+"반찬을 갖추어 밥을 먹으니, 입에 맞고 배를 채운다.",
+"배부르면 삶은 고기도 물리고, 주리면 지게미와 겨도 달다.",
+"친척과 오랜 벗을 대접할 때는, 늙고 젊음에 따라 음식을 달리한다.",
+"첩은 길쌈을 하고, 장막 친 방에서 수건을 들고 모신다.",
+"흰 비단부채는 둥글고 깨끗하며, 은촛대는 빛나고 환하다.",
+"낮에 졸고 밤에 자니, 쪽빛 대자리와 상아 평상이다.",
+"거문고 타며 노래하는 술자리에, 잔을 주고받고 술잔을 든다.",
+"손을 들고 발을 구르니, 기쁘고 즐거우며 또한 편안하다.",
+"맏이의 뒤를 이어가며, 겨울 증제와 가을 상제를 지낸다.",
+"이마를 조아려 두 번 절하니, 두렵고 또 황송하다.",
+"편지와 문서는 간략하고 요긴하게, 돌아보고 답할 때는 살펴 자세히 한다.",
+"몸에 때가 끼면 목욕을 생각하고, 뜨거운 것을 잡으면 시원하기를 바란다.",
+"나귀와 노새와 송아지와 소가, 놀라 뛰고 뛰어넘고 내달린다.",
+"도적을 베어 죽이고, 배반하고 도망한 자를 사로잡는다.",
+"여포의 활, 웅의료의 방울, 혜강의 거문고, 완적의 휘파람이 있다.",
+"몽염의 붓, 채륜의 종이, 마균의 재주, 임공자의 낚시가 있다.",
+"어지러움을 풀고 세상을 이롭게 하였으니, 모두가 아름답고 묘하다.",
+"모장과 서시의 고운 자태는, 찡그림도 곱고 웃음도 아름다웠다.",
+"세월은 화살처럼 늘 재촉하나, 햇빛은 밝고 환하게 빛난다.",
+"선기옥형은 매달려 돌고, 그믐달은 돌아가며 다시 비춘다.",
+"섶에 불붙이듯 복을 닦아 이으면, 길이 편안하고 길함이 높아진다.",
+"걸음을 법도에 맞추고 옷깃을 여미며, 조정에서 굽어보고 우러른다.",
+"띠를 매어 의젓하고 씩씩하게 하고, 오가며 우러러 바라본다.",
+"외롭고 좁아 들은 것이 적으면, 어리석은 자와 똑같이 꾸지람을 듣는다.",
+"어조사라 이르는 것은, 언·재·호·야 이 넉 자이다."
+];
+
+/* ── 글자 축 · 족(族) ─────────────────────
+   다산의 촉류방통. 천자문 안에 실제로 있는 글자만 묶었다.
+   한 구절에서 만난 글자는 제 족으로 흘러들어가 거기서 복습된다.
+   여기 없는 글자는 구절 축에서만 다룬다.
+   ---------------------------------------- */
+const JOK = [
+ {id:'j01', name:'하늘과 땅',   chars:'天地玄黃宇宙日月星辰雲雨露霜陰陽'},
+ {id:'j02', name:'때와 철',     chars:'寒暑秋冬歲年晝夕夙晩早時'},
+ {id:'j03', name:'물과 뫼',     chars:'水河海川淵池溪谷巖岡嶽野田土石'},
+ {id:'j04', name:'나라와 임금', chars:'國王帝皇君臣民官朝京都邑府城'},
+ {id:'j05', name:'집안 사람',   chars:'父母兄弟子兒姑伯叔夫婦女男妾'},
+ {id:'j06', name:'몸',         chars:'身髮首心手足目耳口骸顙躬面毛'},
+ {id:'j07', name:'마음과 성품', chars:'仁慈孝忠信德善惡性情志意愛敬恭'},
+ {id:'j08', name:'글과 배움',   chars:'學文字書詩經讀習談言辭語音問'},
+ {id:'j09', name:'풀과 나무',   chars:'草木松蘭荷梧桐枇杷棠槐葉根條枝林'},
+ {id:'j10', name:'새와 짐승',   chars:'鳥鳳鷄鴈龍羊羔犢駒驢騾獸禽鱗羽魚'},
+ {id:'j11', name:'빛깔',       chars:'白赤丹靑紫綵色素'},
+ {id:'j12', name:'셈',         chars:'壹二四五八九百千萬寸尺'},
+ {id:'j13', name:'크고 작음',   chars:'大巨高長短廣遠深薄多寡微少'},
+ {id:'j14', name:'오고 감',     chars:'來往去存立建動靜行止入出登退'},
+ {id:'j15', name:'옷과 먹거리', chars:'衣裳冠帶巾扇飯膳食果菜酒糧'},
+ {id:'j16', name:'그릇과 물건', chars:'器杯觴筆紙琴瑟笙劍珠玉金碑箱'},
+ {id:'j17', name:'벼슬과 다스림', chars:'仕職政治卿相將爵祿賞法刑軍兵'},
+ {id:'j18', name:'어조사',      chars:'焉哉乎也之而以於曰云者其此'}
+];
+
+/* ── 단계 ─────────────────────────────────
+   한 마디(여덟 자)를 다섯 단계로 익힌다.
+   배송을 통과해야 다음 마디로 나아간다. 서당의 규칙이다.
+   ---------------------------------------- */
+const STAGES = [
+  { id:'seongdok', name:'들이기', mode:'read',
+    scored:false, coin:0,
+    desc:'여덟 자를 소리 내어 읽고 뜻을 훑는다. 채점하지 않는다.' },
+
+  { id:'geulja',   name:'글자',   mode:'recall',
+    scored:true,  coin:80,  perChar:true,
+    desc:'한 자씩 음을 직접 적는다. 못 적으면 그때 보기를 준다.' },
+
+  { id:'sori',     name:'소리',   mode:'cloze',
+    scored:true,  coin:60,
+    desc:'네 자 구에서 빠진 한 자를 채운다.' },
+
+  { id:'tteut',    name:'뜻',     mode:'meaning',
+    scored:true,  coin:60,
+    desc:'여덟 자 한 마디의 풀이를 고른다.' },
+
+  { id:'baesong',  name:'배송',   mode:'order',
+    scored:true,  coin:120, gate:true,
+    desc:'책을 덮고 여덟 자를 차례대로 놓는다. 통과해야 다음 마디로 간다.' }
+];
+
+/* ── 되짚기(간격 반복) ─────────────────────
+   맞힌 횟수가 이어질수록 다시 만나는 날이 멀어진다.
+   틀리면 처음으로 돌아간다.
+   ---------------------------------------- */
+const SRS_DAYS = [1, 3, 7, 16, 35, 90];
+function nextDue(streak, now){
+  const d = SRS_DAYS[Math.min(streak, SRS_DAYS.length - 1)];
+  return (now || Date.now()) + d * 864e5;
+}
+
+/* ── 조립 ────────────────────────────────── */
 const CHEONJA = CJ_RAW.join(' ').trim().split(/\s+/)
-  .map(t => ({ c:t[0], hun:t.slice(1,-1), um:t.slice(-1) }));
+  .map((t, i) => ({
+    i,
+    c: t[0],
+    hun: t.slice(1, -1),
+    um: t.slice(-1),
+    gu: Math.floor(i / 8)          // 몇 번째 마디에 속하는가
+  }));
+
+const CHAR_INDEX = {};
+CHEONJA.forEach(o => { CHAR_INDEX[o.c] = o; });
+
+// 글자마다 제 족을 달아 준다
+JOK.forEach(j => {
+  [...j.chars].forEach(c => { if (CHAR_INDEX[c]) CHAR_INDEX[c].jok = j.id; });
+});
+
+const GUJEOL = GU_MEAN.map((mean, g) => {
+  const chars = CHEONJA.slice(g * 8, g * 8 + 8);
+  return {
+    g,
+    chars,                                   // 여덟 자
+    gu1: chars.slice(0, 4).map(o => o.c).join(''),   // 앞 넉 자
+    gu2: chars.slice(4, 8).map(o => o.c).join(''),   // 뒤 넉 자
+    mean
+  };
+});
+
+/* ── 학습 상태의 빈 꼴 ───────────────────── */
+const EMPTY_PROGRESS = {
+  gu: 0,        // 지금 익히는 마디 (0~124)
+  stage: 0,     // 그 마디에서 밟고 있는 단계 (0~4)
+  done: [],     // 배송까지 마친 마디 번호
+  char: {}      // 글자별 되짚기 기록 { '天': {n, ok, streak, due} }
+};
+
+/* 글자 하나를 채점한 뒤 기록을 고쳐 준다 */
+function markChar(prog, ch, correct, now) {
+  const r = prog.char[ch] || { n: 0, ok: 0, streak: 0, due: 0 };
+  r.n++;
+  if (correct) { r.ok++; r.streak++; }
+  else { r.streak = 0; }
+  r.due = correct ? nextDue(r.streak, now) : (now || Date.now()) + 864e5;
+  prog.char[ch] = r;
+  return r;
+}
+
+/* 오늘 되짚을 글자들. 익힌 적 있는 글자 중 기한이 찬 것만. */
+function dueChars(prog, now, limit) {
+  const t = now || Date.now();
+  return Object.keys(prog.char)
+    .filter(c => prog.char[c].due <= t)
+    .sort((a, b) => prog.char[a].due - prog.char[b].due)
+    .slice(0, limit || 12)
+    .map(c => CHAR_INDEX[c]);
+}
+
+/* 한 족 안에서 이미 만난 글자만 추린다 (글자 축 화면용) */
+function jokProgress(prog, jokId) {
+  const j = JOK.find(x => x.id === jokId);
+  const all = [...j.chars].filter(c => CHAR_INDEX[c]);
+  const met = all.filter(c => prog.char[c]);
+  return { jok: j, all, met, ratio: met.length / all.length };
+}
+
 
 const BOOKS = {
   cheonja:  { name:'천자문',   ready:true  },
@@ -335,7 +633,7 @@ const BOOKS = {
    ------------------------------------- */
 const ITEMS = {
   mhs_04:{name:'디딤돌 길',slot:'ground',rar:'N',cur:'coin',amt:500,box:[400,300],at:[0,600],fixed:true,
-    svg:`<path d="M200 292 V150 M200 176 L108 96 M200 176 L292 96" stroke="#D9C7A6" stroke-width="26" fill="none" stroke-linecap="round" stroke-linejoin="round"/><g fill="#C7B392"><ellipse cx="200" cy="272" rx="15" ry="7"/><ellipse cx="200" cy="238" rx="14" ry="7"/><ellipse cx="200" cy="200" rx="15" ry="7"/><ellipse cx="166" cy="156" rx="13" ry="6"/><ellipse cx="134" cy="124" rx="13" ry="6"/><ellipse cx="234" cy="156" rx="13" ry="6"/><ellipse cx="266" cy="124" rx="13" ry="6"/></g>`},
+    svg:`<path d="M200 2 C186 42 214 72 200 106 C186 142 214 172 200 208 C188 242 210 268 200 300" stroke="#E4D6B8" stroke-width="24" fill="none" stroke-linecap="round"/><g fill="#BCA786"><ellipse cx="199" cy="18" rx="13" ry="6"/><ellipse cx="194" cy="52" rx="13" ry="6"/><ellipse cx="205" cy="86" rx="13" ry="6"/><ellipse cx="198" cy="120" rx="13" ry="6"/><ellipse cx="204" cy="154" rx="13" ry="6"/><ellipse cx="196" cy="188" rx="13" ry="6"/><ellipse cx="203" cy="222" rx="13" ry="6"/><ellipse cx="199" cy="256" rx="13" ry="6"/><ellipse cx="201" cy="288" rx="13" ry="6"/></g>`},
 
   mhs_12:{name:'싸리 울타리',slot:'mid',rar:'N',cur:'coin',amt:450,box:[200,60],at:[104,352],anchor:'bc',
     svg:`<g stroke="#B08F6A" stroke-width="5" stroke-linecap="round"><path d="M12 56 V10"/><path d="M38 58 V8"/><path d="M64 56 V10"/><path d="M90 58 V8"/><path d="M116 56 V10"/><path d="M142 58 V8"/><path d="M168 56 V10"/><path d="M190 58 V12"/></g><g stroke="#96764F" stroke-width="4" stroke-linecap="round"><path d="M4 22 H196"/><path d="M4 44 H196"/></g>`},
@@ -355,10 +653,10 @@ const ITEMS = {
   mhs_09:{name:'백매 가지',slot:'mid',rar:'R',cur:'coin',amt:1300,box:[120,100],at:[266,476],anchor:'bc',
     svg:`<path d="M4 92 q34 -14 56 -36 q17 -18 56 -22" stroke="#7A5F45" stroke-width="7" fill="none" stroke-linecap="round"/><path d="M38 68 q8 -18 4 -28 M76 42 q10 -16 8 -24" stroke="#7A5F45" stroke-width="4" fill="none" stroke-linecap="round"/><g fill="#FFFFFF"><circle cx="28" cy="72" r="12"/><circle cx="50" cy="54" r="13"/><circle cx="76" cy="38" r="12"/><circle cx="102" cy="26" r="11"/><circle cx="42" cy="34" r="10"/></g><g fill="#F0A8BE"><circle cx="50" cy="54" r="4"/><circle cx="76" cy="38" r="4"/><circle cx="28" cy="72" r="3.5"/></g>`},
 
-  mhs_22:{name:'그네',slot:'mid',rar:'SR',cur:'gem',amt:160,box:[112,156],at:[68,566],anchor:'bc',
+  mhs_22:{name:'그네',slot:'mid',rar:'SR',cur:'gem',amt:160,box:[112,156],at:[60,558],anchor:'bc',
     svg:`<path d="M10 154 L48 26 M102 154 L64 26" stroke="#8A6A4E" stroke-width="8" fill="none" stroke-linecap="round"/><path d="M22 100 L90 100" stroke="#96764F" stroke-width="5" stroke-linecap="round"/><rect x="34" y="20" width="44" height="10" rx="4" fill="#7A5F45"/><g stroke="#C9A87C" stroke-width="3.5" stroke-linecap="round"><path d="M46 30 V106"/><path d="M66 30 V106"/></g><rect x="38" y="106" width="36" height="10" rx="4" fill="#B08F6A"/><g fill="#F0A8BE"><circle cx="34" cy="24" r="6"/><circle cx="78" cy="24" r="6"/></g><g fill="#FBD8E2"><circle cx="34" cy="24" r="2.6"/><circle cx="78" cy="24" r="2.6"/></g>`},
 
-  mhs_21:{name:'작은 연못',slot:'front',rar:'SR',cur:'gem',amt:140,box:[136,68],at:[196,524],anchor:'bc',
+  mhs_21:{name:'작은 연못',slot:'front',rar:'SR',cur:'gem',amt:140,box:[136,68],at:[104,558],anchor:'bc',
     svg:`<ellipse cx="68" cy="48" rx="66" ry="19" fill="#94A86E"/><ellipse cx="68" cy="44" rx="58" ry="16" fill="#6FA8A0"/><ellipse cx="68" cy="42" rx="54" ry="14" fill="#8FC6BC"/><g fill="#A79684"><ellipse cx="12" cy="46" rx="9" ry="5"/><ellipse cx="34" cy="56" rx="10" ry="5"/><ellipse cx="102" cy="54" rx="10" ry="5"/><ellipse cx="124" cy="44" rx="9" ry="5"/></g><g fill="#4E9A6E"><ellipse cx="40" cy="40" rx="13" ry="5"/><ellipse cx="92" cy="47" rx="12" ry="4.5"/></g><path d="M24 46 q14 -3 26 1 M78 36 q14 -3 24 1" stroke="#C4E4DC" stroke-width="2" fill="none" stroke-linecap="round"/><g fill="#F0A8BE"><circle cx="66" cy="36" r="5"/><circle cx="58" cy="40" r="4"/><circle cx="74" cy="40" r="4"/></g><circle cx="66" cy="36" r="2" fill="#FBD8E2"/>`},
 
   mhs_10:{name:'진달래 덤불',slot:'mid',rar:'N',cur:'coin',amt:600,box:[90,60],at:[352,502],anchor:'bc',
@@ -367,19 +665,19 @@ const ITEMS = {
   mhs_11:{name:'개나리 덤불',slot:'mid',rar:'N',cur:'coin',amt:600,box:[90,60],at:[44,516],anchor:'bc',
     svg:`<ellipse cx="45" cy="42" rx="42" ry="18" fill="#6E9A50"/><ellipse cx="45" cy="35" rx="37" ry="15" fill="#8AB566"/><g fill="#F2C43C"><circle cx="18" cy="30" r="6.5"/><circle cx="42" cy="20" r="7"/><circle cx="66" cy="28" r="6.5"/><circle cx="30" cy="44" r="6"/><circle cx="58" cy="44" r="6"/></g><g fill="#FBE29A"><circle cx="42" cy="20" r="3"/><circle cx="18" cy="30" r="2.8"/></g>`},
 
-  mhs_15:{name:'나무 평상',slot:'front',rar:'R',cur:'gem',amt:90,box:[100,46],at:[314,562],anchor:'bc',
+  mhs_15:{name:'나무 평상',slot:'front',rar:'R',cur:'gem',amt:90,box:[100,46],at:[316,556],anchor:'bc',
     svg:`<rect x="4" y="14" width="92" height="12" rx="4" fill="#B08F6A"/><rect x="4" y="9" width="92" height="9" rx="4" fill="#C9A87C"/><rect x="14" y="26" width="8" height="20" rx="3" fill="#96764F"/><rect x="78" y="26" width="8" height="20" rx="3" fill="#96764F"/><g fill="#F0A8BE"><ellipse cx="30" cy="7" rx="4.5" ry="3"/><ellipse cx="68" cy="6" rx="4.5" ry="3"/></g>`},
 
-  mhs_13:{name:'돌물확',slot:'front',rar:'R',cur:'gem',amt:80,box:[80,44],at:[136,576],anchor:'bc',
+  mhs_13:{name:'돌물확',slot:'front',rar:'R',cur:'gem',amt:80,box:[80,44],at:[150,586],anchor:'bc',
     svg:`<ellipse cx="40" cy="34" rx="34" ry="15" fill="#A79684"/><ellipse cx="40" cy="27" rx="34" ry="15" fill="#C4B4A0"/><ellipse cx="40" cy="25" rx="26" ry="11" fill="#8FB6C4"/><ellipse cx="40" cy="23" rx="26" ry="11" fill="#A9CDD8"/><g fill="#F0A8BE"><ellipse cx="30" cy="20" rx="4.5" ry="3"/><ellipse cx="49" cy="25" rx="4.5" ry="3"/></g>`},
 
-  mhs_16:{name:'삿갓 장독',slot:'front',rar:'N',cur:'coin',amt:550,box:[70,60],at:[252,590],anchor:'bc',
+  mhs_16:{name:'삿갓 장독',slot:'front',rar:'N',cur:'coin',amt:550,box:[70,60],at:[250,592],anchor:'bc',
     svg:`<path d="M20 56 q-9 -22 3 -32 q9 -8 18 0 q12 10 3 32 Z" fill="#5C3F2C"/><path d="M20 56 q-7 -22 5 -30 q8 -7 15 0 q12 8 5 30 Z" fill="#7C5942"/><path d="M10 24 q23 -16 46 0 Z" fill="#D9B96A"/><path d="M8 25 q25 -20 50 0 q-13 5 -25 5 q-12 0 -25 -5 Z" fill="#E8CD8A"/>`},
 
-  mhs_20:{name:'서안과 붓',slot:'front',rar:'N',cur:'coin',amt:900,box:[80,54],at:[336,594],anchor:'bc',
+  mhs_20:{name:'서안과 붓',slot:'front',rar:'N',cur:'coin',amt:900,box:[80,54],at:[316,596],anchor:'bc',
     svg:`<rect x="8" y="24" width="64" height="10" rx="4" fill="#96764F"/><rect x="8" y="19" width="64" height="8" rx="4" fill="#B08F6A"/><rect x="16" y="34" width="6" height="20" rx="2" fill="#7A5F45"/><rect x="58" y="34" width="6" height="20" rx="2" fill="#7A5F45"/><path d="M18 19 h26 v-9 h-26 Z" fill="#F2E7D2"/><rect x="50" y="13" width="4.5" height="7" rx="1.6" fill="#3D3A36"/><rect x="50" y="0" width="4.5" height="14" rx="2" fill="#B08F6A"/><ellipse cx="62" cy="18" rx="9" ry="4" fill="#5C6B72"/><ellipse cx="62" cy="16" rx="9" ry="4" fill="#7D8C93"/>`},
 
-  mhs_17:{name:'호랑나비',slot:'air',rar:'R',cur:'gem',amt:70,box:[80,70],at:[262,420],
+  mhs_17:{name:'호랑나비',slot:'air',rar:'R',cur:'gem',amt:70,box:[80,70],at:[300,392],
     svg:`<g stroke="#C9738F" stroke-width="2" fill="#FBD3E0"><path d="M24 34 q-14 -16 -3 -23 q11 -6 6 18"/><path d="M24 34 q14 -16 3 -23 q-11 -6 -6 18"/></g><line x1="24" y1="13" x2="24" y2="34" stroke="#B85A78" stroke-width="2"/><g stroke="#E0A03C" stroke-width="2" fill="#FCE9AF"><path d="M56 60 q-12 -14 -2 -20 q9 -5 5 16"/><path d="M56 60 q12 -14 2 -20 q-9 -5 -5 16"/></g><line x1="56" y1="42" x2="56" y2="60" stroke="#C98A2C" stroke-width="2"/>`}
 };
 const RAR_COLOR = {SR:'#E8A33C',R:'#6FA8C8',N:'#B3AEA6'};
@@ -408,41 +706,41 @@ spr_08:{name:'흩날리는 꽃비',slot:'air',rar:'SR',cur:'gem',amt:200,box:[80
 sum_06:{name:'여름 풀밭',slot:'ground',rar:'N',cur:'coin',amt:600,box:[400,300],at:[0,600],fixed:true,gkind:'cover',
   svg:`<rect width="400" height="300" fill="#8FBF6A"/><path d="M0 46 q110 -16 210 4 q90 18 190 -6 v256 H0Z" fill="#7FB25C"/><g fill="#71A551"><ellipse cx="70" cy="120" rx="46" ry="13"/><ellipse cx="300" cy="92" rx="40" ry="11"/><ellipse cx="180" cy="252" rx="52" ry="14"/></g><g stroke="#5E9145" stroke-width="2.5" fill="none" stroke-linecap="round"><path d="M40 180 q-4 -14 2 -20"/><path d="M120 240 q4 -14 -2 -18"/><path d="M280 200 q-4 -12 2 -16"/><path d="M340 268 q4 -14 -2 -18"/></g><g fill="#F5F1E0"><circle cx="96" cy="196" r="3.5"/><circle cx="248" cy="164" r="3.5"/><circle cx="322" cy="240" r="3.5"/></g>`},
 
-sum_01:{name:'파초',slot:'mid',rar:'R',cur:'coin',amt:1500,box:[120,152],at:[300,470],anchor:'bc',
+sum_01:{name:'파초',slot:'mid',rar:'R',cur:'coin',amt:1500,box:[120,152],at:[280,500],anchor:'bc',
   svg:`<path d="M60 150 v-48" stroke="#4A7D3E" stroke-width="10" fill="none" stroke-linecap="round"/><path d="M60 104 q-38 -8 -56 -38 q34 -6 56 28 Z" fill="#4E9A4A"/><path d="M60 108 q38 -12 54 -42 q-34 -4 -54 32 Z" fill="#5CAC55"/><path d="M60 80 q-40 4 -56 -20 q34 -10 56 4 Z" fill="#3F8A3E"/><path d="M60 84 q40 0 54 -26 q-34 -8 -54 12 Z" fill="#4E9A4A"/><path d="M60 58 q-18 -20 -14 -44 q18 14 18 42 Z" fill="#5CAC55"/><path d="M60 60 q20 -18 20 -40 q-16 10 -20 38 Z" fill="#6ABA60"/>`},
 
-sum_02:{name:'대숲',slot:'mid',rar:'N',cur:'coin',amt:800,box:[140,186],at:[60,440],anchor:'bc',
+sum_02:{name:'대숲',slot:'mid',rar:'N',cur:'coin',amt:800,box:[140,186],at:[340,436],anchor:'bc',
   svg:`<g stroke="#5C9A6B" stroke-width="6" fill="none" stroke-linecap="round"><path d="M22 184 q4 -84 -2 -126"/><path d="M52 184 q6 -74 0 -110"/><path d="M84 184 q4 -88 -2 -130"/><path d="M116 184 q6 -70 2 -102"/></g><g stroke="#4A8558" stroke-width="2"><path d="M15 130h12M15 96h12M45 138h12M45 104h12M77 126h12M77 92h12M109 134h12"/></g><g fill="#4E8F62"><ellipse cx="8" cy="60" rx="16" ry="4.5" transform="rotate(-24 8 60)"/><ellipse cx="34" cy="74" rx="16" ry="4.5" transform="rotate(18 34 74)"/><ellipse cx="24" cy="98" rx="15" ry="4" transform="rotate(-16 24 98)"/><ellipse cx="68" cy="52" rx="16" ry="4.5" transform="rotate(22 68 52)"/><ellipse cx="62" cy="84" rx="15" ry="4" transform="rotate(-20 62 84)"/><ellipse cx="104" cy="70" rx="15" ry="4" transform="rotate(26 104 70)"/><ellipse cx="128" cy="96" rx="14" ry="4" transform="rotate(-14 128 96)"/></g>`},
 
-sum_03:{name:'연꽃 못',slot:'front',rar:'SR',cur:'gem',amt:200,box:[170,84],at:[196,530],anchor:'bc',
+sum_03:{name:'연꽃 못',slot:'front',rar:'SR',cur:'gem',amt:200,box:[170,84],at:[110,568],anchor:'bc',
   svg:`<ellipse cx="85" cy="60" rx="84" ry="23" fill="#94A86E"/><ellipse cx="85" cy="55" rx="74" ry="20" fill="#4E8F8A"/><ellipse cx="85" cy="52" rx="70" ry="18" fill="#79BFB6"/><g fill="#A79684"><ellipse cx="14" cy="58" rx="10" ry="5"/><ellipse cx="44" cy="70" rx="11" ry="5"/><ellipse cx="128" cy="68" rx="11" ry="5"/><ellipse cx="156" cy="56" rx="10" ry="5"/></g><g fill="#3E8461"><ellipse cx="46" cy="50" rx="18" ry="7"/><ellipse cx="112" cy="58" rx="17" ry="6.5"/><ellipse cx="80" cy="66" rx="16" ry="6"/></g><g fill="#4E9A6E"><ellipse cx="46" cy="48" rx="18" ry="7"/><ellipse cx="112" cy="56" rx="17" ry="6.5"/><ellipse cx="80" cy="64" rx="16" ry="6"/></g><g><path d="M66 44 q0 -12 1 -18" stroke="#5FA05F" stroke-width="3" fill="none"/><g fill="#F0A9C4"><ellipse cx="67" cy="22" rx="5" ry="12"/><ellipse cx="58" cy="26" rx="4" ry="11" transform="rotate(-26 58 26)"/><ellipse cx="76" cy="26" rx="4" ry="11" transform="rotate(26 76 26)"/></g><ellipse cx="67" cy="24" rx="3" ry="8" fill="#FDE4EC"/></g><g><path d="M124 48 q0 -10 1 -14" stroke="#5FA05F" stroke-width="2.5" fill="none"/><g fill="#F6C0D4"><ellipse cx="125" cy="32" rx="4" ry="9"/><ellipse cx="118" cy="35" rx="3.4" ry="8" transform="rotate(-26 118 35)"/><ellipse cx="132" cy="35" rx="3.4" ry="8" transform="rotate(26 132 35)"/></g></g>`},
 
-sum_04:{name:'수국 덤불',slot:'mid',rar:'N',cur:'coin',amt:700,box:[104,78],at:[352,506],anchor:'bc',
+sum_04:{name:'수국 덤불',slot:'mid',rar:'N',cur:'coin',amt:700,box:[104,78],at:[338,542],anchor:'bc',
   svg:`<ellipse cx="52" cy="56" rx="48" ry="21" fill="#4A7D3E"/><ellipse cx="52" cy="48" rx="42" ry="17" fill="#63A052"/><g fill="#7E93C9"><circle cx="24" cy="36" r="12"/><circle cx="54" cy="24" r="14"/><circle cx="82" cy="38" r="12"/></g><g fill="#A3B4DD"><circle cx="20" cy="32" r="4"/><circle cx="28" cy="40" r="4"/><circle cx="49" cy="20" r="4.5"/><circle cx="59" cy="28" r="4.5"/><circle cx="78" cy="34" r="4"/><circle cx="86" cy="42" r="4"/></g><g fill="#D8B7D9"><circle cx="24" cy="42" r="3.6"/><circle cx="58" cy="18" r="4"/><circle cx="80" cy="44" r="3.6"/></g>`},
 
-sum_05:{name:'못가 정자',slot:'mid',rar:'SR',cur:'gem',amt:260,box:[160,150],at:[96,462],anchor:'bc',
+sum_05:{name:'못가 정자',slot:'mid',rar:'SR',cur:'gem',amt:260,box:[160,150],at:[110,482],anchor:'bc',
   svg:`<rect x="24" y="118" width="112" height="18" rx="3" fill="#C9B79A"/><rect x="24" y="112" width="112" height="9" rx="3" fill="#8E7A5E"/><rect x="34" y="136" width="9" height="14" fill="#7A5F45"/><rect x="117" y="136" width="9" height="14" fill="#7A5F45"/><rect x="36" y="56" width="8" height="58" fill="#A88C6A"/><rect x="116" y="56" width="8" height="58" fill="#A88C6A"/><rect x="76" y="56" width="8" height="58" fill="#B99C79"/><path d="M12 58 q68 -42 136 0 Z" fill="#5D6B75"/><path d="M4 60 q76 -52 152 0 q-18 9 -76 9 q-58 0 -76 -9 Z" fill="#6E7E8A"/><path d="M80 14 q-38 14 -66 42 M80 14 q38 14 66 42" stroke="#5D6B75" stroke-width="2.5" fill="none"/><circle cx="80" cy="12" r="5" fill="#5D6B75"/><path d="M36 76 h88" stroke="#B99C79" stroke-width="4"/>`},
 
-sum_07:{name:'고추잠자리',slot:'air',rar:'R',cur:'coin',amt:900,box:[86,60],at:[276,410],
+sum_07:{name:'고추잠자리',slot:'air',rar:'R',cur:'coin',amt:900,box:[86,60],at:[240,396],
   svg:`<g stroke="#8FC6C6" stroke-width="1.6" fill="#CDECEC"><ellipse cx="34" cy="20" rx="15" ry="4.5" transform="rotate(-14 34 20)"/><ellipse cx="34" cy="27" rx="13" ry="4" transform="rotate(12 34 27)"/></g><line x1="34" y1="23" x2="58" y2="28" stroke="#D9553F" stroke-width="2.5" stroke-linecap="round"/><circle cx="32" cy="23" r="4" fill="#D9553F"/><g stroke="#A9CDD8" stroke-width="1.4" fill="#DDF0F2"><ellipse cx="60" cy="46" rx="11" ry="3.4" transform="rotate(-16 60 46)"/><ellipse cx="60" cy="51" rx="10" ry="3" transform="rotate(14 60 51)"/></g><line x1="60" y1="48" x2="78" y2="52" stroke="#E08A4C" stroke-width="2" stroke-linecap="round"/><circle cx="59" cy="48" r="3" fill="#E08A4C"/>`},
 
 /* ── 가을 ───────────────────────────── */
 aut_06:{name:'낙엽 바닥',slot:'ground',rar:'N',cur:'coin',amt:600,box:[400,300],at:[0,600],fixed:true,gkind:'cover',
   svg:`<rect width="400" height="300" fill="#DCC894"/><path d="M0 48 q100 -14 190 6 q90 20 210 -4 v250 H0Z" fill="#CEB77E"/><path d="M0 150 q120 -12 220 8 q80 16 180 2 v140 H0Z" fill="#C0A76C"/><g fill="#D9541F"><path d="M46 96 l7 -6 l6 7 l-7 6 Z"/><path d="M186 186 l7 -6 l6 7 l-7 6 Z"/><path d="M290 132 l7 -6 l6 7 l-7 6 Z"/></g><g fill="#F0873A"><path d="M104 214 l7 -6 l6 7 l-7 6 Z"/><path d="M254 66 l7 -6 l6 7 l-7 6 Z"/><path d="M340 240 l7 -6 l6 7 l-7 6 Z"/></g><g fill="#F7BE4C"><path d="M62 268 l6 -5 l5 6 l-6 5 Z"/><path d="M162 118 l6 -5 l5 6 l-6 5 Z"/><path d="M348 160 l6 -5 l5 6 l-6 5 Z"/></g>`},
 
-aut_01:{name:'단풍나무',slot:'mid',rar:'SR',cur:'gem',amt:190,box:[156,168],at:[96,466],anchor:'bc',
+aut_01:{name:'단풍나무',slot:'mid',rar:'SR',cur:'gem',amt:190,box:[156,168],at:[104,472],anchor:'bc',
   svg:`<path d="M82 166 q7 -56 -2 -84 q-8 -22 -28 -36" stroke="#7A5540" stroke-width="12" fill="none" stroke-linecap="round"/><path d="M78 96 q26 -14 42 -40 M76 124 q-22 -8 -34 -24" stroke="#7A5540" stroke-width="8" fill="none" stroke-linecap="round"/><g fill="#D9541F"><circle cx="40" cy="52" r="24"/><circle cx="82" cy="30" r="26"/><circle cx="122" cy="52" r="22"/><circle cx="58" cy="80" r="22"/><circle cx="108" cy="88" r="21"/><circle cx="30" cy="88" r="16"/></g><g fill="#F0873A"><circle cx="82" cy="26" r="12"/><circle cx="42" cy="48" r="10"/><circle cx="108" cy="84" r="10"/><circle cx="58" cy="76" r="9"/><circle cx="122" cy="48" r="8"/></g><g fill="#F7BE4C"><circle cx="82" cy="22" r="5"/><circle cx="42" cy="44" r="4.5"/><circle cx="108" cy="80" r="4.5"/></g>`},
 
-aut_02:{name:'감나무',slot:'mid',rar:'R',cur:'coin',amt:1600,box:[130,142],at:[334,442],anchor:'bc',
+aut_02:{name:'감나무',slot:'mid',rar:'R',cur:'coin',amt:1600,box:[130,142],at:[312,448],anchor:'bc',
   svg:`<path d="M66 140 q-5 -42 2 -62 q5 -18 20 -28" stroke="#6F5A3E" stroke-width="8" fill="none" stroke-linecap="round"/><path d="M68 88 q20 -8 32 -22 M66 102 q-18 -6 -28 -20" stroke="#6F5A3E" stroke-width="6" fill="none" stroke-linecap="round"/><g fill="#5E8A3C"><circle cx="34" cy="52" r="20"/><circle cx="66" cy="34" r="22"/><circle cx="98" cy="52" r="19"/><circle cx="46" cy="76" r="19"/><circle cx="88" cy="76" r="19"/></g><g fill="#6F9E45"><circle cx="66" cy="30" r="11"/><circle cx="38" cy="70" r="9"/><circle cx="94" cy="70" r="9"/></g><g fill="#EE8C22"><circle cx="38" cy="58" r="9"/><circle cx="80" cy="44" r="9.5"/><circle cx="62" cy="80" r="9"/><circle cx="104" cy="60" r="8"/></g><g fill="#F5A93F"><circle cx="36" cy="56" r="3.6"/><circle cx="78" cy="42" r="3.8"/><circle cx="60" cy="78" r="3.6"/></g><g fill="#4A7030"><rect x="34" y="50" width="8" height="2.6" rx="1.3"/><rect x="76" y="36" width="8" height="2.6" rx="1.3"/><rect x="58" y="72" width="8" height="2.6" rx="1.3"/></g>`},
 
-aut_03:{name:'억새',slot:'mid',rar:'N',cur:'coin',amt:550,box:[110,96],at:[54,514],anchor:'bc',
-  svg:`<g stroke="#C0A76C" stroke-width="3" fill="none" stroke-linecap="round"><path d="M32 94 q-3 -42 -8 -60"/><path d="M50 94 q3 -44 5 -62"/><path d="M70 96 q8 -38 16 -56"/><path d="M18 96 q-10 -32 -16 -48"/></g><g fill="#E8D7B0"><ellipse cx="24" cy="28" rx="7" ry="17" transform="rotate(-8 24 28)"/><ellipse cx="55" cy="24" rx="7" ry="18" transform="rotate(6 55 24)"/><ellipse cx="86" cy="36" rx="6.5" ry="16" transform="rotate(18 86 36)"/><ellipse cx="2" cy="44" rx="6" ry="14" transform="rotate(-20 2 44)"/></g><g fill="#F5EBD4"><ellipse cx="24" cy="22" rx="4" ry="9"/><ellipse cx="55" cy="18" rx="4" ry="9"/></g>`},
+aut_03:{name:'억새',slot:'mid',rar:'N',cur:'coin',amt:550,box:[110,96],at:[58,524],anchor:'bc',
+  svg:`<g stroke="#A8894F" stroke-width="3" fill="none" stroke-linecap="round"><path d="M32 94 q-3 -42 -8 -60"/><path d="M50 94 q3 -44 5 -62"/><path d="M70 96 q8 -38 16 -56"/><path d="M18 96 q-10 -32 -16 -48"/></g><g fill="#E8D7B0"><ellipse cx="24" cy="28" rx="7" ry="17" transform="rotate(-8 24 28)"/><ellipse cx="55" cy="24" rx="7" ry="18" transform="rotate(6 55 24)"/><ellipse cx="86" cy="36" rx="6.5" ry="16" transform="rotate(18 86 36)"/><ellipse cx="2" cy="44" rx="6" ry="14" transform="rotate(-20 2 44)"/></g><g fill="#F5EBD4"><ellipse cx="24" cy="22" rx="4" ry="9"/><ellipse cx="55" cy="18" rx="4" ry="9"/></g>`},
 
-aut_04:{name:'국화 화분',slot:'front',rar:'N',cur:'coin',amt:650,box:[86,74],at:[136,576],anchor:'bc',
+aut_04:{name:'국화 화분',slot:'front',rar:'N',cur:'coin',amt:650,box:[86,74],at:[124,566],anchor:'bc',
   svg:`<ellipse cx="43" cy="70" rx="24" ry="7" fill="#A88650"/><path d="M23 70 l4 -22 h32 l4 22 Z" fill="#B5744A"/><path d="M23 70 l3 -20 h30 l3 20 Z" fill="#C98B5C"/><rect x="19" y="44" width="48" height="8" rx="3" fill="#A85F3C"/><g fill="#F2C43C"><circle cx="30" cy="30" r="9"/><circle cx="50" cy="24" r="9.5"/><circle cx="42" cy="40" r="8.5"/><circle cx="62" cy="36" r="7.5"/></g><g fill="#FBE29A"><circle cx="30" cy="30" r="4"/><circle cx="50" cy="24" r="4.2"/><circle cx="42" cy="40" r="3.8"/></g><path d="M24 42 q-7 -7 -9 -16 M64 44 q7 -6 9 -14" stroke="#6F9E45" stroke-width="3" fill="none" stroke-linecap="round"/>`},
 
-aut_05:{name:'장독대',slot:'front',rar:'R',cur:'coin',amt:1500,box:[140,86],at:[292,586],anchor:'bc',
+aut_05:{name:'장독대',slot:'front',rar:'R',cur:'coin',amt:1500,box:[140,86],at:[318,572],anchor:'bc',
   svg:`<ellipse cx="70" cy="80" rx="68" ry="12" fill="#C4B4A0"/><rect x="8" y="66" width="124" height="12" rx="4" fill="#A79684"/><g><path d="M22 68 q-8 -22 2 -32 q8 -8 17 -8 q9 0 17 8 q10 10 2 32 Z" fill="#4E3628"/><path d="M22 68 q-6 -22 4 -30 q7 -7 15 -7 q8 0 15 7 q10 8 4 30 Z" fill="#7C5942"/><ellipse cx="41" cy="28" rx="15" ry="5" fill="#3D2A20"/></g><g><path d="M74 68 q-7 -18 1 -26 q6 -6 13 -6 q7 0 13 6 q8 8 1 26 Z" fill="#4E3628"/><path d="M74 68 q-5 -18 3 -24 q5 -5 11 -5 q6 0 11 5 q8 6 3 24 Z" fill="#95704F"/><ellipse cx="88" cy="36" rx="12" ry="4" fill="#3D2A20"/></g><g><path d="M110 68 q-5 -14 1 -20 q5 -5 10 -5 q5 0 10 5 q6 6 1 20 Z" fill="#4E3628"/><ellipse cx="121" cy="43" rx="10" ry="3.4" fill="#3D2A20"/></g>`},
 
 aut_07:{name:'지는 낙엽',slot:'air',rar:'R',cur:'gem',amt:180,box:[80,80],at:[0,0],fall:'leaf',
@@ -452,19 +750,19 @@ aut_07:{name:'지는 낙엽',slot:'air',rar:'R',cur:'gem',amt:180,box:[80,80],at
 win_06:{name:'눈밭',slot:'ground',rar:'N',cur:'coin',amt:600,box:[400,300],at:[0,600],fixed:true,gkind:'cover',
   svg:`<rect width="400" height="300" fill="#F4F8FC"/><path d="M0 46 q110 -16 210 6 q90 18 190 -4 v252 H0Z" fill="#FFFFFF"/><path d="M0 156 q120 -14 230 8 q70 14 170 0 v136 H0Z" fill="#E7EEF6"/><g fill="#DAE4EF"><ellipse cx="70" cy="112" rx="42" ry="11"/><ellipse cx="300" cy="88" rx="36" ry="9"/><ellipse cx="180" cy="248" rx="48" ry="12"/></g><g stroke="#C9D6E4" stroke-width="2" fill="none" stroke-linecap="round"><path d="M40 200 q22 -6 44 2"/><path d="M240 168 q26 -6 50 2"/><path d="M120 262 q26 -6 50 2"/></g>`},
 
-win_01:{name:'눈 덮인 소나무',slot:'mid',rar:'SR',cur:'gem',amt:190,box:[156,180],at:[96,472],anchor:'bc',
+win_01:{name:'눈 덮인 소나무',slot:'mid',rar:'SR',cur:'gem',amt:190,box:[156,180],at:[100,480],anchor:'bc',
   svg:`<path d="M78 178 q5 -54 -2 -86" stroke="#6B5040" stroke-width="10" fill="none" stroke-linecap="round"/><path d="M76 122 q-24 -8 -40 -24 M78 102 q26 -12 42 -30 M74 148 q-22 -4 -34 -18" stroke="#6B5040" stroke-width="7" fill="none" stroke-linecap="round"/><g fill="#2F5B45"><ellipse cx="34" cy="94" rx="28" ry="13"/><ellipse cx="120" cy="70" rx="30" ry="14"/><ellipse cx="40" cy="132" rx="26" ry="12"/><ellipse cx="78" cy="48" rx="32" ry="15"/><ellipse cx="112" cy="116" rx="24" ry="11"/></g><g fill="#3E7357"><ellipse cx="34" cy="92" rx="28" ry="12"/><ellipse cx="120" cy="68" rx="30" ry="13"/><ellipse cx="40" cy="130" rx="26" ry="11"/><ellipse cx="78" cy="46" rx="32" ry="14"/><ellipse cx="112" cy="114" rx="24" ry="10"/></g><g fill="#FFFFFF"><ellipse cx="34" cy="84" rx="24" ry="7"/><ellipse cx="120" cy="60" rx="26" ry="7"/><ellipse cx="40" cy="122" rx="22" ry="6"/><ellipse cx="78" cy="37" rx="28" ry="8"/><ellipse cx="112" cy="106" rx="20" ry="6"/></g>`},
 
-win_02:{name:'동백나무',slot:'mid',rar:'R',cur:'coin',amt:1500,box:[116,126],at:[336,450],anchor:'bc',
+win_02:{name:'동백나무',slot:'mid',rar:'R',cur:'coin',amt:1500,box:[116,126],at:[328,454],anchor:'bc',
   svg:`<path d="M58 124 q-4 -34 0 -50 M58 96 q16 -8 24 -18 M58 108 q-14 -8 -22 -16" stroke="#6B5040" stroke-width="6" fill="none" stroke-linecap="round"/><g fill="#2F5B45"><ellipse cx="30" cy="66" rx="22" ry="14"/><ellipse cx="80" cy="58" rx="24" ry="15"/><ellipse cx="56" cy="42" rx="24" ry="14"/><ellipse cx="54" cy="84" rx="24" ry="13"/></g><g fill="#3E7357"><ellipse cx="30" cy="64" rx="22" ry="13"/><ellipse cx="80" cy="56" rx="24" ry="14"/><ellipse cx="56" cy="40" rx="24" ry="13"/><ellipse cx="54" cy="82" rx="24" ry="12"/></g><g fill="#C8384A"><circle cx="34" cy="52" r="8"/><circle cx="76" cy="42" r="8.5"/><circle cx="68" cy="76" r="8"/><circle cx="28" cy="82" r="7"/><circle cx="92" cy="70" r="6.5"/></g><g fill="#E8626F"><circle cx="34" cy="52" r="3.6"/><circle cx="76" cy="42" r="3.8"/><circle cx="68" cy="76" r="3.6"/></g><g fill="#F5D356"><circle cx="34" cy="52" r="1.7"/><circle cx="76" cy="42" r="1.8"/><circle cx="68" cy="76" r="1.7"/></g><g fill="#FFFFFF"><ellipse cx="56" cy="32" rx="20" ry="6"/><ellipse cx="84" cy="48" rx="16" ry="5"/></g>`},
 
-win_03:{name:'석등',slot:'front',rar:'R',cur:'coin',amt:1400,box:[76,116],at:[136,576],anchor:'bc',
+win_03:{name:'석등',slot:'front',rar:'R',cur:'coin',amt:1400,box:[76,116],at:[334,548],anchor:'bc',
   svg:`<ellipse cx="38" cy="112" rx="28" ry="8" fill="#C6CEDA"/><rect x="26" y="80" width="24" height="30" rx="2" fill="#9AA3B0"/><rect x="18" y="70" width="40" height="12" rx="3" fill="#AEB7C3"/><rect x="20" y="40" width="36" height="30" rx="3" fill="#AEB7C3"/><rect x="26" y="46" width="24" height="20" rx="2" fill="#F5D356"/><path d="M12 40 q26 -16 52 0 Z" fill="#7C8492"/><path d="M10 38 q28 -20 56 0 q-15 5 -28 5 q-13 0 -28 -5 Z" fill="#FFFFFF"/><rect x="31" y="26" width="14" height="7" rx="2" fill="#9AA3B0"/><ellipse cx="38" cy="25" rx="10" ry="4" fill="#FFFFFF"/>`},
 
-win_04:{name:'눈사람',slot:'front',rar:'N',cur:'coin',amt:500,box:[74,84],at:[252,588],anchor:'bc',
+win_04:{name:'눈사람',slot:'front',rar:'N',cur:'coin',amt:500,box:[74,84],at:[246,584],anchor:'bc',
   svg:`<ellipse cx="37" cy="80" rx="22" ry="7" fill="#DCE5EE"/><circle cx="37" cy="62" r="17" fill="#FFFFFF" stroke="#DCE5EE" stroke-width="1.5"/><circle cx="37" cy="34" r="12" fill="#FFFFFF" stroke="#DCE5EE" stroke-width="1.5"/><circle cx="33" cy="32" r="2" fill="#4A5462"/><circle cx="41" cy="32" r="2" fill="#4A5462"/><path d="M37 36 l7 3 l-7 2 Z" fill="#EE8C22"/><path d="M23 34 q14 -9 28 0 Z" fill="#C8384A"/><path d="M22 20 q15 -6 30 0 l-4 -9 h-22 Z" fill="#3D3A36"/><path d="M18 60 q-10 -5 -15 -13 M56 60 q10 -5 15 -13" stroke="#6B5040" stroke-width="2.5" fill="none" stroke-linecap="round"/><g fill="#4A5462"><circle cx="37" cy="56" r="2"/><circle cx="37" cy="66" r="2"/></g>`},
 
-win_05:{name:'눈 쌓인 장독대',slot:'front',rar:'N',cur:'coin',amt:900,box:[140,92],at:[292,588],anchor:'bc',
+win_05:{name:'눈 쌓인 장독대',slot:'front',rar:'N',cur:'coin',amt:900,box:[140,92],at:[86,590],anchor:'bc',
   svg:`<ellipse cx="70" cy="86" rx="68" ry="12" fill="#C6CEDA"/><rect x="8" y="70" width="124" height="12" rx="4" fill="#AEB7C3"/><g><path d="M22 72 q-8 -22 2 -32 q8 -8 17 -8 q9 0 17 8 q10 10 2 32 Z" fill="#4E3628"/><path d="M22 72 q-6 -22 4 -30 q7 -7 15 -7 q8 0 15 7 q10 8 4 30 Z" fill="#7C5942"/><ellipse cx="41" cy="32" rx="15" ry="5" fill="#3D2A20"/><ellipse cx="41" cy="28" rx="16" ry="6" fill="#FFFFFF"/></g><g><path d="M74 72 q-7 -18 1 -26 q6 -6 13 -6 q7 0 13 6 q8 8 1 26 Z" fill="#4E3628"/><path d="M74 72 q-5 -18 3 -24 q5 -5 11 -5 q6 0 11 5 q8 6 3 24 Z" fill="#95704F"/><ellipse cx="88" cy="40" rx="12" ry="4" fill="#3D2A20"/><ellipse cx="88" cy="36" rx="13" ry="5" fill="#FFFFFF"/></g><g><path d="M110 72 q-5 -14 1 -20 q5 -5 10 -5 q5 0 10 5 q6 6 1 20 Z" fill="#4E3628"/><ellipse cx="121" cy="43" rx="11" ry="4" fill="#FFFFFF"/></g><rect x="8" y="66" width="124" height="7" rx="3" fill="#FFFFFF"/>`},
 
 win_07:{name:'내리는 눈',slot:'air',rar:'R',cur:'gem',amt:180,box:[80,80],at:[0,0],fall:'snow',
@@ -512,7 +810,7 @@ function findWear(id){
 const START_WEAR = ['jg_dahong','ch_namsaek','sh_gomu'];
 const S = load() || {
   coin: 2400, gem: 120,
-  learned: 4,
+  prog: { gu:0, stage:0, ci:0, done:[], char:{} },
   owned: SAMPLE_PLACED.slice(),
   placed: SAMPLE_PLACED.slice(),
   spot: {},
@@ -525,6 +823,10 @@ if(!S.spot) S.spot={};
 if(!S.pos.inside) S.pos.inside={x:200,y:520};
 if(!S.closet) S.closet=START_WEAR.slice();
 if(!S.wear) S.wear={ top:'jg_dahong', bottom:'ch_namsaek', outer:null, shoes:'sh_gomu' };
+if(!S.prog) S.prog={ gu:0, stage:0, ci:0, done:[], char:{} };
+if(S.prog.ci===undefined) S.prog.ci=0;
+const P = S.prog;
+const metCount = ()=>Object.keys(P.char).length;
 
 /* ── 아바타 ─────────────────────────────── */
 const A = { git:'#FFFFFF', beoseon:'#F7F1E4', hair:'#2B2620', skin:'#F7DFC8' };
@@ -654,7 +956,7 @@ function village(){
       <path d="M276 214 q63 -38 126 0 q-18 6 -63 6 q-45 0 -63 -6 Z" fill="#8B7D71"/>
       <rect x="316" y="186" width="46" height="20" rx="5" fill="#3D3A36"/>
       <text x="339" y="201" text-anchor="middle" font-family="Gaegu, serif" font-size="15" font-weight="700" fill="#F2E4CB">書堂</text>
-      ${S.learned<1000?`<g class="badge-bob"><circle cx="382" cy="186" r="9" fill="#D9463F" stroke="#3D3A36" stroke-width="2.5"/></g>`:''}
+      ${P.gu<GUJEOL.length?`<g class="badge-bob"><circle cx="382" cy="186" r="9" fill="#D9463F" stroke="#3D3A36" stroke-width="2.5"/></g>`:''}
     </g>
   </g>`;
 }
@@ -711,7 +1013,7 @@ function drawSeodang(){
       <path d="M48 212 q152 -68 304 0 q-40 9 -152 9 q-112 0 -152 -9 Z" fill="#8B7D71"/>
       <rect x="168" y="166" width="64" height="24" rx="5" fill="#3D3A36"/>
       <text x="200" y="184" text-anchor="middle" font-family="Gaegu, serif" font-size="19" font-weight="700" fill="#F2E4CB">書堂</text>
-      ${S.learned<1000?`<g class="badge-bob"><circle cx="316" cy="176" r="9" fill="#D9463F" stroke="#3D3A36" stroke-width="2.5"/></g>`:''}
+      ${P.gu<GUJEOL.length?`<g class="badge-bob"><circle cx="316" cy="176" r="9" fill="#D9463F" stroke="#3D3A36" stroke-width="2.5"/></g>`:''}
       <text x="200" y="326" text-anchor="middle" font-family="Gaegu, sans-serif" font-size="17" fill="#6B6154">문을 누르면 안으로 듭니다</text>
     </g>
     <g fill="#B7A17B"><ellipse cx="70" cy="420" rx="34" ry="9"/><ellipse cx="330" cy="440" rx="30" ry="8"/></g>
@@ -733,13 +1035,13 @@ function drawSeodang(){
 /* ── 장면 3 · 서당 안 ───────────────────── */
 function scroll(x, act, ax, label, sub, on){
   return `<g class="tapzone" data-act="${act}" data-ax="${ax}" data-ay="500" role="button" aria-label="${label}">
-    <rect x="${x-8}" y="180" width="120" height="180" fill="transparent"/>
+    <rect x="${x-6}" y="180" width="116" height="180" fill="transparent"/>
     <rect x="${x}" y="188" width="104" height="10" rx="4" fill="#8A6A4E"/>
     <rect x="${x+4}" y="196" width="96" height="140" fill="${on?'#F7EFDD':'#E6DCC8'}" stroke="${on?'#3D3A36':'#9C917F'}" stroke-width="3"/>
     <rect x="${x}" y="332" width="104" height="10" rx="4" fill="#8A6A4E"/>
-    <text x="${x+52}" y="252" text-anchor="middle" font-family="Gaegu, sans-serif" font-size="26" font-weight="700" fill="${on?'#3D3A36':'#9C917F'}">${label}</text>
-    <text x="${x+52}" y="284" text-anchor="middle" font-family="Gaegu, sans-serif" font-size="16" fill="${on?'#7A6E5E':'#A99E8B'}">${sub}</text>
-    ${on&&S.learned<1000?`<g class="badge-bob"><circle cx="${x+98}" cy="200" r="9" fill="#D9463F" stroke="#3D3A36" stroke-width="2.5"/></g>`:''}
+    <text x="${x+52}" y="250" text-anchor="middle" font-family="Gaegu, sans-serif" font-size="21" font-weight="700" fill="${on?'#3D3A36':'#9C917F'}">${label}</text>
+    <text x="${x+52}" y="284" text-anchor="middle" font-family="Gaegu, sans-serif" font-size="15" fill="${on?'#7A6E5E':'#A99E8B'}">${sub}</text>
+    ${on&&P.gu<GUJEOL.length?`<g class="badge-bob"><circle cx="${x+98}" cy="200" r="9" fill="#D9463F" stroke="#3D3A36" stroke-width="2.5"/></g>`:''}
   </g>`;
 }
 function drawInside(){
@@ -751,8 +1053,9 @@ function drawInside(){
     <rect y="352" width="400" height="16" fill="#8A6A4E"/>
     <rect y="368" width="400" height="232" fill="#C9A87C"/>
     <g stroke="#B08F6A" stroke-width="2"><path d="M0 404 H400M0 448 H400M0 496 H400M0 548 H400"/></g>
-    ${scroll(56,'study-cheonja',110,'천자문',`${S.learned} / 1000자`,true)}
-    ${scroll(240,'study-myeongsim',292,'명심보감','곧 문 엽니다',false)}
+    ${scroll(10,'study-cheonja',62,'천자문',`${P.gu} / 125마디`,true)}
+    ${scroll(148,'study-jok',200,'글자 익힘책',`${metCount()}자 익힘`,true)}
+    ${scroll(286,'study-myeongsim',338,'명심보감','곧 문 엽니다',false)}
     <g>
       <rect x="150" y="392" width="100" height="12" rx="4" fill="#96764F"/>
       <rect x="150" y="386" width="100" height="8" rx="4" fill="#B08F6A"/>
@@ -837,7 +1140,8 @@ function doAct(act){
   if(act==='enter-seodang') return goScene('inside');
   if(act==='go-market')     return goScene('market');
   if(act==='go-garden')     return goScene('garden');
-  if(act==='study-cheonja')   return openStudy('cheonja');
+  if(act==='study-cheonja')   return openStudy();
+  if(act==='study-jok')       return openJok();
   if(act==='study-myeongsim') return toast('명심보감은 곧 문을 엽니다');
   if(act==='shop-flower')  return openShop();
   if(act==='shop-clothes') return openClothes();
@@ -965,48 +1269,325 @@ document.querySelectorAll('#nav button').forEach(b=>{
 });
 
 /* ── 학습 ───────────────────────────────── */
-function openStudy(b){ openSheetRaw(BOOKS[b].name); renderStudy(); }
+/* ── 학습 · 구절 축(강독) ─────────────────
+   한 마디(여덟 자)를 다섯 단계로 익힌다.
+   배송을 통과해야 다음 마디로 나아간다.
+   ---------------------------------------- */
+const shuffle = a => a.slice().sort(()=>Math.random()-.5);
+
+function openStudy(){ openSheetRaw('천자문'); renderStudy(); }
+
+function stepBar(){
+  return `<div class="steps">${STAGES.map((s,k)=>
+    `<span class="${k<P.stage?'past':k===P.stage?'now':''}">${s.name}</span>`).join('')}</div>`;
+}
+function guTitle(g){ return `<div class="gu">${g.gu1}   ${g.gu2}</div>`; }
+
 function renderStudy(){
-  if(S.learned>=CHEONJA.length){
+  if(P.gu>=GUJEOL.length){
     sheetBody.innerHTML=`<div class="hanja-card"><div class="hanja">終</div>
-      <div class="hunum">천자문 천 자를 모두 익혔습니다.</div></div>
-      <p class="note">처음부터 다시 짚어보고 싶으면 아래를 누르세요.</p>
-      <button class="subbtn" id="resetStudy">천자문 처음부터 다시</button>`;
+      <div class="hunum">천자문 백스물다섯 마디를 다 마쳤습니다.</div></div>
+      <p class="note">익힌 글자는 글자 익힘책에서 계속 되짚을 수 있습니다.</p>
+      <button class="subbtn" id="resetStudy">처음 마디부터 다시</button>`;
     document.getElementById('resetStudy').addEventListener('click',()=>{
-      S.learned=0; save(); syncHUD(); renderStudy();
+      P.gu=0; P.stage=0; P.ci=0; save(); syncHUD(); renderStudy();
     });
     return;
   }
-  const i=S.learned, q=CHEONJA[i];
-  const gu=CJ_RAW[Math.floor(i/8)].split(' ').map(t=>t[0]);
-  const guTxt=gu.slice(0,4).join('')+'   '+gu.slice(4).join('');
-  const pool=CHEONJA.filter((_,k)=>k!==i).sort(()=>Math.random()-.5).slice(0,3);
-  const opts=[q,...pool].sort(()=>Math.random()-.5);
-  sheetBody.innerHTML=`
+  const g=GUJEOL[P.gu];
+  const fn=[stSeongdok, stGeulja, stSori, stTteut, stBaesong][P.stage];
+  fn(g);
+}
+function passStage(g, coin){
+  if(coin){ S.coin+=coin; toast(`엽전 ${coin}냥`); }
+  P.stage++;
+  if(P.stage>=STAGES.length){
+    if(!P.done.includes(P.gu)) P.done.push(P.gu);
+    P.gu++; P.stage=0; P.ci=0;
+  }
+  save(); syncHUD(); renderStudy();
+}
+
+/* 1 들이기 — 소리 내어 읽고 뜻을 훑는다. 채점 없음 */
+function stSeongdok(g){
+  sheetBody.innerHTML=stepBar()+`
     <div class="hanja-card">
-      <div class="gu">${guTxt}</div>
-      <div class="hanja">${q.c}</div>
-      <div class="hunum">${q.hun} ${q.um}</div>
-      <div class="hint">${i+1}번째 글자 · ${CHEONJA.length-i-1}자 남음</div>
+      <div class="hint">${P.gu+1}번째 마디</div>
+      ${guTitle(g)}
+      <div class="grid8">${g.chars.map(o=>
+        `<div class="ja"><b>${o.c}</b><span>${o.hun} ${o.um}</span></div>`).join('')}</div>
+      <div class="mean">${g.mean}</div>
     </div>
-    <p class="note">뜻과 소리를 눈에 익힌 뒤 아래에서 골라보세요.</p>
-    <div class="choices">${opts.map(o=>`<button class="choice" data-c="${o.c}">${o.hun} ${o.um}</button>`).join('')}</div>`;
-  sheetBody.querySelectorAll('.choice').forEach(btn=>{
-    btn.addEventListener('click',()=>{
-      const ok=btn.dataset.c===q.c;
-      sheetBody.querySelectorAll('.choice').forEach(b=>{ b.disabled=true; if(b.dataset.c===q.c) b.classList.add('right'); });
-      if(!ok) btn.classList.add('wrong');
-      if(ok){ S.learned++; S.coin+=120; save(); syncHUD(); }
-      sheetBody.insertAdjacentHTML('beforeend',
-        `<button class="bigbtn" id="nextBtn">${ok?'엽전 120냥 받고 이어하기':'다시 익히기'}</button>`);
-      document.getElementById('nextBtn').addEventListener('click', renderStudy);
+    <p class="note">소리 내어 두어 번 읽어 보세요. 여기서는 채점하지 않습니다.</p>
+    <button class="bigbtn" id="go">다 읽었습니다</button>`;
+  document.getElementById('go').addEventListener('click',()=>passStage(g,0));
+}
+
+/* 2 글자 — 음을 직접 적는다. 못 적으면 그때 보기를 준다 */
+function stGeulja(g){
+  const o=g.chars[P.ci];
+  sheetBody.innerHTML=stepBar()+`
+    <div class="hanja-card">
+      <div class="hint">${P.ci+1} / 8</div>
+      <div class="hanja">${o.c}</div>
+      <div class="hunum">${o.hun} □</div>
+    </div>
+    <p class="note">이 글자의 음을 적어 보세요.</p>
+    <div class="answer"><input id="um" type="text" inputmode="text" maxlength="2"
+      autocomplete="off" autocapitalize="off" aria-label="음">
+      <button class="bigbtn" id="ck" style="margin:0;width:auto;padding:14px 22px">확인</button></div>
+    <div id="after"></div>`;
+  const inp=document.getElementById('um');
+  inp.focus();
+  const check=()=>{
+    const v=(inp.value||'').trim();
+    if(!v) return;
+    if(v===o.um){ markChar(P,o.c,true); save(); reveal(true); }
+    else { markChar(P,o.c,false); save(); reveal(false); }
+  };
+  document.getElementById('ck').addEventListener('click',check);
+  inp.addEventListener('keydown',e=>{ if(e.key==='Enter') check(); });
+
+  function reveal(ok){
+    inp.disabled=true;
+    document.getElementById('ck').disabled=true;
+    const after=document.getElementById('after');
+    if(ok){
+      after.innerHTML=`<div class="verdict right">떠올렸습니다 — ${o.hun} ${o.um}</div>
+        <button class="bigbtn" id="nx">다음 글자</button>`;
+    } else {
+      const opts=shuffle([o, ...shuffle(CHEONJA.filter(x=>x.um!==o.um)).slice(0,3)]);
+      after.innerHTML=`<div class="verdict wrong">아직입니다. 보기에서 골라 보세요.</div>
+        <div class="choices">${opts.map(x=>
+          `<button class="choice" data-u="${x.um}">${o.hun} ${x.um}</button>`).join('')}</div>`;
+      after.querySelectorAll('.choice').forEach(b=>b.addEventListener('click',()=>{
+        after.querySelectorAll('.choice').forEach(x=>{
+          x.disabled=true; if(x.dataset.u===o.um) x.classList.add('right');
+        });
+        if(b.dataset.u!==o.um) b.classList.add('wrong');
+        after.insertAdjacentHTML('beforeend',`<button class="bigbtn" id="nx">다음 글자</button>`);
+        document.getElementById('nx').addEventListener('click',next);
+      }));
+      return;
+    }
+    document.getElementById('nx').addEventListener('click',next);
+  }
+  function next(){
+    P.ci++;
+    if(P.ci>=8){ P.ci=0; passStage(g, STAGES[1].coin); }
+    else { save(); renderStudy(); }
+  }
+}
+
+/* 3 소리 — 넉 자 구에서 빠진 한 자를 채운다 */
+function stSori(g){
+  const half=P.ci<1?0:1;
+  const phrase=half?g.gu2:g.gu1;
+  const base=half?4:0;
+  const k=Math.floor(Math.random()*4);
+  const ans=g.chars[base+k];
+  const shown=[...phrase].map((c,n)=>n===k?'<i>□</i>':c).join('');
+  const opts=shuffle([ans, ...shuffle(CHEONJA.filter(x=>x.c!==ans.c)).slice(0,3)]);
+  sheetBody.innerHTML=stepBar()+`
+    <div class="hanja-card">
+      <div class="hint">${half?'뒤':'앞'} 넉 자</div>
+      <div class="cloze">${shown}</div>
+      <div class="hunum">${ans.hun} ${ans.um}</div>
+    </div>
+    <p class="note">빈자리에 들어갈 글자를 고르세요.</p>
+    <div class="choices">${opts.map(x=>`<button class="choice ja-opt" data-c="${x.c}">${x.c}</button>`).join('')}</div>
+    <div id="after"></div>`;
+  sheetBody.querySelectorAll('.choice').forEach(b=>b.addEventListener('click',()=>{
+    const ok=b.dataset.c===ans.c;
+    sheetBody.querySelectorAll('.choice').forEach(x=>{
+      x.disabled=true; if(x.dataset.c===ans.c) x.classList.add('right');
     });
-  });
+    if(!ok) b.classList.add('wrong');
+    markChar(P,ans.c,ok); save();
+    document.getElementById('after').innerHTML=
+      `<button class="bigbtn" id="nx">${ok?(half?'다음 단계로':'뒤 넉 자'):'다시'}</button>`;
+    document.getElementById('nx').addEventListener('click',()=>{
+      if(!ok) return renderStudy();
+      if(half){ P.ci=0; passStage(g, STAGES[2].coin); }
+      else { P.ci=1; save(); renderStudy(); }
+    });
+  }));
+}
+
+/* 4 뜻 — 여덟 자 한 마디의 풀이를 고른다 */
+function stTteut(g){
+  const others=shuffle(GUJEOL.filter(x=>x.g!==g.g)).slice(0,3);
+  const opts=shuffle([g,...others]);
+  sheetBody.innerHTML=stepBar()+`
+    <div class="hanja-card">${guTitle(g)}
+      <div class="grid8 small">${g.chars.map(o=>
+        `<div class="ja"><b>${o.c}</b><span>${o.hun} ${o.um}</span></div>`).join('')}</div>
+    </div>
+    <p class="note">이 마디의 풀이로 알맞은 것을 고르세요.</p>
+    <div class="choices">${opts.map(x=>
+      `<button class="choice" data-g="${x.g}">${x.mean}</button>`).join('')}</div>
+    <div id="after"></div>`;
+  sheetBody.querySelectorAll('.choice').forEach(b=>b.addEventListener('click',()=>{
+    const ok=+b.dataset.g===g.g;
+    sheetBody.querySelectorAll('.choice').forEach(x=>{
+      x.disabled=true; if(+x.dataset.g===g.g) x.classList.add('right');
+    });
+    if(!ok) b.classList.add('wrong');
+    document.getElementById('after').innerHTML=
+      `<button class="bigbtn" id="nx">${ok?'배송으로':'다시'}</button>`;
+    document.getElementById('nx').addEventListener('click',()=>
+      ok?passStage(g,STAGES[3].coin):renderStudy());
+  }));
+}
+
+/* 5 배송 — 책을 덮고 여덟 자를 차례대로 놓는다 */
+function stBaesong(g){
+  let put=[];
+  const pool=shuffle(g.chars);
+  const draw=()=>{
+    sheetBody.innerHTML=stepBar()+`
+      <div class="hanja-card">
+        <div class="hint">책을 덮고 차례대로 놓으세요</div>
+        <div class="slots">${Array.from({length:8},(_,n)=>
+          `<span class="${n<put.length?'on':''}">${n<put.length?put[n]:'□'}</span>`
+          + (n===3?'<em></em>':'')).join('')}</div>
+      </div>
+      <div class="pick">${pool.map(o=>
+        `<button class="ja-opt" data-c="${o.c}" ${put.includes(o.c)?'disabled':''}>${o.c}</button>`).join('')}</div>
+      <div id="after"></div>`;
+    sheetBody.querySelectorAll('.pick button').forEach(b=>
+      b.addEventListener('click',()=>tap(b.dataset.c)));
+  };
+  const tap=(c)=>{
+    const want=g.chars[put.length].c;
+    if(c===want){
+      put.push(c);
+      markChar(P,c,true);
+      if(put.length===8){ save(); return done(true); }
+      draw();
+    } else {
+      markChar(P,c,false); save(); done(false);
+    }
+  };
+  const done=(ok)=>{
+    draw();
+    document.getElementById('after').innerHTML= ok
+      ? `<div class="verdict right">외웠습니다.</div>
+         <div class="mean">${g.mean}</div>
+         <button class="bigbtn" id="nx">다음 마디로</button>`
+      : `<div class="verdict wrong">차례가 어긋났습니다. 다시 해 보세요.</div>
+         <div class="gu">${g.gu1}   ${g.gu2}</div>
+         <button class="bigbtn" id="nx">다시</button>`;
+    sheetBody.querySelectorAll('.pick button').forEach(b=>b.disabled=true);
+    document.getElementById('nx').addEventListener('click',()=>{
+      if(ok) passStage(g, STAGES[4].coin);
+      else { put=[]; draw(); }
+    });
+  };
+  draw();
+}
+
+/* ── 학습 · 글자 축(촉류방통) ────────────── */
+function openJok(){ openSheetRaw('글자 익힘책'); renderJok(); }
+function renderJok(){
+  const due=dueChars(P, Date.now(), 99);
+  sheetBody.innerHTML=`
+    <div class="hanja-card" style="padding:14px">
+      <div class="hunum">익힌 글자 ${metCount()}자</div>
+      <div class="hint">되짚을 때가 된 글자 ${due.length}자</div>
+    </div>
+    ${due.length?`<button class="bigbtn" id="rev">오늘 되짚기 (${Math.min(due.length,12)}자)</button>`:
+      `<p class="note">지금 되짚을 글자가 없습니다. 마디를 더 익히면 여기에 쌓입니다.</p>`}
+    ${JOK.map(j=>{
+      const p=jokProgress(P,j.id);
+      return `<div class="jokrow">
+        <div class="jokhead"><b>${j.name}</b><span>${p.met.length} / ${p.all.length}</span></div>
+        <div class="jokbar"><i style="width:${(p.ratio*100).toFixed(0)}%"></i></div>
+        <div class="jokchars">${p.all.map(c=>
+          `<span class="${P.char[c]?'met':''}">${c}</span>`).join('')}</div>
+      </div>`;
+    }).join('')}
+    <p class="note">구절에서 만난 글자가 제 부류로 흘러들어옵니다. 진한 글자가 만나 본 글자입니다.</p>`;
+  const rev=document.getElementById('rev');
+  if(rev) rev.addEventListener('click',()=>runReview(due.slice(0,12)));
+}
+function runReview(list){
+  let n=0, got=0;
+  const step=()=>{
+    if(n>=list.length){
+      S.coin+=got*20; save(); syncHUD();
+      sheetBody.innerHTML=`<div class="hanja-card">
+          <div class="hunum">${list.length}자 되짚었습니다.</div>
+          <div class="hint">맞힌 것 ${got}자 · 엽전 ${got*20}냥</div></div>
+        <button class="bigbtn" id="bk">글자 익힘책으로</button>`;
+      document.getElementById('bk').addEventListener('click',renderJok);
+      return;
+    }
+    const o=list[n];
+    sheetBody.innerHTML=`
+      <div class="hanja-card">
+        <div class="hint">되짚기 ${n+1} / ${list.length}</div>
+        <div class="hanja">${o.c}</div>
+        <div class="hunum">${o.hun} □</div>
+      </div>
+      <p class="note">음을 적어 보세요.</p>
+      <div class="answer"><input id="um" type="text" maxlength="2" autocomplete="off" aria-label="음">
+        <button class="bigbtn" id="ck" style="margin:0;width:auto;padding:14px 22px">확인</button></div>
+      <div id="after"></div>`;
+    const inp=document.getElementById('um'); inp.focus();
+    const check=()=>{
+      const v=(inp.value||'').trim(); if(!v) return;
+      const ok=v===o.um;
+      if(ok) got++;
+      markChar(P,o.c,ok); save();
+      inp.disabled=true; document.getElementById('ck').disabled=true;
+      document.getElementById('after').innerHTML=
+        `<div class="verdict ${ok?'right':'wrong'}">${ok?'맞혔습니다':'아니요'} — ${o.hun} ${o.um}</div>
+         <button class="bigbtn" id="nx">다음</button>`;
+      document.getElementById('nx').addEventListener('click',()=>{ n++; step(); });
+    };
+    document.getElementById('ck').addEventListener('click',check);
+    inp.addEventListener('keydown',e=>{ if(e.key==='Enter') check(); });
+  };
+  step();
 }
 
 /* ── 상점 ───────────────────────────────── */
 const PACK_NAME = { all:'사철 두는 것', spring:'매화 핀 언덕', summer:'연꽃 뜬 못',
                     autumn:'단풍 드는 뜰', winter:'눈 내린 뜰' };
+
+/* 계절마다 「이렇게 꾸미면 이런 그림이 된다」는 모범 배치.
+   울타리·사립문·길은 어느 계절에나 깔리는 틀로 함께 넣는다. */
+const FRAME = ['mhs_04','mhs_12','mhs_23','mhs_24'];
+const PACK_SAMPLE = {
+  all:    ['mhs_04','mhs_12','mhs_23','mhs_24','mhs_22','mhs_15','mhs_13','mhs_16','mhs_20'],
+  spring: FRAME.concat(['mhs_07','mhs_08','mhs_09','mhs_10','mhs_11','mhs_21','mhs_17','spr_08']),
+  summer: FRAME.concat(['sum_06','sum_05','sum_02','sum_01','sum_03','sum_04','sum_07']),
+  autumn: FRAME.concat(['aut_06','aut_01','aut_02','aut_03','aut_04','aut_05','aut_07']),
+  winter: FRAME.concat(['win_06','win_01','win_02','win_03','win_04','win_05','win_07'])
+};
+function placeAt(o){
+  const it=o.it, [w,h]=it.box; let [x,y]=it.at;
+  if(it.anchor==='bc'){ x-=w/2; y-=h; } else y-=h;
+  return `<g transform="translate(${x},${y})">${it.svg}</g>`;
+}
+function packPreview(season){
+  const list=(PACK_SAMPLE[season]||[]).map(id=>({id,it:ITEMS[id]})).filter(o=>o.it);
+  const ground=list.filter(o=>o.it.slot==='ground')
+    .sort((a,b)=>(a.it.gkind==='cover'?0:1)-(b.it.gkind==='cover'?0:1));
+  const body=list.filter(o=>o.it.slot==='mid'||o.it.slot==='front')
+    .sort((a,b)=>a.it.at[1]-b.it.at[1]);
+  const air=list.filter(o=>o.it.slot==='air');
+  // 흩날리는 것은 미리보기에서 멈춰 세워 세 군데에 흩뿌린다
+  const airHtml=air.map(o=>o.it.fall
+    ? `<g transform="translate(4,296) scale(1.5)">${o.it.svg}</g>
+       <g transform="translate(190,430) scale(1.3)">${o.it.svg}</g>
+       <g transform="translate(300,320) scale(1.2)">${o.it.svg}</g>`
+    : placeAt(o)).join('');
+  return `<svg class="preview" viewBox="0 264 400 336" preserveAspectRatio="xMidYMid meet" role="img"
+      aria-label="${PACK_NAME[season]} 꾸민 모습">
+    <rect x="0" y="258" width="400" height="40" fill="#C6D89C"/>${emptyLand()}${ground.map(placeAt).join('')}${body.map(placeAt).join('')}${airHtml}</svg>`;
+}
 let shopTab='spring';
 function openShop(){
   openSheetRaw('꽃전');
@@ -1018,8 +1599,8 @@ function renderShop(){
   sheetBody.innerHTML=`
     <div class="tabs">${SEASON_TABS.map(([k,label])=>
       `<button data-tab="${k}" class="${k===shopTab?'on':''}">${label}</button>`).join('')}</div>
-    <div class="packhead">
-      <div class="strip"><h2>${PACK_NAME[shopTab]}</h2></div>
+    <div class="packhead banner">
+      <div class="art">${packPreview(shopTab)}<div class="strip"><h2>${PACK_NAME[shopTab]}</h2></div></div>
       <div class="sub">${SEASON_NAME[shopTab]} · ${ids.length}종 입고 · ${mine}종 보유</div>
     </div>
     <div class="grid">${ids.map(id=>cellHTML(id,'shop')).join('')}</div>
@@ -1176,9 +1757,9 @@ function renderBag(){
 function syncHUD(){
   document.getElementById('coinTxt').textContent=S.coin.toLocaleString();
   document.getElementById('gemTxt').textContent=S.gem.toLocaleString();
-  document.getElementById('rankTxt').textContent=`천자문 ${S.learned}자 익힘`;
-  document.getElementById('progBar').style.width=Math.min(100,(S.learned/1000)*100)+'%';
-  document.getElementById('navDot').style.display=S.learned<CHEONJA.length?'block':'none';
+  document.getElementById('rankTxt').textContent=`${P.gu}마디 · ${metCount()}자 익힘`;
+  document.getElementById('progBar').style.width=Math.min(100,(P.gu/GUJEOL.length)*100)+'%';
+  document.getElementById('navDot').style.display=(P.gu<GUJEOL.length||dueChars(P).length)?'block':'none';
 }
 let toastTimer;
 function toast(msg){
