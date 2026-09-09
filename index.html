@@ -1098,20 +1098,31 @@ function drawSeodang(){
 }
 
 /* ── 장면 3 · 서당 안 ───────────────────── */
-/* 학습 세 가지를 서안 위에 놓인 책 모양으로 그린다 */
-function bookZone(x, w, color, act, ax, ay, label, sub, ready, badge){
-  const y=311, h=34;
+/* 학습 세 가지를 각자 딴 서안 위에 놓인 책 모양으로 그린다 */
+function bookDesk(cx, act, ax, ay, color, label, sub, ready, badge){
+  const bw=58, bh=34, by=311;               // 책
+  const dw=82, dy=347, dh=16;               // 서안 상판
+  const legY=dy+dh, legH=40;                // 서안 다리
+  const bx=cx-bw/2, dx=cx-dw/2;
   const c = ready ? color : '#B9B2A4';
   const halo='style="paint-order:stroke;stroke:#FBF3E4;stroke-width:4px;stroke-linejoin:round"';
   return `<g class="tapzone" data-act="${act}" data-ax="${ax}" data-ay="${ay}" role="button" aria-label="${label}">
-    <rect x="${x-10}" y="${y-40}" width="${w+20}" height="${h+58}" fill="transparent"/>
-    <rect x="${x}" y="${y}" width="${w}" height="${h}" rx="3" fill="${c}" stroke="${A.line}" stroke-width="2.6" stroke-linejoin="round"/>
-    <rect x="${x+5}" y="${y+5}" width="${w-10}" height="${h-10}" rx="1.5" fill="${shade(c,ready?24:12)}"/>
-    <path d="M${x+w/2} ${y+3} v${h-6}" stroke="${shade(c,-45)}" stroke-width="2"/>
-    ${badge&&ready&&P.gu<GUJEOL.length?`<g class="badge-bob"><circle cx="${x+w-2}" cy="${y-2}" r="8" fill="#D9463F" stroke="#3D3A36" stroke-width="2.2"/></g>`:''}
-    <text x="${x+w/2}" y="${y-16}" text-anchor="middle" font-family="Gaegu, sans-serif" font-size="15" font-weight="700"
+    <rect x="${dx-10}" y="${by-38}" width="${dw+20}" height="190" fill="transparent"/>
+    <ellipse cx="${cx}" cy="${legY+legH+4}" rx="${dw/2+6}" ry="7" fill="rgba(43,36,28,.18)"/>
+    <rect x="${dx+7}" y="${legY}" width="9" height="${legH}" rx="2" fill="#8A6A4E" stroke="${A.line}" stroke-width="1.8"/>
+    <rect x="${dx+dw-16}" y="${legY}" width="9" height="${legH}" rx="2" fill="#8A6A4E" stroke="${A.line}" stroke-width="1.8"/>
+    <rect x="${dx}" y="${dy}" width="${dw}" height="${dh}" rx="3" fill="#B08F6A" stroke="${A.line}" stroke-width="2.4" stroke-linejoin="round"/>
+    <rect x="${dx}" y="${dy}" width="${dw}" height="6" rx="3" fill="#C9A87C"/>
+    <rect x="${bx+bw-9}" y="${by+3}" width="9" height="${bh-6}" rx="1.5" fill="#F7F1E4" stroke="${A.line}" stroke-width="1.6"/>
+    <g stroke="${shade('#F7F1E4',-35)}" stroke-width="1"><path d="M${bx+bw-6} ${by+8} h4 M${bx+bw-6} ${by+bh/2} h4 M${bx+bw-6} ${by+bh-8} h4"/></g>
+    <rect x="${bx}" y="${by}" width="${bw-6}" height="${bh}" rx="3" fill="${c}" stroke="${A.line}" stroke-width="2.6" stroke-linejoin="round"/>
+    <rect x="${bx+8}" y="${by+4}" width="${bw-22}" height="${bh-8}" rx="1.5" fill="${shade(c,ready?22:10)}"/>
+    <path d="M${bx+9} ${by+3} v${bh-6}" stroke="${shade(c,-45)}" stroke-width="2"/>
+    <path d="M${cx-3} ${by-7} h6 v13 l-3 -4 l-3 4 Z" fill="${shade(c,-20)}" stroke="${A.line}" stroke-width="1.4" stroke-linejoin="round"/>
+    ${badge&&ready&&P.gu<GUJEOL.length?`<g class="badge-bob"><circle cx="${bx+bw-2}" cy="${by-6}" r="8" fill="#D9463F" stroke="#3D3A36" stroke-width="2.2"/></g>`:''}
+    <text x="${cx}" y="${by-14}" text-anchor="middle" font-family="Gaegu, sans-serif" font-size="15" font-weight="700"
       fill="${ready?'#3D3A36':'#9C917F'}" ${halo}>${label}</text>
-    <text x="${x+w/2}" y="${y+h+22}" text-anchor="middle" font-family="Gaegu, sans-serif" font-size="12"
+    <text x="${cx}" y="${legY+legH+24}" text-anchor="middle" font-family="Gaegu, sans-serif" font-size="12"
       fill="${ready?'#7A6E5E':'#A99E8B'}" ${halo}>${sub}</text>
   </g>`;
 }
@@ -1119,14 +1130,9 @@ function drawInside(){
   const p = S.pos.inside;
   scene.innerHTML = `
     <image href="bg/bg-inside.png" xlink:href="bg/bg-inside.png" x="0" y="0" width="400" height="600" preserveAspectRatio="xMidYMid slice"/>
-    <ellipse cx="200" cy="416" rx="150" ry="12" fill="rgba(43,36,28,.16)"/>
-    <rect x="86" y="365" width="11" height="46" rx="2" fill="#8A6A4E" stroke="${A.line}" stroke-width="2"/>
-    <rect x="303" y="365" width="11" height="46" rx="2" fill="#8A6A4E" stroke="${A.line}" stroke-width="2"/>
-    <rect x="70" y="345" width="260" height="20" rx="3" fill="#B08F6A" stroke="${A.line}" stroke-width="2.6" stroke-linejoin="round"/>
-    <rect x="70" y="345" width="260" height="8" rx="3" fill="#C9A87C"/>
-    ${bookZone(84, 64,'#6E9A50','study-cheonja',116,450,'천자문',`${P.gu} / 125마디`,true,true)}
-    ${bookZone(168,64,'#8FA8B8','study-myeongsim',200,450,'명심보감','곧 문 엽니다',false,false)}
-    ${bookZone(252,64,'#C9A24A','study-jok',284,450,'글자 익힘책',`${metCount()}자 익힘`,true,true)}
+    ${bookDesk(100,'study-cheonja',100,450,'#6E9A50','천자문',`${P.gu} / 125마디`,true,true)}
+    ${bookDesk(200,'study-myeongsim',200,450,'#8FA8B8','명심보감','곧 문 엽니다',false,false)}
+    ${bookDesk(300,'study-jok',300,450,'#C9A24A','글자 익힘책',`${metCount()}자 익힘`,true,true)}
     <g class="tapzone" data-act="go-seodang" data-ax="340" data-ay="556" role="button" aria-label="마당으로 나가기">
       <rect x="288" y="470" width="112" height="130" fill="transparent"/>
       <rect x="316" y="500" width="72" height="86" rx="3" fill="#6F6258"/>
