@@ -1128,32 +1128,25 @@ function drawInside(){
 }
 
 /* ── 장면 4 · 저잣거리 ──────────────────── */
-function stall(x, act, ax, color, label, sub, ready){
-  return `<g class="tapzone" data-act="${act}" data-ax="${ax}" data-ay="490" role="button" aria-label="${label}">
-    <rect x="${x}" y="280" width="94" height="158" fill="transparent"/>
-    <rect x="${x+8}" y="352" width="78" height="56" fill="#C9B79A"/>
-    <rect x="${x+8}" y="346" width="78" height="12" rx="3" fill="#8A6A4E"/>
-    <rect x="${x+12}" y="358" width="70" height="40" rx="3" fill="#EADCC2"/>
-    <path d="M${x+1} 344 h92 l-10 -30 h-72 Z" fill="${color}"/>
-    <g stroke="rgba(255,255,255,.5)" stroke-width="6">
-      <path d="M${x+22} 344 L${x+29} 314"/><path d="M${x+50} 344 L${x+54} 314"/><path d="M${x+76} 344 L${x+77} 314"/></g>
-    <rect x="${x+6}" y="408" width="7" height="26" fill="#8A6A4E"/>
-    <rect x="${x+81}" y="408" width="7" height="26" fill="#8A6A4E"/>
-    <rect x="${x+14}" y="286" width="66" height="24" rx="5" fill="#3D3A36"/>
-    <text x="${x+47}" y="304" text-anchor="middle" font-family="Gaegu, sans-serif" font-size="17" font-weight="700" fill="#F2E4CB">${label}</text>
-    <text x="${x+47}" y="428" text-anchor="middle" font-family="Gaegu, sans-serif" font-size="15" fill="${ready?'#5C5346':'#9C917F'}">${sub}</text>
+function marketZone(hit, act, ax, ay, label, sub, ready){
+  const [x,y,w,h]=hit;
+  const halo='style="paint-order:stroke;stroke:#FBF3E4;stroke-width:5px;stroke-linejoin:round"';
+  return `<g class="tapzone" data-act="${act}" data-ax="${ax}" data-ay="${ay}" role="button" aria-label="${label}">
+    <rect x="${x}" y="${y}" width="${w}" height="${h}" fill="transparent"/>
+    <text x="${x+w/2}" y="${y+h+22}" text-anchor="middle" font-family="Gaegu, sans-serif" font-size="18" font-weight="700"
+      fill="${ready?'#3D3A36':'#9C917F'}" ${halo}>${label}</text>
+    <text x="${x+w/2}" y="${y+h+40}" text-anchor="middle" font-family="Gaegu, sans-serif" font-size="14"
+      fill="${ready?'#7A6E5E':'#A99E8B'}" ${halo}>${sub}</text>
   </g>`;
 }
 function drawMarket(){
   const p = S.pos.market;
-  scene.innerHTML = sky() + hills() + `
-    <rect y="262" width="400" height="338" fill="#D0BE9C"/>
-    <path d="M0 440 q200 -16 400 6 v154 H0Z" fill="#C2AE8A"/>
-    <g fill="#B7A17B"><ellipse cx="60" cy="510" rx="26" ry="8"/><ellipse cx="200" cy="540" rx="30" ry="9"/><ellipse cx="330" cy="506" rx="24" ry="8"/></g>
-    ${stall(4,  'shop-flower', 51,'#E48AA6','꽃전', '38종',  true)}
-    ${stall(102,'shop-clothes',149,'#7FA9C9','옷전', '14벌',  true)}
-    ${stall(200,'shop-stone',  247,'#8FA8B8','석물전','준비 중',false)}
-    ${stall(298,'shop-goods',  345,'#C9A24A','물목전','준비 중',false)}
+  scene.innerHTML = `
+    <image href="bg/bg-market.png" xlink:href="bg/bg-market.png" x="0" y="0" width="400" height="600" preserveAspectRatio="xMidYMid slice"/>
+    ${marketZone([0,100,100,130],  'shop-flower', 50,300,'꽃전', '38종',  true)}
+    ${marketZone([100,100,100,130],'shop-clothes',150,300,'옷전', '14벌',  true)}
+    ${marketZone([200,100,100,130],'shop-stone',  250,300,'석물전','준비 중',false)}
+    ${marketZone([300,100,100,130],'shop-goods',  350,300,'물목전','준비 중',false)}
     <g class="tapzone" data-act="go-garden" data-ax="344" data-ay="556" role="button" aria-label="나의 정원으로">
       <rect x="300" y="474" width="100" height="126" fill="transparent"/>
       <path d="M400 600 L356 512 L332 512 L380 600 Z" fill="#E4D6B4"/>
@@ -1166,7 +1159,7 @@ function drawMarket(){
 /* ── 장면 관리 ──────────────────────────── */
 const scene = document.getElementById('scene');
 const DRAW = { garden:drawGarden, seodang:drawSeodang, inside:drawInside, market:drawMarket };
-const FLOOR = { garden:[330,592,24,376], seodang:[280,584,32,368], inside:[260,590,30,370], market:[470,586,24,376] };
+const FLOOR = { garden:[330,592,24,376], seodang:[280,584,32,368], inside:[260,590,30,370], market:[260,590,30,370] };
 const NAVKEY = { garden:'garden', seodang:'seodang', inside:'seodang', market:'market' };
 let where='garden', walking=false, placingId=null;
 
