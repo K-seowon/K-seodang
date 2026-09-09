@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
-<title>K-서당</title>
+<title>운교서당</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Gaegu:wght@400;700&display=swap" rel="stylesheet">
@@ -226,7 +226,7 @@ body{font-family:'Gaegu',system-ui,sans-serif;color:var(--ink);-webkit-font-smoo
 
 <script>
 /* =========================================================
-   K-서당 v0.8   (v0.7에서 이어짐)
+   운교서당 v0.8   (v0.7에서 이어짐)
    수정
      1. 나의 정원 = 빈 대지. 길이 대지를 지나가고 그 길 위에
         저잣거리(왼쪽 끝)와 서당(오른쪽 끝)이 있다.
@@ -820,14 +820,24 @@ const START_WEAR = ['jg_dahong','ch_namsaek','sh_gomu'];
 const S = load() || {
   coin: 2400, gem: 12,
   prog: { gu:0, stage:0, ci:0, done:[], char:{} },
-  owned: SAMPLE_PLACED.slice(),
+  owned: Object.fromEntries(SAMPLE_PLACED.map(id=>[id,1])),
   placed: SAMPLE_PLACED.slice(),
   spot: {},
+  seq: 0,
   locked: false,
   closet: START_WEAR.slice(),
   wear: { top:'jg_dahong', bottom:'ch_namsaek', outer:null, shoes:'sh_gomu' },
   pos: { garden:{x:200,y:470}, seodang:{x:200,y:500}, inside:{x:200,y:520}, market:{x:200,y:500} }
 };
+// 예전 저장 자료( owned가 배열 )를 개수 표(맵)로 바꿔준다
+if(Array.isArray(S.owned)){
+  const counts={};
+  S.owned.forEach(id=>{ counts[id]=(counts[id]||0)+1; });
+  S.owned=counts;
+}
+if(!S.owned) S.owned={};
+if(!S.placed) S.placed=[];
+if(!S.seq) S.seq=0;
 if(!S.spot) S.spot={};
 if(!S.pos.inside) S.pos.inside={x:200,y:520};
 if(!S.closet) S.closet=START_WEAR.slice();
@@ -988,14 +998,19 @@ function emptyLand(){
     <g fill="#AAC37D"><ellipse cx="70" cy="420" rx="46" ry="13"/><ellipse cx="300" cy="392" rx="40" ry="11"/>
       <ellipse cx="180" cy="560" rx="52" ry="14"/><ellipse cx="352" cy="536" rx="38" ry="11"/></g>`;
 }
+/* 정원에 놓인 것 하나하나를 「자리표(iid)」로 구별한다.
+   자리표는 "물건종류__번호" 모양이고, 옛 저장 자료처럼 번호가 없으면
+   물건종류 그 자체를 자리표로 본다 (깔개·길 등 한 개만 놓는 것들). */
+function typeOf(iid){ return String(iid).split('__')[0]; }
+function newIid(id){ S.seq=(S.seq||0)+1; return `${id}__${S.seq}`; }
 function drawGarden(){
-  const list = S.placed.map(id=>({id,it:ITEMS[id]})).filter(o=>o.it);
+  const list = S.placed.map(iid=>({iid,id:typeOf(iid),it:ITEMS[typeOf(iid)]})).filter(o=>o.it);
   const ground = list.filter(o=>o.it.slot==='ground')
     .sort((a,b)=>(a.it.gkind==='cover'?0:1)-(b.it.gkind==='cover'?0:1));
   const mid    = list.filter(o=>o.it.slot==='mid'||o.it.slot==='front');
   const air    = list.filter(o=>o.it.slot==='air');
   const p = S.pos.garden;
-  const pool = mid.map(o=>({y:spotOf(o.id)[1], html:place(o)}))
+  const pool = mid.map(o=>({y:spotOf(o.iid)[1], html:place(o)}))
     .concat([{y:p.y, html:avatarSVG(p.x,p.y)}])
     .sort((a,b)=>a.y-b.y);
   scene.innerHTML = sky() + hills() + village() + emptyLand()
@@ -1003,15 +1018,15 @@ function drawGarden(){
     + pool.map(o=>o.html).join('')
     + air.map(o=> o.it.fall ? fallSVG(o.it.fall) : place(o)).join('');
 }
-function spotOf(id){ return S.spot[id] || ITEMS[id].at; }
-function xyOf(id){
-  const it=ITEMS[id], [w,h]=it.box; let [x,y]=spotOf(id);
+function spotOf(iid){ return S.spot[iid] || ITEMS[typeOf(iid)].at; }
+function xyOf(iid){
+  const it=ITEMS[typeOf(iid)], [w,h]=it.box; let [x,y]=spotOf(iid);
   if(it.anchor==='bc'){ x-=w/2; y-=h; } else y-=h;
   return [x,y];
 }
 function place(o){
-  const [x,y]=xyOf(o.id);
-  return `<g data-id="${o.id}" transform="translate(${x},${y})">${o.it.svg}</g>`;
+  const [x,y]=xyOf(o.iid);
+  return `<g data-iid="${o.iid}" data-id="${o.id}" transform="translate(${x},${y})">${o.it.svg}</g>`;
 }
 
 /* ── 장면 2 · 서당 마당 ─────────────────── */
@@ -1173,12 +1188,12 @@ function doAct(act){
 /* ── 손가락 처리: 걷기 · 끌기 · 놓기 ───── */
 let ptr=null, drag=null;
 scene.addEventListener('pointerdown', e=>{
-  const item = e.target.closest('[data-id]');
+  const item = e.target.closest('[data-iid]');
   const act  = e.target.closest('[data-act]');
   ptr = { x:e.clientX, y:e.clientY, act, moved:false };
   if(where==='garden' && !S.locked && !placingId && item && !ITEMS[item.dataset.id].fixed){
-    const p=svgPoint(e), [ix,iy]=spotOf(item.dataset.id);
-    drag = { id:item.dataset.id, g:item, ox:p.x-ix, oy:p.y-iy };
+    const p=svgPoint(e), [ix,iy]=spotOf(item.dataset.iid);
+    drag = { id:item.dataset.iid, g:item, ox:p.x-ix, oy:p.y-iy };
     item.classList.add('dragging');
     scene.setPointerCapture(e.pointerId);
   }
@@ -1249,7 +1264,7 @@ function startPlacing(id){
   overlay.classList.remove('on');
   where='garden'; drawScene();
   if(it.fixed){
-    if(it.gkind) S.placed = S.placed.filter(x=>!(ITEMS[x] && ITEMS[x].gkind===it.gkind));
+    if(it.gkind) S.placed = S.placed.filter(x=>!(ITEMS[typeOf(x)] && ITEMS[typeOf(x)].gkind===it.gkind));
     if(!S.placed.includes(id)) S.placed.push(id);
     save(); drawScene(); toast(`${it.name}을(를) 깔았습니다`); return;
   }
@@ -1260,8 +1275,9 @@ function startPlacing(id){
 function dropItem(x,y){
   const id=placingId; if(!id) return;
   const [y0,y1,x0,x1]=FLOOR.garden;
-  S.spot[id]=[Math.round(clamp(x,x0,x1)),Math.round(clamp(y,y0,y1))];
-  if(!S.placed.includes(id)) S.placed.push(id);
+  const iid=newIid(id);
+  S.spot[iid]=[Math.round(clamp(x,x0,x1)),Math.round(clamp(y,y0,y1))];
+  S.placed.push(iid);
   placingId=null; document.getElementById('placeBar').classList.remove('on');
   save(); drawScene(); toast(`${ITEMS[id].name}을(를) 놓았습니다`);
 }
@@ -1616,9 +1632,12 @@ function openShop(){
   openSheetRaw('운교장터 · 꽃전');
   renderShop();
 }
+function ownedCount(id){ return (S.owned && S.owned[id]) || 0; }
+function placedInstances(id){ return S.placed.filter(iid=>typeOf(iid)===id); }
+function placedCount(id){ return placedInstances(id).length; }
 function renderShop(){
   const ids=Object.keys(ITEMS).filter(id=>ITEMS[id].season===shopTab);
-  const mine=ids.filter(id=>S.owned.includes(id)).length;
+  const mine=ids.filter(id=>ownedCount(id)>0).length;
   sheetBody.innerHTML=`
     <div class="tabs">${SEASON_TABS.map(([k,label])=>
       `<button data-tab="${k}" class="${k===shopTab?'on':''}">${label}</button>`).join('')}</div>
@@ -1633,26 +1652,28 @@ function renderShop(){
   sheetBody.querySelectorAll('.cell').forEach(c=>c.addEventListener('click',()=>buy(c.dataset.id)));
 }
 function cellHTML(id,mode){
-  const it=ITEMS[id], has=S.owned.includes(id), on=S.placed.includes(id);
+  const it=ITEMS[id], cnt=ownedCount(id), onCnt=placedCount(id);
   const [w,h]=it.box, m=Math.max(w,h);
   const foot = mode==='shop'
-    ? (has?'보유 중':`${it.cur==='coin'?COIN_SVG:BUNDLE_SVG}${it.amt}`)
-    : (on?'거두기':'정원에 놓기');
-  return `<button class="cell ${mode==='shop'&&has?'owned':''} ${mode==='bag'&&on?'placed':''}" data-id="${id}">
+    ? `${it.cur==='coin'?COIN_SVG:BUNDLE_SVG}${it.amt}`
+    : (onCnt<cnt?'정원에 놓기':'거두기');
+  const tag = mode==='shop'
+    ? (cnt?`<span class="tag">보유 ${cnt}</span>`:'')
+    : (cnt?`<span class="tag">${onCnt}/${cnt}</span>`:'');
+  return `<button class="cell ${mode==='bag'&&onCnt?'placed':''}" data-id="${id}">
     <span class="rar" style="background:${RAR_COLOR[it.rar]}">${it.rar}</span>
-    ${mode==='bag'&&on?'<span class="tag">놓임</span>':''}
+    ${tag}
     <svg class="thumb" viewBox="${(w-m)/2} ${(h-m)/2} ${m} ${m}">${it.svg}</svg>
     <div class="cname">${it.name}</div>
     <div class="cost">${foot}</div></button>`;
 }
 function buy(id){
   const it=ITEMS[id];
-  if(S.owned.includes(id)) return toast('이미 보따리에 있습니다');
   const bag=it.cur==='coin'?S.coin:S.gem;
   if(bag<it.amt) return toast(it.cur==='coin'?'엽전이 모자랍니다':'꾸러미가 모자랍니다');
   if(it.cur==='coin') S.coin-=it.amt; else S.gem-=it.amt;
-  S.owned.push(id); save(); syncHUD(); renderShop();
-  toast(`${it.name} — 정원보따리에 넣었습니다`);
+  S.owned[id]=(S.owned[id]||0)+1; save(); syncHUD(); renderShop();
+  toast(`${it.name} — 정원보따리에 넣었습니다 (${S.owned[id]}개)`);
 }
 
 /* ── 옷 미리보기 ────────────────────────── */
@@ -1751,8 +1772,9 @@ function openBag(){
   renderBag();
 }
 function renderBag(){
+  const ownedIds=Object.keys(S.owned).filter(id=>ownedCount(id)>0);
   const tabs=`<div class="tabs">
-    <button data-bag="garden" class="${bagTab==='garden'?'on':''}">정원보따리 ${S.owned.length}</button>
+    <button data-bag="garden" class="${bagTab==='garden'?'on':''}">정원보따리 ${ownedIds.length}</button>
     <button data-bag="hakdong" class="${bagTab==='hakdong'?'on':''}">학동보따리 ${S.closet.length}</button></div>`;
 
   if(bagTab==='hakdong'){
@@ -1768,11 +1790,11 @@ function renderBag(){
       `<p class="note">학동이 입을 것들입니다. 두루마기는 다시 누르면 벗습니다.</p>`;
   } else {
     let body='';
-    if(!S.owned.length){
+    if(!ownedIds.length){
       body=`<p class="note">아직 가진 물건이 없습니다. 저잣거리 꽃전에서 골라보세요.</p>`;
     } else {
       body = SEASON_TABS.map(([k,label])=>{
-        const ids=S.owned.filter(id=>ITEMS[id] && ITEMS[id].season===k);
+        const ids=ownedIds.filter(id=>ITEMS[id] && ITEMS[id].season===k);
         if(!ids.length) return '';
         return `<p class="note" style="margin:14px 2px 8px;font-weight:700;color:#5C5346">${label} · ${ids.length}종</p>
           <div class="grid">${ids.map(id=>cellHTML(id,'bag')).join('')}</div>`;
@@ -1781,7 +1803,7 @@ function renderBag(){
        <p class="note">봄 물건을 샘플 자리에 다시 놓습니다. 옮겨둔 자리는 지워집니다.</p>`;
     }
     sheetBody.innerHTML = tabs +
-      `<p class="note" style="margin:0 2px 4px">${S.owned.length}종 보유 · ${S.placed.length}종 정원에 놓임</p>` + body;
+      `<p class="note" style="margin:0 2px 4px">${ownedIds.length}종 보유 · ${S.placed.length}개 정원에 놓임</p>` + body;
   }
 
   sheetBody.querySelectorAll('.tabs button').forEach(b=>
@@ -1791,16 +1813,21 @@ function renderBag(){
   sheetBody.querySelectorAll('.cell[data-id]').forEach(c=>{
     c.addEventListener('click',()=>{
       const id=c.dataset.id;
-      if(S.placed.includes(id)){
-        S.placed=S.placed.filter(x=>x!==id); save(); renderBag();
+      if(placedCount(id)<ownedCount(id)){
+        startPlacing(id);
+      } else {
+        const insts=placedInstances(id), last=insts[insts.length-1];
+        if(!last) return;
+        S.placed=S.placed.filter(x=>x!==last); delete S.spot[last];
+        save(); renderBag();
         toast(`${ITEMS[id].name}을(를) 거두었습니다`);
-      } else startPlacing(id);
+      }
     });
   });
   const sb=document.getElementById('sampleBtn');
   if(sb) sb.addEventListener('click',()=>{
     S.spot={};
-    S.placed=S.owned.filter(id=>SAMPLE_PLACED.includes(id));
+    S.placed=SAMPLE_PLACED.filter(id=>ownedCount(id)>0);
     save(); renderBag(); toast('샘플 배치로 되돌렸습니다');
   });
 }
