@@ -1098,25 +1098,35 @@ function drawSeodang(){
 }
 
 /* ── 장면 3 · 서당 안 ───────────────────── */
-function studyZone(hit, act, ax, ay, label, sub, on, badge){
-  const [x,y,w,h]=hit;
-  const halo='style="paint-order:stroke;stroke:#FBF3E4;stroke-width:5px;stroke-linejoin:round"';
+/* 학습 세 가지를 서안 위에 놓인 책 모양으로 그린다 */
+function bookZone(x, w, color, act, ax, ay, label, sub, ready, badge){
+  const y=311, h=34;
+  const c = ready ? color : '#B9B2A4';
+  const halo='style="paint-order:stroke;stroke:#FBF3E4;stroke-width:4px;stroke-linejoin:round"';
   return `<g class="tapzone" data-act="${act}" data-ax="${ax}" data-ay="${ay}" role="button" aria-label="${label}">
-    <rect x="${x}" y="${y}" width="${w}" height="${h}" fill="transparent"/>
-    ${badge&&on&&P.gu<GUJEOL.length?`<g class="badge-bob"><circle cx="${x+w-6}" cy="${y+12}" r="9" fill="#D9463F" stroke="#3D3A36" stroke-width="2.5"/></g>`:''}
-    <text x="${x+w/2}" y="${y+h+22}" text-anchor="middle" font-family="Gaegu, sans-serif" font-size="18" font-weight="700"
-      fill="${on?'#3D3A36':'#9C917F'}" ${halo}>${label}</text>
-    <text x="${x+w/2}" y="${y+h+40}" text-anchor="middle" font-family="Gaegu, sans-serif" font-size="14"
-      fill="${on?'#7A6E5E':'#A99E8B'}" ${halo}>${sub}</text>
+    <rect x="${x-10}" y="${y-40}" width="${w+20}" height="${h+58}" fill="transparent"/>
+    <rect x="${x}" y="${y}" width="${w}" height="${h}" rx="3" fill="${c}" stroke="${A.line}" stroke-width="2.6" stroke-linejoin="round"/>
+    <rect x="${x+5}" y="${y+5}" width="${w-10}" height="${h-10}" rx="1.5" fill="${shade(c,ready?24:12)}"/>
+    <path d="M${x+w/2} ${y+3} v${h-6}" stroke="${shade(c,-45)}" stroke-width="2"/>
+    ${badge&&ready&&P.gu<GUJEOL.length?`<g class="badge-bob"><circle cx="${x+w-2}" cy="${y-2}" r="8" fill="#D9463F" stroke="#3D3A36" stroke-width="2.2"/></g>`:''}
+    <text x="${x+w/2}" y="${y-16}" text-anchor="middle" font-family="Gaegu, sans-serif" font-size="15" font-weight="700"
+      fill="${ready?'#3D3A36':'#9C917F'}" ${halo}>${label}</text>
+    <text x="${x+w/2}" y="${y+h+22}" text-anchor="middle" font-family="Gaegu, sans-serif" font-size="12"
+      fill="${ready?'#7A6E5E':'#A99E8B'}" ${halo}>${sub}</text>
   </g>`;
 }
 function drawInside(){
   const p = S.pos.inside;
   scene.innerHTML = `
     <image href="bg/bg-inside.png" xlink:href="bg/bg-inside.png" x="0" y="0" width="400" height="600" preserveAspectRatio="xMidYMid slice"/>
-    ${studyZone([10,20,95,215],'study-cheonja',56,420,'천자문',`${P.gu} / 125마디`,true,true)}
-    ${studyZone([100,40,170,195],'study-myeongsim',182,430,'명심보감','곧 문 엽니다',false,false)}
-    ${studyZone([278,60,95,175],'study-jok',324,420,'글자 익힘책',`${metCount()}자 익힘`,true,true)}
+    <ellipse cx="200" cy="416" rx="150" ry="12" fill="rgba(43,36,28,.16)"/>
+    <rect x="86" y="365" width="11" height="46" rx="2" fill="#8A6A4E" stroke="${A.line}" stroke-width="2"/>
+    <rect x="303" y="365" width="11" height="46" rx="2" fill="#8A6A4E" stroke="${A.line}" stroke-width="2"/>
+    <rect x="70" y="345" width="260" height="20" rx="3" fill="#B08F6A" stroke="${A.line}" stroke-width="2.6" stroke-linejoin="round"/>
+    <rect x="70" y="345" width="260" height="8" rx="3" fill="#C9A87C"/>
+    ${bookZone(84, 64,'#6E9A50','study-cheonja',116,450,'천자문',`${P.gu} / 125마디`,true,true)}
+    ${bookZone(168,64,'#8FA8B8','study-myeongsim',200,450,'명심보감','곧 문 엽니다',false,false)}
+    ${bookZone(252,64,'#C9A24A','study-jok',284,450,'글자 익힘책',`${metCount()}자 익힘`,true,true)}
     <g class="tapzone" data-act="go-seodang" data-ax="340" data-ay="556" role="button" aria-label="마당으로 나가기">
       <rect x="288" y="470" width="112" height="130" fill="transparent"/>
       <rect x="316" y="500" width="72" height="86" rx="3" fill="#6F6258"/>
@@ -1128,25 +1138,33 @@ function drawInside(){
 }
 
 /* ── 장면 4 · 저잣거리 ──────────────────── */
-function marketZone(hit, act, ax, ay, label, sub, ready){
-  const [x,y,w,h]=hit;
-  const halo='style="paint-order:stroke;stroke:#FBF3E4;stroke-width:5px;stroke-linejoin:round"';
-  return `<g class="tapzone" data-act="${act}" data-ax="${ax}" data-ay="${ay}" role="button" aria-label="${label}">
-    <rect x="${x}" y="${y}" width="${w}" height="${h}" fill="transparent"/>
-    <text x="${x+w/2}" y="${y+h+22}" text-anchor="middle" font-family="Gaegu, sans-serif" font-size="18" font-weight="700"
-      fill="${ready?'#3D3A36':'#9C917F'}" ${halo}>${label}</text>
-    <text x="${x+w/2}" y="${y+h+40}" text-anchor="middle" font-family="Gaegu, sans-serif" font-size="14"
-      fill="${ready?'#7A6E5E':'#A99E8B'}" ${halo}>${sub}</text>
+/* 전마다 좌판(차양+평상) 모양을 그려 그 안에 누름칸을 둔다 */
+function stallZone(x, act, label, sub, color, ready){
+  const c = ready ? color : '#B9B2A4';
+  return `<g class="tapzone" data-act="${act}" data-ax="${x+47}" data-ay="490" role="button" aria-label="${label}">
+    <rect x="${x}" y="280" width="94" height="158" fill="transparent"/>
+    <path d="M${x+1} 344 h92 l-10 -30 h-72 Z" fill="${c}" stroke="${A.line}" stroke-width="2.6" stroke-linejoin="round"/>
+    <path d="M${x+22} 344 L${x+29} 314 M${x+50} 344 L${x+54} 314 M${x+76} 344 L${x+77} 314"
+      stroke="${shade(c,ready?30:16)}" stroke-width="4" stroke-linecap="round"/>
+    <rect x="${x+8}" y="346" width="78" height="12" rx="3" fill="#8A6A4E" stroke="${A.line}" stroke-width="2.2" stroke-linejoin="round"/>
+    <rect x="${x+8}" y="352" width="78" height="56" fill="#C9B79A" stroke="${A.line}" stroke-width="2.4" stroke-linejoin="round"/>
+    <rect x="${x+12}" y="358" width="70" height="40" rx="3" fill="#EADCC2" stroke="${shade('#EADCC2',-30)}" stroke-width="1.6"/>
+    <rect x="${x+6}" y="408" width="7" height="26" rx="2" fill="#8A6A4E" stroke="${A.line}" stroke-width="1.8"/>
+    <rect x="${x+81}" y="408" width="7" height="26" rx="2" fill="#8A6A4E" stroke="${A.line}" stroke-width="1.8"/>
+    <rect x="${x+14}" y="286" width="66" height="24" rx="5" fill="#3D3A36" stroke="${A.line}" stroke-width="2"/>
+    <text x="${x+47}" y="304" text-anchor="middle" font-family="Gaegu, sans-serif" font-size="17" font-weight="700" fill="#F2E4CB">${label}</text>
+    <text x="${x+47}" y="428" text-anchor="middle" font-family="Gaegu, sans-serif" font-size="15" fill="${ready?'#5C5346':'#9C917F'}"
+      style="paint-order:stroke;stroke:#FBF3E4;stroke-width:3px">${sub}</text>
   </g>`;
 }
 function drawMarket(){
   const p = S.pos.market;
   scene.innerHTML = `
     <image href="bg/bg-market.png" xlink:href="bg/bg-market.png" x="0" y="0" width="400" height="600" preserveAspectRatio="xMidYMid slice"/>
-    ${marketZone([0,100,100,130],  'shop-flower', 50,300,'꽃전', '38종',  true)}
-    ${marketZone([100,100,100,130],'shop-clothes',150,300,'옷전', '14벌',  true)}
-    ${marketZone([200,100,100,130],'shop-stone',  250,300,'석물전','준비 중',false)}
-    ${marketZone([300,100,100,130],'shop-goods',  350,300,'물목전','준비 중',false)}
+    ${stallZone(4,  'shop-flower', '꽃전', '38종',   '#E48AA6',true)}
+    ${stallZone(102,'shop-clothes','옷전', '14벌',   '#7FA9C9',true)}
+    ${stallZone(200,'shop-stone',  '석물전','준비 중','#8FA8B8',false)}
+    ${stallZone(298,'shop-goods',  '물목전','준비 중','#C9A24A',false)}
     <g class="tapzone" data-act="go-garden" data-ax="344" data-ay="556" role="button" aria-label="나의 정원으로">
       <rect x="300" y="474" width="100" height="126" fill="transparent"/>
       <path d="M400 600 L356 512 L332 512 L380 600 Z" fill="#E4D6B4"/>
@@ -1159,7 +1177,7 @@ function drawMarket(){
 /* ── 장면 관리 ──────────────────────────── */
 const scene = document.getElementById('scene');
 const DRAW = { garden:drawGarden, seodang:drawSeodang, inside:drawInside, market:drawMarket };
-const FLOOR = { garden:[330,592,24,376], seodang:[280,584,32,368], inside:[260,590,30,370], market:[260,590,30,370] };
+const FLOOR = { garden:[330,592,24,376], seodang:[280,584,32,368], inside:[420,590,30,370], market:[450,586,24,376] };
 const NAVKEY = { garden:'garden', seodang:'seodang', inside:'seodang', market:'market' };
 let where='garden', walking=false, placingId=null;
 
