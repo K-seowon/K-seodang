@@ -1050,28 +1050,14 @@ function place(o){
 /* ── 장면 2 · 서당 마당 ─────────────────── */
 function drawSeodang(){
   const p = S.pos.seodang;
-  scene.innerHTML = sky() + hills() + `
-    <rect y="262" width="400" height="338" fill="#D9C7A6"/>
-    <path d="M0 300 q120 -12 220 4 q90 14 180 -4 v300 H0Z" fill="#CFB995"/>
-    <g class="tapzone" data-act="enter-seodang" data-ax="200" data-ay="466" role="button" aria-label="서당 안으로 들어가기">
-      <rect x="48" y="150" width="304" height="150" fill="transparent"/>
-      <rect x="72" y="288" width="256" height="14" rx="3" fill="#C4B4A0"/>
-      <rect x="80" y="216" width="240" height="76" fill="#EADCC2"/>
-      <rect x="106" y="230" width="52" height="58" rx="2" fill="#C9A87C" stroke="#8A6A4E" stroke-width="2"/>
-      <rect x="174" y="228" width="52" height="60" rx="2" fill="#5E4632"/>
-      <rect x="242" y="230" width="52" height="58" rx="2" fill="#C9A87C" stroke="#8A6A4E" stroke-width="2"/>
-      <g stroke="#8A6A4E" stroke-width="1.5"><path d="M106 250h52M106 270h52M242 250h52M242 270h52"/></g>
-      <rect x="84" y="212" width="232" height="10" rx="3" fill="#B08F6A"/>
-      <rect x="86" y="216" width="10" height="76" fill="#8A6A4E"/>
-      <rect x="304" y="216" width="10" height="76" fill="#8A6A4E"/>
-      <path d="M56 210 q144 -56 288 0 Z" fill="#6F6258"/>
-      <path d="M48 212 q152 -68 304 0 q-40 9 -152 9 q-112 0 -152 -9 Z" fill="#8B7D71"/>
-      <rect x="158" y="166" width="84" height="24" rx="5" fill="#3D3A36"/>
-      <text x="200" y="184" text-anchor="middle" font-family="Gaegu, sans-serif" font-size="17" font-weight="700" fill="#F2E4CB">운교서당</text>
-      ${P.gu<GUJEOL.length?`<g class="badge-bob"><circle cx="316" cy="176" r="9" fill="#D9463F" stroke="#3D3A36" stroke-width="2.5"/></g>`:''}
-      <text x="200" y="326" text-anchor="middle" font-family="Gaegu, sans-serif" font-size="17" fill="#6B6154">문을 누르면 안으로 듭니다</text>
+  scene.innerHTML = `
+    <image href="bg/bg-seodang.png" xlink:href="bg/bg-seodang.png" x="0" y="0" width="400" height="600" preserveAspectRatio="xMidYMid slice"/>
+    <g class="tapzone" data-act="enter-seodang" data-ax="200" data-ay="274" role="button" aria-label="서당 안으로 들어가기">
+      <rect x="64" y="106" width="272" height="152" fill="transparent"/>
+      ${P.gu<GUJEOL.length?`<g class="badge-bob"><circle cx="282" cy="138" r="9" fill="#D9463F" stroke="#3D3A36" stroke-width="2.5"/></g>`:''}
+      <text x="200" y="290" text-anchor="middle" font-family="Gaegu, sans-serif" font-size="17" fill="#5C5346"
+        style="paint-order:stroke;stroke:#FBF3E4;stroke-width:5px;stroke-linejoin:round">문을 누르면 안으로 듭니다</text>
     </g>
-    <g fill="#B7A17B"><ellipse cx="70" cy="420" rx="34" ry="9"/><ellipse cx="330" cy="440" rx="30" ry="8"/></g>
     <g class="tapzone" data-act="go-garden" data-ax="56" data-ay="556" role="button" aria-label="나의 정원으로">
       <rect x="0" y="474" width="100" height="126" fill="transparent"/>
       <path d="M0 600 L44 512 L68 512 L20 600 Z" fill="#E4D6B4"/>
@@ -1169,7 +1155,7 @@ function drawMarket(){
 /* ── 장면 관리 ──────────────────────────── */
 const scene = document.getElementById('scene');
 const DRAW = { garden:drawGarden, seodang:drawSeodang, inside:drawInside, market:drawMarket };
-const FLOOR = { garden:[330,592,24,376], seodang:[440,586,24,376], inside:[470,586,24,376], market:[470,586,24,376] };
+const FLOOR = { garden:[330,592,24,376], seodang:[280,584,32,368], inside:[470,586,24,376], market:[470,586,24,376] };
 const NAVKEY = { garden:'garden', seodang:'seodang', inside:'seodang', market:'market' };
 let where='garden', walking=false, placingId=null;
 
