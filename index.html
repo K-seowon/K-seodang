@@ -958,12 +958,6 @@ function avatarSVG(x,y){
 }
 
 /* ── 공통 조각 ──────────────────────────── */
-function sky(){return `<rect width="400" height="600" fill="#FDF3E9"/>
-  <circle cx="332" cy="48" r="26" fill="#FFF3D8"/>
-  <ellipse cx="80" cy="54" rx="58" ry="17" fill="#FFFAF3"/>
-  <ellipse cx="222" cy="36" rx="44" ry="13" fill="#FFFAF3"/>`;}
-function hills(){return `<path d="M0 196 L94 152 L166 190 L248 156 L346 194 L400 174 V262 H0Z" fill="#AEBCA4"/>
-  <path d="M0 216 L114 176 L208 214 L298 180 L400 212 V262 H0Z" fill="#8FA88A"/>`;}
 const FALL = {
   petal:{ cols:['#F0A8BE','#FBD8E2'], rmin:4,   rmax:6.5, n:14, dur:[7,13] },
   leaf :{ cols:['#D9541F','#F0873A','#F7BE4C'], rmin:4, rmax:6, n:13, dur:[6,12] },
@@ -990,47 +984,22 @@ function signboard(x,y,w,label){
 }
 
 /* ── 장면 1 · 나의 정원 (빈 대지) ────────── */
+/* 위쪽 3분의 1 안에만 마을 그림을 깔고(원본 비율 그대로, 폭 맞춤),
+   그 아래 마당은 지금처럼 코드로 이어 그린다. 저잣거리는 그림
+   왼쪽, 서당은 그림 오른쪽에 있어 누르는 자리도 그리 맞춘다. */
 function village(){
-  // 대지를 가로지르는 길. 왼쪽 끝에 저잣거리, 오른쪽 끝에 서당
+  const IMG_H = 400*724/2172; // 원본 비율(2172:724)대로 폭 400에 맞춘 높이 ≈133
   return `<g>
-    <path d="M0 250 q100 -22 200 -16 q100 6 200 -12 L400 250 q-100 18 -200 12 q-100 -6 -200 16 Z" fill="#D9C7A6"/>
-    <g fill="#C7B392"><ellipse cx="46" cy="258" rx="8" ry="3"/><ellipse cx="130" cy="245" rx="8" ry="3"/>
-      <ellipse cx="196" cy="240" rx="8" ry="3"/><ellipse cx="330" cy="232" rx="8" ry="3"/></g>
-
-    <g aria-label="구름다리와 샘">
-      <path d="M262 234 C265 254, 261 268, 258 286 L242 286 C247 268, 251 254, 252 234 Z" fill="#7FB2AC"/>
-      <path d="M260 238 C262 256, 259 268, 257 284 L249 284 C252 268, 254 256, 254 238 Z" fill="#B6DED6"/>
-      <path d="M248 264 q8 -3 12 1" stroke="#E2F2EE" stroke-width="1.8" fill="none" stroke-linecap="round"/>
-      <path fill="#B5BDC7" fill-rule="evenodd"
-        d="M222 268 h70 v-22 q-35 -22 -70 -2 Z
-           M244 268 q0 -20 13 -20 q13 0 13 20 Z"/>
-      <path d="M218 248 q39 -25 78 -5 v9 q-39 -20 -78 5 Z" fill="#CFD6DE"/>
-      <path d="M218 244 q39 -25 78 -5" stroke="#8A9099" stroke-width="2.2" fill="none" stroke-linecap="round"/>
-      <g stroke="#8A9099" stroke-width="1.8">
-        <path d="M232 246 v6"/><path d="M248 238 v6"/><path d="M264 237 v6"/><path d="M280 241 v6"/></g>
-    </g>
-    <path d="M188 262 L176 322 L228 322 L214 258 Z" fill="#D9C7A6"/>
+    <image href="bg/bg-village.png" xlink:href="bg/bg-village.png" x="0" y="0" width="400" height="${IMG_H.toFixed(2)}" preserveAspectRatio="xMidYMid meet"/>
+    <path d="M0 ${IMG_H.toFixed(0)} Q100 ${(IMG_H+12).toFixed(0)} 200 ${(IMG_H+5).toFixed(0)} Q300 ${(IMG_H-2).toFixed(0)} 400 ${(IMG_H+7).toFixed(0)} V600 H0 Z" fill="#D9C7A6"/>
 
     <g class="tapzone" data-act="go-market" data-ax="150" data-ay="352" role="button" aria-label="저잣거리로 가기">
-      <rect x="0" y="176" width="128" height="86" fill="transparent"/>
-      <rect x="14" y="228" width="42" height="26" fill="#C9B79A"/>
-      <rect x="62" y="230" width="42" height="24" fill="#C9B79A"/>
-      <path d="M8 226 h54 l-7 -18 h-40 Z" fill="#E48AA6"/>
-      <path d="M58 228 h52 l-7 -18 h-38 Z" fill="#C9A24A"/>
-      <rect x="20" y="196" width="70" height="20" rx="5" fill="#3D3A36"/>
-      <text x="55" y="211" text-anchor="middle" font-family="Gaegu, sans-serif" font-size="15" font-weight="700" fill="#F2E4CB">운교장터</text>
+      <rect x="0" y="26" width="172" height="96" fill="transparent"/>
     </g>
 
     <g class="tapzone" data-act="go-seodang" data-ax="250" data-ay="352" role="button" aria-label="서당으로 가기">
-      <rect x="272" y="160" width="128" height="94" fill="transparent"/>
-      <rect x="296" y="216" width="86" height="36" fill="#EADCC2"/>
-      <g fill="#C9A87C" stroke="#8A6A4E" stroke-width="1.5"><rect x="306" y="224" width="22" height="26"/><rect x="336" y="224" width="22" height="26"/></g>
-      <rect x="292" y="212" width="94" height="8" rx="3" fill="#B08F6A"/>
-      <path d="M280 212 q59 -30 118 0 Z" fill="#6F6258"/>
-      <path d="M276 214 q63 -38 126 0 q-18 6 -63 6 q-45 0 -63 -6 Z" fill="#8B7D71"/>
-      <rect x="308" y="186" width="62" height="20" rx="5" fill="#3D3A36"/>
-      <text x="339" y="201" text-anchor="middle" font-family="Gaegu, sans-serif" font-size="13" font-weight="700" fill="#F2E4CB">운교서당</text>
-      ${P.gu<GUJEOL.length?`<g class="badge-bob"><circle cx="382" cy="186" r="9" fill="#D9463F" stroke="#3D3A36" stroke-width="2.5"/></g>`:''}
+      <rect x="282" y="22" width="118" height="100" fill="transparent"/>
+      ${P.gu<GUJEOL.length?`<g class="badge-bob"><circle cx="388" cy="38" r="9" fill="#D9463F" stroke="#3D3A36" stroke-width="2.5"/></g>`:''}
     </g>
   </g>`;
 }
@@ -1055,7 +1024,7 @@ function drawGarden(){
   const pool = mid.map(o=>({y:spotOf(o.iid)[1], html:place(o)}))
     .concat([{y:p.y, html:avatarSVG(p.x,p.y)}])
     .sort((a,b)=>a.y-b.y);
-  scene.innerHTML = sky() + hills() + village() + emptyLand()
+  scene.innerHTML = village() + emptyLand()
     + ground.map(place).join('')
     + pool.map(o=>o.html).join('')
     + air.map(o=> o.it.fall ? fallSVG(o.it.fall) : place(o)).join('');
