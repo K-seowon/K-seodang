@@ -26,8 +26,11 @@ body{font-family:'Gaegu',system-ui,sans-serif;color:var(--ink);-webkit-font-smoo
   display:flex;align-items:center;gap:6px;font-size:17px;line-height:1.1;box-shadow:0 2px 0 rgba(61,58,54,.25)}
 .plate .num{font-weight:700;font-size:19px}
 #who{flex-direction:column;align-items:flex-start;gap:1px;padding:5px 12px}
+#who .nameRow{display:flex;align-items:center;gap:6px}
 #who .name{font-weight:700;font-size:18px}
 #who .rank{font-size:15px;color:#7A6E5E}
+.grade{font-size:11px;font-weight:700;padding:1px 8px;border-radius:9px;border:2px solid var(--ink);color:#fff}
+#rankDemoBtn{pointer-events:auto;cursor:pointer;margin-left:auto;color:var(--ink)}
 .bar{width:86px;height:8px;background:var(--hanji-2);border:2px solid var(--ink);border-radius:6px;overflow:hidden;margin-top:2px}
 .bar>i{display:block;height:100%;background:var(--maehwa);width:0%}
 .pip{width:22px;height:22px;flex:0 0 auto;display:block}
@@ -189,12 +192,17 @@ body{font-family:'Gaegu',system-ui,sans-serif;color:var(--ink);-webkit-font-smoo
 <div id="app">
   <div id="hud">
     <div class="plate" id="who">
-      <span class="name">푸믹</span>
+      <span class="nameRow"><span class="name">푸믹</span><span class="grade" id="gradeTxt"></span></span>
       <span class="rank" id="rankTxt"></span>
       <span class="bar"><i id="progBar"></i></span>
     </div>
     <div class="plate"><svg class="pip" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9.5" fill="#E8A33C" stroke="#3D3A36" stroke-width="2.4"/><rect x="8.6" y="8.6" width="6.8" height="6.8" rx="1.2" fill="#FBF3E4" stroke="#3D3A36" stroke-width="2"/></svg><span class="num" id="coinTxt">0</span></div>
     <div class="plate" id="gemPlate" role="button" aria-label="엽전 바꾸기"><svg class="pip" viewBox="0 0 24 24" aria-hidden="true"><circle cx="17.5" cy="15" r="6" fill="#B5731F" stroke="#3D3A36" stroke-width="1.8"/><circle cx="15" cy="15" r="6.2" fill="#C9832A" stroke="#3D3A36" stroke-width="1.8"/><circle cx="12.5" cy="15" r="6.4" fill="#D9922F" stroke="#3D3A36" stroke-width="1.8"/><path d="M9 11.5 C9 5, 17 5, 16.5 10" fill="none" stroke="#8A6A4E" stroke-width="2.2" stroke-linecap="round"/><circle cx="9" cy="15" r="7" fill="#E8A33C" stroke="#3D3A36" stroke-width="2.2"/><rect x="6.7" y="12.7" width="4.6" height="4.6" rx="1" fill="#FBF3E4" stroke="#3D3A36" stroke-width="1.8"/></svg><span class="num" id="gemTxt">0</span></div>
+    <button class="plate" id="rankDemoBtn" aria-label="급수 시험(발표용)">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:18px;height:18px">
+        <path d="M9 3h6M10 3v6l-5 9a2 2 0 0 0 2 3h10a2 2 0 0 0 2-3l-5-9V3"/><path d="M8.5 15h7"/>
+      </svg>
+    </button>
   </div>
 
   <div id="stage">
@@ -631,12 +639,14 @@ const EMPTY_PROGRESS = {
 
 /* 글자 하나를 채점한 뒤 기록을 고쳐 준다 */
 function markChar(prog, ch, correct, now) {
+  const isNew = !(ch in prog.char);
   const r = prog.char[ch] || { n: 0, ok: 0, streak: 0, due: 0 };
   r.n++;
   if (correct) { r.ok++; r.streak++; }
   else { r.streak = 0; }
   r.due = correct ? nextDue(r.streak, now) : (now || Date.now()) + 864e5;
   prog.char[ch] = r;
+  if (isNew) checkRankUp();
   return r;
 }
 
@@ -896,6 +906,69 @@ if(S.prog.ci===undefined) S.prog.ci=0;
 const P = S.prog;
 const metCount = ()=>Object.keys(P.char).length;
 
+/* ── 학동의 급 ───────────────────────────
+   정원이 자라는 모습에 빗댄 이름. 익힌 글자 수(화면에 보이는 수 =
+   실제 + 발표용 보정)로 매긴다. 급이 오르면 축하와 함께 엽전을 준다.
+   ------------------------------------- */
+const RANKS = [
+  {name:'씨앗', min:0,   color:'#8B6A4E', bonus:0},
+  {name:'새싹', min:50,  color:'#6FAE55', bonus:300},
+  {name:'떡잎', min:150, color:'#3F9142', bonus:500},
+  {name:'연두', min:350, color:'#9CB93C', bonus:800},
+  {name:'초록', min:600, color:'#2A6B33', bonus:1200},
+  {name:'열매', min:850, color:'#C0392B', bonus:2000}
+];
+function effCount(){ return metCount() + (S.demoBoost||0); }
+function rankOf(n){ let idx=0; for(let i=0;i<RANKS.length;i++) if(n>=RANKS[i].min) idx=i; return idx; }
+function rankInfo(n){
+  const idx=rankOf(n), cur=RANKS[idx], next=RANKS[idx+1];
+  return { idx, name:cur.name, color:cur.color, next: next?next.name:null, toNext: next?next.min-n:0 };
+}
+if(S.demoBoost===undefined) S.demoBoost=0;
+if(P.rankSeen===undefined) P.rankSeen=rankOf(metCount());
+let pendingRankUp=null;
+function checkRankUp(){
+  const idx=rankOf(metCount());
+  if(idx>P.rankSeen){
+    let bonus=0;
+    for(let i=P.rankSeen+1;i<=idx;i++) bonus+=RANKS[i].bonus;
+    P.rankSeen=idx;
+    if(bonus) S.coin+=bonus;
+    save(); syncHUD();
+    // 문제 풀이 화면을 덮어쓰지 않도록, 지금 펼친 창을 닫을 때 보여준다
+    pendingRankUp={rank:RANKS[idx], bonus};
+  }
+}
+function showRankUp(rank, bonus){
+  openSheetRaw('급이 올랐습니다!');
+  sheetBody.innerHTML = `
+    <div class="hanja-card" style="padding:30px 16px">
+      <div class="hint" style="margin-top:0">학동의 급이 올랐습니다</div>
+      <div style="display:inline-block;padding:9px 26px;border-radius:16px;border:3px solid #3D3A36;
+        background:${rank.color};color:#fff;font-size:30px;font-weight:700;margin:10px 0 12px">${rank.name}</div>
+      ${bonus?`<div class="hint">축하 엽전 <b>${bonus.toLocaleString()}</b>냥을 받았습니다</div>`:''}
+    </div>`;
+}
+/* 발표용: 실제 익힌 글자 수는 그대로 두고 화면에 보이는 급만 잠깐 올린다 */
+function openRankDemo(){ openSheetRaw('급수 시험 (발표용)'); renderRankDemo(); }
+function renderRankDemo(){
+  sheetBody.innerHTML = `
+    <p class="note">실제로 익힌 글자 수는 바뀌지 않습니다. 화면에 보이는 급만 잠깐 올려서 확인합니다.</p>
+    <p class="note" style="font-weight:700">지금 표시되는 글자 수: ${effCount()}자 (실제 ${metCount()}자 + 시험 ${S.demoBoost}자)</p>
+    <div class="choices">
+      ${RANKS.map((r,i)=>`<button class="choice" data-rank="${i}">${r.name}급으로 (${r.min}자)</button>`).join('')}
+      <button class="choice" data-rank="-1">시험 끄기(실제 값으로)</button>
+    </div>`;
+  sheetBody.querySelectorAll('.choice').forEach(b=>b.addEventListener('click',()=>{
+    const i=+b.dataset.rank;
+    if(i<0){ S.demoBoost=0; save(); syncHUD(); renderRankDemo(); return; }
+    S.demoBoost=Math.max(0, RANKS[i].min-metCount());
+    save(); syncHUD();
+    showRankUp(RANKS[i], RANKS[i].bonus);
+    if(RANKS[i].bonus){ S.coin+=RANKS[i].bonus; save(); syncHUD(); }
+  }));
+}
+
 /* ── 아바타 ─────────────────────────────── */
 const A = { git:'#FFFFFF', beoseon:'#F7F1E4', hair:'#2B2620', skin:'#F7DFC8' };
 
@@ -1104,6 +1177,26 @@ function plumStagesPreview(){
   }).join('');
 }
 
+/* 이름 팻말 — 돈으로 살 수 없고 학습으로만(급이 오르면) 바뀐다.
+   나중에 이웃이 왔을 때 이 팻말로 급을 알아볼 수 있게 된다. */
+function nameplateSVG(){
+  const rk = rankInfo(effCount()), w=78;
+  return `
+    <rect x="${w/2-13}" y="40" width="5" height="18" rx="1" fill="#8A6A4E" stroke="${LINE}" stroke-width="1.6"/>
+    <rect x="${w/2+8}" y="40" width="5" height="18" rx="1" fill="#8A6A4E" stroke="${LINE}" stroke-width="1.6"/>
+    <rect x="1" y="0" width="${w-2}" height="40" rx="5" fill="#C9A87C" stroke="${LINE}" stroke-width="2.4" stroke-linejoin="round"/>
+    <text x="${w/2}" y="15" text-anchor="middle" font-family="Gaegu, sans-serif" font-size="12" font-weight="700" fill="#3D3A36">푸믹</text>
+    <rect x="9" y="20" width="${w-18}" height="15" rx="7" fill="${rk.color}" stroke="${LINE}" stroke-width="1.6"/>
+    <text x="${w/2}" y="31" text-anchor="middle" font-family="Gaegu, sans-serif" font-size="11" font-weight="700" fill="#fff">${rk.name}</text>`;
+}
+function nameplateScene(){
+  const w=78,h=58, cx=335, baseY=555;
+  return `<g transform="translate(${cx},${baseY}) scale(${SIZE_SCALE}) translate(${-w/2},${-h})">
+    <ellipse cx="${w/2}" cy="${h}" rx="${(w*0.3).toFixed(1)}" ry="4" fill="rgba(43,36,28,.22)"/>
+    ${nameplateSVG()}
+  </g>`;
+}
+
 /* 정원에 놓인 것 하나하나를 「자리표(iid)」로 구별한다.
    자리표는 "물건종류__번호" 모양이고, 옛 저장 자료처럼 번호가 없으면
    물건종류 그 자체를 자리표로 본다 (깔개·길 등 한 개만 놓는 것들). */
@@ -1123,6 +1216,7 @@ function drawGarden(){
     + ground.map(place).join('')
     + pool.map(o=>o.html).join('')
     + air.map(o=> o.it.fall ? fallSVG(o.it.fall) : place(o)).join('')
+    + nameplateScene()
     + plumStagesPreview(); // 임시 확인용 — 크기 확인 후 이 줄과 위 함수들을 지운다
 }
 function spotOf(iid){ return S.spot[iid] || ITEMS[typeOf(iid)].at; }
@@ -1413,9 +1507,16 @@ const overlay=document.getElementById('overlay');
 const sheetTitle=document.getElementById('sheetTitle');
 const sheetBody=document.getElementById('sheetBody');
 function openSheetRaw(t){ sheetTitle.textContent=t; overlay.classList.add('on'); }
-function closeSheet(){ overlay.classList.remove('on'); drawScene(); }
+function closeSheet(){
+  overlay.classList.remove('on'); drawScene();
+  if(pendingRankUp){
+    const r=pendingRankUp; pendingRankUp=null;
+    setTimeout(()=>showRankUp(r.rank, r.bonus), 260);
+  }
+}
 document.getElementById('closeSheet').addEventListener('click', closeSheet);
 document.getElementById('gemPlate').addEventListener('click', openExchange);
+document.getElementById('rankDemoBtn').addEventListener('click', openRankDemo);
 
 document.querySelectorAll('#nav button').forEach(b=>{
   b.addEventListener('click',()=>{
@@ -1959,7 +2060,11 @@ function renderBag(){
 function syncHUD(){
   document.getElementById('coinTxt').textContent=S.coin.toLocaleString();
   document.getElementById('gemTxt').textContent=S.gem.toLocaleString();
-  document.getElementById('rankTxt').textContent=`${P.gu}마디 · ${metCount()}자 익힘`;
+  const rk = rankInfo(effCount());
+  const gt = document.getElementById('gradeTxt');
+  gt.textContent = rk.name; gt.style.background = rk.color;
+  const nextTxt = rk.next ? `${rk.next}까지 ${rk.toNext}자` : '가장 높은 급';
+  document.getElementById('rankTxt').textContent=`${P.gu}마디 · ${metCount()}자 익힘 · ${nextTxt}`;
   document.getElementById('progBar').style.width=Math.min(100,(P.gu/GUJEOL.length)*100)+'%';
   document.getElementById('navDot').style.display=(P.gu<GUJEOL.length||dueChars(P).length)?'block':'none';
 }
