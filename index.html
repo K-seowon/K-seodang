@@ -67,16 +67,19 @@ body{font-family:'Gaegu',system-ui,sans-serif;color:var(--ink);-webkit-font-smoo
 .badge-bob{animation:bob 1.6s ease-in-out infinite}
 @keyframes fall{0%{transform:translate(0,-30px) rotate(0)}10%{opacity:.9}100%{transform:translate(var(--dx),660px) rotate(340deg);opacity:0}}
 .petal{opacity:0;animation:fall linear infinite}
-@keyframes kettleTilt{0%{transform:rotate(6deg);opacity:0}15%{opacity:1}30%{transform:rotate(-34deg)}
-  75%{transform:rotate(-34deg);opacity:1}100%{transform:rotate(-10deg);opacity:0}}
-.can{opacity:0;animation:kettleTilt 1s ease-in-out forwards;transform-origin:0 0}
+@keyframes kettleFade{0%{opacity:0}15%{opacity:1}75%{opacity:1}100%{opacity:0}}
+.can{opacity:0;animation:kettleFade 1s ease-in-out forwards}
 @keyframes waterdrop2{0%{opacity:0;transform:translate(0,0) scale(1)}8%{opacity:1}85%{opacity:.9}
   100%{opacity:0;transform:translate(var(--ddx),var(--ddy)) scale(.25)}}
 .drop2{opacity:0;animation:waterdrop2 .45s ease-in forwards}
 @keyframes plantShake{0%,100%{transform:translateY(0)}20%{transform:translateY(-4px)}40%{transform:translateY(2px)}
   60%{transform:translateY(-3px)}80%{transform:translateY(1px)}}
 .plant-shake{animation:plantShake .5s ease-in-out;animation-delay:.35s}
-@media (prefers-reduced-motion:reduce){.petal,.badge-bob,.can,.drop2,.plant-shake{animation:none}}
+@media (prefers-reduced-motion:reduce){
+  .petal,.badge-bob{animation:none}
+  .can,.drop2{animation:none;opacity:1}
+  .plant-shake{animation:none}
+}
 
 #nav{position:relative;z-index:20;display:flex;background:var(--hanji);
   border-top:3px solid var(--ink);padding:6px 4px calc(env(safe-area-inset-bottom) + 6px)}
@@ -1229,16 +1232,20 @@ function place(o){
 /* 물뿌리개로 물을 줄 때: 물뿌리개가 기울어지고, 주둥이에서 물방울이
    떨어져 화초에 닿는다(약 1초). 화초 쪽 흔들림은 .plant-shake가 맡는다. */
 function waterCanSVG(cx,cy){
-  return `<g transform="translate(${cx},${cy})"><g class="can">
+  // 기울인 채로(-30도) 고정해 그리고, 움직임은 나타났다 사라지는 것뿐이라
+  // 회전 애니메이션에 기대지 않는다(그 편이 더 잘 나온다)
+  return `<g class="can" transform="translate(${cx},${cy}) rotate(-30)">
     <path d="M-10 -3 h16 a5 5 0 0 1 0 10 h-11 a5 5 0 0 1 -5 -5 Z" fill="#C9A24A" stroke="${LINE}" stroke-width="2.4" stroke-linejoin="round"/>
     <path d="M-3 -3 q1 -6 6 -6 q5 0 6 6" fill="none" stroke="${LINE}" stroke-width="2.2" stroke-linecap="round"/>
     <path d="M6 1 L16 -6" stroke="#7A5F45" stroke-width="3" stroke-linecap="round"/>
     <circle cx="17.5" cy="-7.2" r="2.2" fill="#8B6A4E" stroke="${LINE}" stroke-width="1.6"/>
-  </g></g>`;
+  </g>`;
 }
 function waterFxSVG(w,h){
   const cx=w*0.68, cy=-6;
-  const sx=(cx+9).toFixed(1), sy=(cy-16).toFixed(1);
+  // 위 -30도로 기울인 물뿌리개의 주둥이 끝(원래 17.5,-7.2)이 실제로
+  // 옮겨가는 자리를 미리 계산해서, 물방울이 거기서부터 떨어지게 한다
+  const sx=(cx+11.6).toFixed(1), sy=(cy-15.0).toFixed(1);
   const ex=(w*0.46).toFixed(1), ey=(h*0.16).toFixed(1);
   const ddx=(ex-sx).toFixed(1), ddy=(ey-sy).toFixed(1);
   const drop=(delay,jx)=>`<ellipse class="drop2" cx="${(+sx+jx).toFixed(1)}" cy="${sy}" rx="3" ry="4.2"
