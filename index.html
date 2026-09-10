@@ -871,7 +871,10 @@ function itemMedia(it){
     </g>`;
 }
 
-const SAMPLE_PLACED = ['mhs_04','mhs_12','mhs_23','mhs_07','mhs_08','mhs_10','mhs_21','mhs_15','spr_08'];
+/* 「매화 핀 언덕」 사철 샘플은 걷어내고, 지금 배경 그림과 어울리는
+   작은 것 두 가지만 남긴다 — 걷는 자리와 심을 자리를 넉넉히 비움 */
+const SAMPLE_PLACED = ['mhs_15','mhs_16'];
+const SAMPLE_SPOT = { mhs_15:[120,480], mhs_16:[280,320] };
 
 /* ── 옷 ─────────────────────────────────
    slot   top(저고리) / bottom(치마·바지) / outer(두루마기) / shoes(신)
@@ -914,7 +917,7 @@ const S = load() || {
   prog: { gu:0, stage:0, ci:0, done:[], char:{} },
   owned: Object.fromEntries(SAMPLE_PLACED.map(id=>[id,1])),
   placed: SAMPLE_PLACED.slice(),
-  spot: {},
+  spot: {...SAMPLE_SPOT},
   seq: 0,
   locked: false,
   closet: START_WEAR.slice(),
@@ -931,6 +934,7 @@ if(!S.owned) S.owned={};
 if(!S.placed) S.placed=[];
 if(!S.seq) S.seq=0;
 if(S.growWater===undefined) S.growWater=0;
+if(!S.growth) S.growth={};
 if(!S.spot) S.spot={};
 if(!S.pos.inside) S.pos.inside={x:200,y:520};
 if(!S.closet) S.closet=START_WEAR.slice();
@@ -1328,18 +1332,32 @@ function spotOf(iid){ return S.spot[iid] || ITEMS[typeOf(iid)].at; }
 /* 물건은 바닥 기준점(spot)을 고정한 채 그 자리에서 SIZE_SCALE만큼
    커지거나 작아진다. ground(깔개·길)만은 화면을 꽉 채워야 하므로
    배율에서 뺀다. */
+/* 씨앗·묘목은 물을 줄수록 자라서 그림과 크기가 바뀐다. 아직 국화
+   (씨앗 대표)와 매화나무(묘목 대표)만 제 그림이 있어서, 나머지
+   다섯 씨앗은 국화 단계를, 나머지 밤/감나무 묘목은 매화나무 단계를
+   임시로 함께 쓴다(나중에 각자 그림이 생기면 이 표만 바꾸면 됨). */
+function growStageIdx(iid){ return Math.min(4, Math.floor((S.growth[iid]||0)/3)); }
+function growVisual(iid, growType){
+  const table = growType==='seed' ? GUK_STAGES : PLUM_STAGES;
+  const s = table[growStageIdx(iid)];
+  return { box:[s.w,s.h], svg:s.draw(), name:s.name };
+}
 function placedTransform(iid){
-  const it=ITEMS[typeOf(iid)], [sx,sy]=spotOf(iid), [w,h]=it.box;
+  const it=ITEMS[typeOf(iid)], [sx,sy]=spotOf(iid);
+  const [w,h] = it.grow ? growVisual(iid, it.grow).box : it.box;
   const ax = it.anchor==='bc' ? w/2 : 0;
   const s = it.slot==='ground' ? 1 : SIZE_SCALE;
   return `translate(${sx},${sy}) scale(${s}) translate(${-ax},${-h})`;
 }
 function place(o){
+  const gv = o.it.grow ? growVisual(o.iid, o.it.grow) : null;
+  const media = gv ? gv.svg : itemMedia(o.it);
   if(o.iid===waterFX){
+    const [w,h] = gv ? gv.box : o.it.box;
     return `<g data-iid="${o.iid}" data-id="${o.id}" transform="${placedTransform(o.iid)}">
-      <g class="plant-shake">${itemMedia(o.it)}</g>${waterFxSVG(o.it.box[0], o.it.box[1])}</g>`;
+      <g class="plant-shake">${media}</g>${waterFxSVG(w,h)}</g>`;
   }
-  return `<g data-iid="${o.iid}" data-id="${o.id}" transform="${placedTransform(o.iid)}">${itemMedia(o.it)}</g>`;
+  return `<g data-iid="${o.iid}" data-id="${o.id}" transform="${placedTransform(o.iid)}">${media}</g>`;
 }
 /* 물조리개 — 둥근 몸통(놋쇠빛), 위로 굽은 손잡이, 앞으로 길게 뻗은
    주둥이, 끝에 구멍 뚫린 둥근 물뿌리개 머리. 붓는 자세 그대로를
@@ -1534,7 +1552,7 @@ scene.addEventListener('pointerup', e=>{
   const p=svgPoint(e);
   if(watering && where==='garden'){
     const iid=P.item&&P.item.dataset.iid, it=iid&&ITEMS[typeOf(iid)];
-    if(it && it.plant) waterPlant(iid, it.name);
+    if(it && (it.plant || it.grow)) waterPlant(iid, it.name);
     else toast('화초나 나무를 눌러 물을 주세요');
     return;
   }
@@ -1586,17 +1604,34 @@ document.getElementById('waterBtn').addEventListener('click', ()=>{
   toast(watering ? '화초나 나무를 눌러 물을 주세요' : '물뿌리개를 거두었습니다');
 });
 const WATER_MS = 3200; // 물조리개가 기울었다 돌아오기까지 걸리는 시간
+const GROW_BONUS = { seed:200, sapling:400 }; // 씨앗이 꽃을 피우면/묘목이 열매를 맺으면 주는 엽전
 function waterPlant(iid, name){
   if(!(S.growWater>0)) return toast('성장수가 없습니다. 화수전에서 사거나 익혀서 모으세요.');
   S.growWater--;
   waterFX=iid; drawScene();
   toast(`${name}에 물을 주었습니다 · 성장수 ${S.growWater}방울 남음`);
   if(!S.growth) S.growth={};
-  S.growth[iid]=(S.growth[iid]||0)+1; save(); syncHUD();
-  const grew = S.growth[iid]%3===0;
+  const oldCnt=S.growth[iid]||0, newCnt=oldCnt+1;
+  S.growth[iid]=newCnt;
+  const it=ITEMS[typeOf(iid)];
+  let laterMsg='';
+  if(it.grow){
+    const oldStage=Math.min(4,Math.floor(oldCnt/3)), newStage=Math.min(4,Math.floor(newCnt/3));
+    if(newStage>oldStage){
+      const table = it.grow==='seed' ? GUK_STAGES : PLUM_STAGES;
+      laterMsg = `${name} — ${table[newStage].name} 단계가 되었습니다`;
+      if(newStage===4){
+        const bonus=GROW_BONUS[it.grow];
+        S.coin+=bonus; laterMsg += ` · 엽전 ${bonus}냥`;
+      }
+    }
+  } else if(newCnt%3===0){
+    laterMsg='무럭무럭 자랐습니다!'; // 기존 장식용 나무·화초는 그림은 안 바뀌고 알림만
+  }
+  save(); syncHUD();
   setTimeout(()=>{
     if(waterFX===iid){ waterFX=null; drawScene(); }
-    if(grew) toast('무럭무럭 자랐습니다!');
+    if(laterMsg) toast(laterMsg);
   }, WATER_MS);
 }
 
@@ -2224,8 +2259,8 @@ function renderBag(){
         return `<p class="note" style="margin:14px 2px 8px;font-weight:700;color:#5C5346">${label} · ${ids.length}종</p>
           <div class="grid">${ids.map(id=>cellHTML(id,'bag')).join('')}</div>`;
       }).join('') +
-      `<button class="subbtn" id="sampleBtn">「매화 핀 언덕」 샘플 배치로 되돌리기</button>
-       <p class="note">봄 물건을 샘플 자리에 다시 놓습니다. 옮겨둔 자리는 지워집니다.</p>`;
+      `<button class="subbtn" id="sampleBtn">처음 배치로 되돌리기</button>
+       <p class="note">나무 평상과 삿갓 장독만 처음 자리에 다시 놓습니다. 옮겨둔 자리는 지워집니다.</p>`;
     }
     sheetBody.innerHTML = tabs +
       `<p class="note" style="margin:0 2px 4px">${ownedIds.length}종 보유 · ${S.placed.length}개 정원에 놓임</p>` + body;
@@ -2251,7 +2286,7 @@ function renderBag(){
   });
   const sb=document.getElementById('sampleBtn');
   if(sb) sb.addEventListener('click',()=>{
-    S.spot={};
+    S.spot={...SAMPLE_SPOT};
     S.placed=SAMPLE_PLACED.filter(id=>ownedCount(id)>0);
     save(); renderBag(); toast('샘플 배치로 되돌렸습니다');
   });
