@@ -192,6 +192,21 @@ body{font-family:'Gaegu',system-ui,sans-serif;color:var(--ink);-webkit-font-smoo
   background:var(--ink);color:var(--hanji);padding:9px 18px;border-radius:20px;font-size:18px;
   opacity:0;transition:opacity .2s,transform .2s;pointer-events:none;white-space:nowrap}
 #toast.on{opacity:1;transform:translateX(-50%) translateY(0)}
+
+#visitBar{position:absolute;left:10px;right:10px;top:calc(env(safe-area-inset-top) + 74px);z-index:28;
+  display:none;align-items:center;gap:8px;background:var(--hanji);border:2.5px solid var(--ink);
+  border-radius:14px;padding:6px 8px 6px 14px;box-shadow:0 2px 0 rgba(61,58,54,.25)}
+#visitBar.on{display:flex}
+#visitBar #visitName{flex:1;font-size:17px;font-weight:700}
+#visitBar button{border:2.5px solid var(--ink);border-radius:10px;background:var(--hanji-2);
+  font-family:inherit;font-size:15px;padding:6px 12px;cursor:pointer}
+
+.neighbor-row{width:100%;text-align:left;display:flex;align-items:center;gap:10px;
+  border:2.5px solid var(--ink);border-radius:14px;background:var(--hanji-2);
+  padding:10px 12px;margin-bottom:10px;font-family:inherit;cursor:pointer}
+.neighbor-row:last-child{margin-bottom:0}
+.neighbor-row .nname{font-size:19px;font-weight:700;flex:1}
+.neighbor-row .nchars{font-size:15px;color:#7A6E5E}
 </style>
 </head>
 <body>
@@ -230,6 +245,7 @@ body{font-family:'Gaegu',system-ui,sans-serif;color:var(--ink);-webkit-font-smoo
       <span id="waterTxt">물주기</span>
     </button>
     <div id="placeBar"><span id="placeMsg"></span><button id="placeCancel">그만두기</button></div>
+    <div id="visitBar"><span id="visitName"></span><button id="visitBackBtn">내 정원으로</button></div>
   </div>
 
   <nav id="nav">
@@ -936,6 +952,7 @@ if(!S.seq) S.seq=0;
 if(S.growWater===undefined) S.growWater=0;
 if(!S.growth) S.growth={};
 if(!S.spot) S.spot={};
+if(!S.neighborWater) S.neighborWater={};
 if(!S.pos.inside) S.pos.inside={x:200,y:520};
 if(!S.closet) S.closet=START_WEAR.slice();
 if(!S.wear) S.wear={ top:'jg_dahong', bottom:'ch_namsaek', outer:null, shoes:'sh_gomu' };
@@ -1043,17 +1060,18 @@ function outerSVG(out){
     <path d="M0 -9 v-30" stroke="rgba(0,0,0,.1)" stroke-width="1.4"/>`;
 }
 
-function avatarSVG(x,y){
-  const w   = S.wear || {};
+function avatarSVG(x,y,wearOverride,withId){
+  if(withId===undefined) withId=true; // 정원에 잠깐 세워두는 이웃 학동은 false로 불러, hakdong과 자리표가 겹치지 않게 한다
+  const w   = wearOverride || S.wear || {};
   const top = WEAR.top[w.top]       || WEAR.top.jg_dahong;
   const bot = WEAR.bottom[w.bottom] || WEAR.bottom.ch_namsaek;
   const out = w.outer ? WEAR.outer[w.outer] : null;
   const sh  = WEAR.shoes[w.shoes]   || WEAR.shoes.sh_gomu;
   const legC = bot.kind==='baji' ? bot.c : '#F1E8D8';
   const armC = out ? out.c : top.c;
-  return `<g id="hakdong" transform="translate(${x},${y}) scale(${SIZE_SCALE})">
+  return `<g${withId?' id="hakdong"':''} transform="translate(${x},${y}) scale(${SIZE_SCALE})">
     <ellipse cx="0" cy="2" rx="17" ry="5" fill="rgba(61,58,54,.16)"/>
-    <g id="hakLegs">
+    <g${withId?' id="hakLegs"':''}>
       <path d="M-9 -14 v10" stroke="${legC}" stroke-width="8" stroke-linecap="round"/>
       <path d="M9 -14 v10" stroke="${legC}" stroke-width="8" stroke-linecap="round"/>
       ${shoeSVG(-9, sh)}
@@ -1099,6 +1117,45 @@ function fallSVG(kind){
 function signboard(x,y,w,label){
   return `<rect x="${x}" y="${y}" width="${w}" height="26" rx="6" fill="#C9A87C" stroke="#3D3A36" stroke-width="2.5"/>
     <text x="${x+w/2}" y="${y+19}" text-anchor="middle" font-family="Gaegu, sans-serif" font-size="17" font-weight="700" fill="#3D3A36">${label}</text>`;
+}
+
+/* ── 이웃 ─────────────────────────────────
+   지금은 서버가 없어 이 안에 미리 적어 둔 넷을 보여준다.
+   나중에 진짜 이웃을 서버에서 받아오게 되면 이 함수 하나만
+   (예: fetch 호출로) 바꾸면 된다. 나머지 화면 쪽 코드는
+   fetchNeighbors()가 돌려주는 모양만 그대로 유지하면 손댈 일이 없다.
+   ------------------------------------------------------- */
+const NEIGHBORS = [
+  { id:'dallae',  name:'달래', rankIdx:1, chars:82,  season:'spring',
+    wear:{ top:'jg_baek',   bottom:'ch_bunhong', outer:null,      shoes:'sh_jip'   },
+    placed:['mhs_07','mhs_09','mhs_10','mhs_11','spr_08'] },
+  { id:'doryeon', name:'도련', rankIdx:2, chars:210, season:'summer',
+    wear:{ top:'jg_yeondu', bottom:'ba_jaet',    outer:null,      shoes:'sh_namak' },
+    placed:['sum_06','sum_01','sum_02','sum_04','sum_07'] },
+  { id:'dume',    name:'두메', rankIdx:3, chars:420, season:'autumn',
+    wear:{ top:'jg_dahong', bottom:'ba_huin',    outer:'du_huin', shoes:'sh_gomu'  },
+    placed:['aut_06','aut_01','aut_02','aut_03','aut_04','aut_05','aut_07'] },
+  { id:'haneui',  name:'하늬', rankIdx:4, chars:680, season:'winter',
+    wear:{ top:'jg_jaju',   bottom:'ch_namsaek', outer:'du_ok',   shoes:'sh_jang'  },
+    placed:['win_06','win_01','win_02','win_03','win_04','win_05','win_07','mhs_22','mhs_23','mhs_12','mhs_20'] }
+];
+function fetchNeighbors(){ return NEIGHBORS; }
+
+function openNeighborList(){
+  openSheetRaw('이웃');
+  const nbs = fetchNeighbors();
+  sheetBody.innerHTML = `<p class="note" style="margin:0 2px 12px">골라서 그 정원을 구경하러 갑니다.</p>`
+    + nbs.map(nb=>{
+      const rk = RANKS[nb.rankIdx];
+      return `<button class="neighbor-row" data-nb="${nb.id}">
+        <span class="grade" style="background:${rk.color}">${rk.name}</span>
+        <span class="nname">${nb.name}</span>
+        <span class="nchars">${nb.chars}자 익힘</span>
+      </button>`;
+    }).join('');
+  sheetBody.querySelectorAll('[data-nb]').forEach(b=>b.addEventListener('click',()=>{
+    enterNeighborGarden(nbs.find(n=>n.id===b.dataset.nb));
+  }));
 }
 
 /* ── 장면 1 · 나의 정원 ─────────────────── */
@@ -1288,21 +1345,23 @@ function gukStagesPreview(){
 
 /* 이름 팻말 — 돈으로 살 수 없고 학습으로만(급이 오르면) 바뀐다.
    나중에 이웃이 왔을 때 이 팻말로 급을 알아볼 수 있게 된다. */
-function nameplateSVG(){
-  const rk = rankInfo(effCount()), w=78;
+function nameplateSVG(name, rk){
+  name = name || '푸믹';
+  rk = rk || rankInfo(effCount());
+  const w=78;
   return `
     <rect x="${w/2-13}" y="40" width="5" height="18" rx="1" fill="#8A6A4E" stroke="${LINE}" stroke-width="1.6"/>
     <rect x="${w/2+8}" y="40" width="5" height="18" rx="1" fill="#8A6A4E" stroke="${LINE}" stroke-width="1.6"/>
     <rect x="1" y="0" width="${w-2}" height="40" rx="5" fill="#C9A87C" stroke="${LINE}" stroke-width="2.4" stroke-linejoin="round"/>
-    <text x="${w/2}" y="15" text-anchor="middle" font-family="Gaegu, sans-serif" font-size="12" font-weight="700" fill="#3D3A36">푸믹</text>
+    <text x="${w/2}" y="15" text-anchor="middle" font-family="Gaegu, sans-serif" font-size="12" font-weight="700" fill="#3D3A36">${name}</text>
     <rect x="9" y="20" width="${w-18}" height="15" rx="7" fill="${rk.color}" stroke="${LINE}" stroke-width="1.6"/>
     <text x="${w/2}" y="31" text-anchor="middle" font-family="Gaegu, sans-serif" font-size="11" font-weight="700" fill="#fff">${rk.name}</text>`;
 }
-function nameplateScene(){
+function nameplateScene(name, rk){
   const w=78,h=58, cx=335, baseY=555;
   return `<g transform="translate(${cx},${baseY}) scale(${SIZE_SCALE}) translate(${-w/2},${-h})">
     <ellipse cx="${w/2}" cy="${h}" rx="${(w*0.3).toFixed(1)}" ry="4" fill="rgba(43,36,28,.22)"/>
-    ${nameplateSVG()}
+    ${nameplateSVG(name, rk)}
   </g>`;
 }
 
@@ -1312,23 +1371,30 @@ function nameplateScene(){
 function typeOf(iid){ return String(iid).split('__')[0]; }
 function newIid(id){ S.seq=(S.seq||0)+1; return `${id}__${S.seq}`; }
 function drawGarden(){
-  const list = S.placed.map(iid=>({iid,id:typeOf(iid),it:ITEMS[typeOf(iid)]})).filter(o=>o.it);
+  const src = visiting ? visiting.placed : S.placed;
+  const list = src.map(iid=>({iid,id:typeOf(iid),it:ITEMS[typeOf(iid)]})).filter(o=>o.it);
   const ground = list.filter(o=>o.it.slot==='ground')
     .sort((a,b)=>(a.it.gkind==='cover'?0:1)-(b.it.gkind==='cover'?0:1));
   const mid    = list.filter(o=>o.it.slot==='mid'||o.it.slot==='front');
   const air    = list.filter(o=>o.it.slot==='air');
-  const p = S.pos.garden;
+  const p = posFor('garden');
   const pool = mid.map(o=>({y:spotOf(o.iid)[1], html:place(o)}))
     .concat([{y:p.y, html:avatarSVG(p.x,p.y)}])
+    .concat(visiting ? [{y:545, html:avatarSVG(200,545,visiting.wear,false)}] : [])
     .sort((a,b)=>a.y-b.y);
   scene.innerHTML = village()
     + ground.map(place).join('')
     + pool.map(o=>o.html).join('')
     + air.map(o=> o.it.fall ? fallSVG(o.it.fall) : place(o)).join('')
-    + nameplateScene()
-    + gukStagesPreview(); // 임시 확인용 — 크기 확인 후 이 줄과 위 함수들을 지운다
+    + (visiting
+        ? nameplateScene(visiting.name, {color:RANKS[visiting.rankIdx].color, name:RANKS[visiting.rankIdx].name})
+        : nameplateScene() + gukStagesPreview()); // 임시 확인용 — 크기 확인 후 이 줄과 위 함수들을 지운다
 }
-function spotOf(iid){ return S.spot[iid] || ITEMS[typeOf(iid)].at; }
+function spotOf(iid){
+  const store = visiting ? (visiting.spot||{}) : S.spot;
+  return store[iid] || ITEMS[typeOf(iid)].at;
+}
+function posFor(w){ return (visiting && w==='garden') ? visitPos : S.pos[w]; }
 /* 물건은 바닥 기준점(spot)을 고정한 채 그 자리에서 SIZE_SCALE만큼
    커지거나 작아진다. ground(깔개·길)만은 화면을 꽉 채워야 하므로
    배율에서 뺀다. */
@@ -1484,12 +1550,13 @@ const DRAW = { garden:drawGarden, seodang:drawSeodang, inside:drawInside, market
 const FLOOR = { garden:[200,560,50,350], seodang:[330,580,40,360], inside:[320,580,40,360], market:[370,580,50,350] };
 const NAVKEY = { garden:'garden', seodang:'seodang', inside:'seodang', market:'market' };
 let where='garden', walking=false, placingId=null;
+let visiting=null, visitPos={x:200,y:470}; // 이웃의 정원을 구경하는 중이면 그 이웃 자료, 아니면 null
 
 function drawScene(){
   DRAW[where]();
   document.querySelectorAll('#nav button').forEach(b=>b.classList.toggle('here', b.dataset.go===NAVKEY[where]));
   const lb=document.getElementById('lockBtn');
-  lb.classList.toggle('on', where==='garden');
+  lb.classList.toggle('on', where==='garden' && !visiting);
   lb.classList.toggle('locked', !!S.locked);
   document.getElementById('lockTxt').textContent = S.locked ? '잠김' : '옮기는 중';
   document.getElementById('lockIcon').innerHTML = S.locked
@@ -1499,12 +1566,26 @@ function drawScene(){
   wb.classList.toggle('on', where==='garden');
   wb.classList.toggle('active', watering);
   document.getElementById('waterTxt').textContent = watering ? '물 주는 중' : '물주기';
+  const vb=document.getElementById('visitBar');
+  vb.classList.toggle('on', !!visiting);
+  if(visiting) document.getElementById('visitName').textContent = `${visiting.name}의 정원`;
 }
 function goScene(name){
+  visiting=null;
   where=name; placingId=null; watering=false;
   document.getElementById('placeBar').classList.remove('on');
   overlay.classList.remove('on');
   drawScene();
+}
+function enterNeighborGarden(nb){
+  visiting=nb; visitPos={x:200,y:470};
+  where='garden'; placingId=null; watering=false;
+  document.getElementById('placeBar').classList.remove('on');
+  overlay.classList.remove('on');
+  drawScene();
+}
+function leaveNeighborGarden(){
+  visiting=null; goScene('garden');
 }
 function doAct(act){
   if(act==='go-seodang')    return goScene('seodang');
@@ -1525,7 +1606,7 @@ scene.addEventListener('pointerdown', e=>{
   const item = e.target.closest('[data-iid]');
   const act  = e.target.closest('[data-act]');
   ptr = { x:e.clientX, y:e.clientY, act, item, moved:false };
-  if(where==='garden' && !S.locked && !placingId && !watering && item && !ITEMS[item.dataset.id].fixed){
+  if(where==='garden' && !S.locked && !placingId && !watering && !visiting && item && !ITEMS[item.dataset.id].fixed){
     const p=svgPoint(e), [ix,iy]=spotOf(item.dataset.iid);
     drag = { id:item.dataset.iid, g:item, ox:p.x-ix, oy:p.y-iy };
     item.classList.add('dragging');
@@ -1552,8 +1633,10 @@ scene.addEventListener('pointerup', e=>{
   const p=svgPoint(e);
   if(watering && where==='garden'){
     const iid=P.item&&P.item.dataset.iid, it=iid&&ITEMS[typeOf(iid)];
-    if(it && (it.plant || it.grow)) waterPlant(iid, it.name);
-    else toast('화초나 나무를 눌러 물을 주세요');
+    if(it && (it.plant || it.grow)){
+      if(visiting) waterNeighborPlant(visiting, iid, it.name);
+      else waterPlant(iid, it.name);
+    } else toast('화초나 나무를 눌러 물을 주세요');
     return;
   }
   if(placingId){ dropItem(p.x, p.y); return; }
@@ -1571,7 +1654,7 @@ scene.addEventListener('pointercancel', ()=>{
 
 function walkTo(x,y,done){
   const g=document.getElementById('hakdong'); if(!g){ done&&done(); return; }
-  const p=S.pos[where], sx=p.x, sy=p.y;
+  const p=posFor(where), sx=p.x, sy=p.y;
   const dx=x-sx, dist=Math.hypot(dx,y-sy);
   if(dist<3){ done&&done(); return; }
   const dur=Math.max(240,dist*9), flip=dx<0?-1:1, legs=document.getElementById('hakLegs');
@@ -1582,7 +1665,13 @@ function walkTo(x,y,done){
     g.setAttribute('transform',`translate(${sx+(x-sx)*k},${sy+(y-sy)*k}) scale(${SIZE_SCALE*flip},${SIZE_SCALE})`);
     if(legs) legs.setAttribute('transform',`translate(0,${Math.abs(Math.sin((t-t0)/90))*-2.2})`);
     if(k<1) requestAnimationFrame(tick);
-    else { if(legs) legs.setAttribute('transform',''); walking=false; S.pos[where]={x,y}; save(); done&&done(); }
+    else {
+      if(legs) legs.setAttribute('transform','');
+      walking=false;
+      if(visiting && where==='garden') visitPos={x,y};
+      else { S.pos[where]={x,y}; save(); }
+      done&&done();
+    }
   };
   requestAnimationFrame(tick);
 }
@@ -1634,6 +1723,21 @@ function waterPlant(iid, name){
     if(laterMsg) toast(laterMsg);
   }, WATER_MS);
 }
+/* 이웃의 화초·나무는 자라지 않지만, 하루 한 번 물을 주면 답례로
+   엽전을 받는다. 자리표(iid)별로 오늘 날짜를 적어 두어, 이웃마다
+   화초마다 하루 한 번만 답례를 받게 한다. */
+function waterNeighborPlant(nb, iid, name){
+  if(!S.neighborWater) S.neighborWater={};
+  const today=new Date().toISOString().slice(0,10);
+  const done=S.neighborWater[nb.id]||{};
+  if(done[iid]===today){ toast('오늘은 이미 물을 주었습니다'); return; }
+  done[iid]=today; S.neighborWater[nb.id]=done;
+  waterFX=iid; drawScene();
+  const bonus=50;
+  S.coin+=bonus; save(); syncHUD();
+  toast(`${name}에 물을 주었습니다 · 답례로 엽전 ${bonus}냥을 받았습니다`);
+  setTimeout(()=>{ if(waterFX===iid){ waterFX=null; drawScene(); } }, WATER_MS);
+}
 
 /* ── 배치 모드 ──────────────────────────── */
 function startPlacing(id){
@@ -1661,6 +1765,7 @@ function dropItem(x,y){
 document.getElementById('placeCancel').addEventListener('click', ()=>{
   placingId=null; document.getElementById('placeBar').classList.remove('on');
 });
+document.getElementById('visitBackBtn').addEventListener('click', leaveNeighborGarden);
 
 /* ── 덮개 화면 ──────────────────────────── */
 const overlay=document.getElementById('overlay');
@@ -1681,12 +1786,8 @@ document.getElementById('rankDemoBtn').addEventListener('click', openRankDemo);
 document.querySelectorAll('#nav button').forEach(b=>{
   b.addEventListener('click',()=>{
     const g=b.dataset.go;
-    if(g==='bag') return openBag();
-    if(g==='neighbors'){
-      openSheetRaw('이웃');
-      sheetBody.innerHTML=`<p class="note">아직 이웃이 없습니다. 정원이 어느 정도 꾸며지면 이웃의 정원을 구경하러 갈 수 있습니다.</p>`;
-      return;
-    }
+    if(g==='bag'){ visiting=null; return openBag(); }
+    if(g==='neighbors') return openNeighborList();
     goScene(g);
   });
 });
