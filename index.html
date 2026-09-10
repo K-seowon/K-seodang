@@ -934,12 +934,6 @@ function avatarSVG(x,y){
 }
 
 /* ── 공통 조각 ──────────────────────────── */
-function sky(){return `<rect width="400" height="600" fill="#FDF3E9"/>
-  <circle cx="332" cy="48" r="26" fill="#FFF3D8"/>
-  <ellipse cx="80" cy="54" rx="58" ry="17" fill="#FFFAF3"/>
-  <ellipse cx="222" cy="36" rx="44" ry="13" fill="#FFFAF3"/>`;}
-function hills(){return `<path d="M0 196 L94 152 L166 190 L248 156 L346 194 L400 174 V262 H0Z" fill="#AEBCA4"/>
-  <path d="M0 216 L114 176 L208 214 L298 180 L400 212 V262 H0Z" fill="#8FA88A"/>`;}
 const FALL = {
   petal:{ cols:['#F0A8BE','#FBD8E2'], rmin:4,   rmax:6.5, n:14, dur:[7,13] },
   leaf :{ cols:['#D9541F','#F0873A','#F7BE4C'], rmin:4, rmax:6, n:13, dur:[6,12] },
@@ -1020,28 +1014,14 @@ function place(o){
 /* ── 장면 2 · 서당 마당 ─────────────────── */
 function drawSeodang(){
   const p = S.pos.seodang;
-  scene.innerHTML = sky() + hills() + `
-    <rect y="262" width="400" height="338" fill="#D9C7A6"/>
-    <path d="M0 300 q120 -12 220 4 q90 14 180 -4 v300 H0Z" fill="#CFB995"/>
-    <g class="tapzone" data-act="enter-seodang" data-ax="200" data-ay="466" role="button" aria-label="서당 안으로 들어가기">
-      <rect x="48" y="150" width="304" height="150" fill="transparent"/>
-      <rect x="72" y="288" width="256" height="14" rx="3" fill="#C4B4A0"/>
-      <rect x="80" y="216" width="240" height="76" fill="#EADCC2"/>
-      <rect x="106" y="230" width="52" height="58" rx="2" fill="#C9A87C" stroke="#8A6A4E" stroke-width="2"/>
-      <rect x="174" y="228" width="52" height="60" rx="2" fill="#5E4632"/>
-      <rect x="242" y="230" width="52" height="58" rx="2" fill="#C9A87C" stroke="#8A6A4E" stroke-width="2"/>
-      <g stroke="#8A6A4E" stroke-width="1.5"><path d="M106 250h52M106 270h52M242 250h52M242 270h52"/></g>
-      <rect x="84" y="212" width="232" height="10" rx="3" fill="#B08F6A"/>
-      <rect x="86" y="216" width="10" height="76" fill="#8A6A4E"/>
-      <rect x="304" y="216" width="10" height="76" fill="#8A6A4E"/>
-      <path d="M56 210 q144 -56 288 0 Z" fill="#6F6258"/>
-      <path d="M48 212 q152 -68 304 0 q-40 9 -152 9 q-112 0 -152 -9 Z" fill="#8B7D71"/>
-      <rect x="158" y="166" width="84" height="24" rx="5" fill="#3D3A36"/>
-      <text x="200" y="184" text-anchor="middle" font-family="Gaegu, sans-serif" font-size="17" font-weight="700" fill="#F2E4CB">운교서당</text>
-      ${P.gu<GUJEOL.length?`<g class="badge-bob"><circle cx="316" cy="176" r="9" fill="#D9463F" stroke="#3D3A36" stroke-width="2.5"/></g>`:''}
-      <text x="200" y="326" text-anchor="middle" font-family="Gaegu, sans-serif" font-size="17" fill="#6B6154">문을 누르면 안으로 듭니다</text>
+  scene.innerHTML = `
+    <image href="bg/bg-woonkyoseodang.png" xlink:href="bg/bg-woonkyoseodang.png" x="0" y="0" width="400" height="600" preserveAspectRatio="xMidYMid slice"/>
+    <g class="tapzone" data-act="enter-seodang" data-ax="200" data-ay="345" role="button" aria-label="글방으로 들어가기">
+      <rect x="60" y="95" width="280" height="225" fill="transparent"/>
+      ${P.gu<GUJEOL.length?`<g class="badge-bob"><circle cx="312" cy="114" r="9" fill="#D9463F" stroke="#3D3A36" stroke-width="2.5"/></g>`:''}
+      <text x="200" y="336" text-anchor="middle" font-family="Gaegu, sans-serif" font-size="17" fill="#5C5346"
+        style="paint-order:stroke;stroke:#FBF3E4;stroke-width:5px;stroke-linejoin:round">문을 누르면 글방으로 듭니다</text>
     </g>
-    <g fill="#B7A17B"><ellipse cx="70" cy="420" rx="34" ry="9"/><ellipse cx="330" cy="440" rx="30" ry="8"/></g>
     <g class="tapzone" data-act="go-garden" data-ax="56" data-ay="556" role="button" aria-label="나의 정원으로">
       <rect x="0" y="474" width="100" height="126" fill="transparent"/>
       <path d="M0 600 L44 512 L68 512 L20 600 Z" fill="#E4D6B4"/>
@@ -1058,38 +1038,26 @@ function drawSeodang(){
 }
 
 /* ── 장면 3 · 서당 안 ───────────────────── */
-function scroll(x, act, ax, label, sub, on){
-  return `<g class="tapzone" data-act="${act}" data-ax="${ax}" data-ay="500" role="button" aria-label="${label}">
-    <rect x="${x-6}" y="180" width="116" height="180" fill="transparent"/>
-    <rect x="${x}" y="188" width="104" height="10" rx="4" fill="#8A6A4E"/>
-    <rect x="${x+4}" y="196" width="96" height="140" fill="${on?'#F7EFDD':'#E6DCC8'}" stroke="${on?'#3D3A36':'#9C917F'}" stroke-width="3"/>
-    <rect x="${x}" y="332" width="104" height="10" rx="4" fill="#8A6A4E"/>
-    <text x="${x+52}" y="250" text-anchor="middle" font-family="Gaegu, sans-serif" font-size="21" font-weight="700" fill="${on?'#3D3A36':'#9C917F'}">${label}</text>
-    <text x="${x+52}" y="284" text-anchor="middle" font-family="Gaegu, sans-serif" font-size="15" fill="${on?'#7A6E5E':'#A99E8B'}">${sub}</text>
-    ${on&&P.gu<GUJEOL.length?`<g class="badge-bob"><circle cx="${x+98}" cy="200" r="9" fill="#D9463F" stroke="#3D3A36" stroke-width="2.5"/></g>`:''}
+/* 그림에 이미 서안·책더미·책장이 있어, 그 위에 누르는 자리만 얹는다 */
+function studyZone(hit, act, ax, ay, label, sub, ready, badge){
+  const [x,y,w,h]=hit;
+  const halo='style="paint-order:stroke;stroke:#FBF3E4;stroke-width:4px;stroke-linejoin:round"';
+  return `<g class="tapzone" data-act="${act}" data-ax="${ax}" data-ay="${ay}" role="button" aria-label="${label}">
+    <rect x="${x}" y="${y}" width="${w}" height="${h}" fill="transparent"/>
+    ${badge&&ready&&P.gu<GUJEOL.length?`<g class="badge-bob"><circle cx="${x+w-8}" cy="${y+10}" r="9" fill="#D9463F" stroke="#3D3A36" stroke-width="2.5"/></g>`:''}
+    <text x="${x+w/2}" y="${y+h+22}" text-anchor="middle" font-family="Gaegu, sans-serif" font-size="16" font-weight="700"
+      fill="${ready?'#3D3A36':'#9C917F'}" ${halo}>${label}</text>
+    <text x="${x+w/2}" y="${y+h+40}" text-anchor="middle" font-family="Gaegu, sans-serif" font-size="13"
+      fill="${ready?'#7A6E5E':'#A99E8B'}" ${halo}>${sub}</text>
   </g>`;
 }
 function drawInside(){
   const p = S.pos.inside;
   scene.innerHTML = `
-    <rect width="400" height="600" fill="#E9DCC0"/>
-    <rect y="0" width="400" height="360" fill="#DFCFAE"/>
-    <g stroke="#C4AE86" stroke-width="2"><path d="M0 120 H400M0 240 H400M100 0 V360M300 0 V360"/></g>
-    <rect y="352" width="400" height="16" fill="#8A6A4E"/>
-    <rect y="368" width="400" height="232" fill="#C9A87C"/>
-    <g stroke="#B08F6A" stroke-width="2"><path d="M0 404 H400M0 448 H400M0 496 H400M0 548 H400"/></g>
-    ${scroll(10,'study-cheonja',62,'천자문',`${P.gu} / 125마디`,true)}
-    ${scroll(148,'study-jok',200,'글자 익힘책',`${metCount()}자 익힘`,true)}
-    ${scroll(286,'study-myeongsim',338,'명심보감','곧 문 엽니다',false)}
-    <g>
-      <rect x="150" y="392" width="100" height="12" rx="4" fill="#96764F"/>
-      <rect x="150" y="386" width="100" height="8" rx="4" fill="#B08F6A"/>
-      <rect x="162" y="404" width="8" height="18" rx="3" fill="#7A5F45"/>
-      <rect x="230" y="404" width="8" height="18" rx="3" fill="#7A5F45"/>
-      <path d="M172 386 h34 v-11 h-34 Z" fill="#F7EFDD"/>
-      <rect x="214" y="378" width="5" height="8" rx="2" fill="#3D3A36"/>
-      <rect x="214" y="362" width="5" height="17" rx="2" fill="#B08F6A"/>
-    </g>
+    <image href="bg/bg-seodanginside.png" xlink:href="bg/bg-seodanginside.png" x="0" y="0" width="400" height="600" preserveAspectRatio="xMidYMid slice"/>
+    ${studyZone([140,185,185,120],'study-cheonja',200,380,'천자문',`${P.gu} / 125마디`,true,true)}
+    ${studyZone([90,200,90,105],'study-jok',110,380,'글자 익힘책',`${metCount()}자 익힘`,true,true)}
+    ${studyZone([270,125,95,180],'study-myeongsim',310,380,'명심보감','곧 문 엽니다',false,false)}
     <g class="tapzone" data-act="go-seodang" data-ax="340" data-ay="556" role="button" aria-label="마당으로 나가기">
       <rect x="288" y="470" width="112" height="130" fill="transparent"/>
       <rect x="316" y="500" width="72" height="86" rx="3" fill="#6F6258"/>
@@ -1101,32 +1069,24 @@ function drawInside(){
 }
 
 /* ── 장면 4 · 저잣거리 ──────────────────── */
-function stall(x, act, ax, color, label, sub, ready){
-  return `<g class="tapzone" data-act="${act}" data-ax="${ax}" data-ay="490" role="button" aria-label="${label}">
-    <rect x="${x}" y="280" width="94" height="158" fill="transparent"/>
-    <rect x="${x+8}" y="352" width="78" height="56" fill="#C9B79A"/>
-    <rect x="${x+8}" y="346" width="78" height="12" rx="3" fill="#8A6A4E"/>
-    <rect x="${x+12}" y="358" width="70" height="40" rx="3" fill="#EADCC2"/>
-    <path d="M${x+1} 344 h92 l-10 -30 h-72 Z" fill="${color}"/>
-    <g stroke="rgba(255,255,255,.5)" stroke-width="6">
-      <path d="M${x+22} 344 L${x+29} 314"/><path d="M${x+50} 344 L${x+54} 314"/><path d="M${x+76} 344 L${x+77} 314"/></g>
-    <rect x="${x+6}" y="408" width="7" height="26" fill="#8A6A4E"/>
-    <rect x="${x+81}" y="408" width="7" height="26" fill="#8A6A4E"/>
-    <rect x="${x+14}" y="286" width="66" height="24" rx="5" fill="#3D3A36"/>
-    <text x="${x+47}" y="304" text-anchor="middle" font-family="Gaegu, sans-serif" font-size="17" font-weight="700" fill="#F2E4CB">${label}</text>
-    <text x="${x+47}" y="428" text-anchor="middle" font-family="Gaegu, sans-serif" font-size="15" fill="${ready?'#5C5346':'#9C917F'}">${sub}</text>
+/* 그림 속 좌판마다 이미 이름 깃발(의전/화수전/목석방)이 있어
+   그 위에 누르는 자리만 얹는다 */
+function marketZone(hit, act, ax, ay, label, sub, ready){
+  const [x,y,w,h]=hit;
+  const halo='style="paint-order:stroke;stroke:#FBF3E4;stroke-width:4px;stroke-linejoin:round"';
+  return `<g class="tapzone" data-act="${act}" data-ax="${ax}" data-ay="${ay}" role="button" aria-label="${label}">
+    <rect x="${x}" y="${y}" width="${w}" height="${h}" fill="transparent"/>
+    <text x="${x+w/2}" y="${y+h+22}" text-anchor="middle" font-family="Gaegu, sans-serif" font-size="14" font-weight="700"
+      fill="${ready?'#3D3A36':'#9C917F'}" ${halo}>${sub}</text>
   </g>`;
 }
 function drawMarket(){
   const p = S.pos.market;
-  scene.innerHTML = sky() + hills() + `
-    <rect y="262" width="400" height="338" fill="#D0BE9C"/>
-    <path d="M0 440 q200 -16 400 6 v154 H0Z" fill="#C2AE8A"/>
-    <g fill="#B7A17B"><ellipse cx="60" cy="510" rx="26" ry="8"/><ellipse cx="200" cy="540" rx="30" ry="9"/><ellipse cx="330" cy="506" rx="24" ry="8"/></g>
-    ${stall(4,  'shop-flower', 51,'#E48AA6','꽃전', '38종',  true)}
-    ${stall(102,'shop-clothes',149,'#7FA9C9','옷전', '14벌',  true)}
-    ${stall(200,'shop-stone',  247,'#8FA8B8','석물전','준비 중',false)}
-    ${stall(298,'shop-goods',  345,'#C9A24A','물목전','준비 중',false)}
+  scene.innerHTML = `
+    <image href="bg/bg-marketstreet.png" xlink:href="bg/bg-marketstreet.png" x="0" y="0" width="400" height="600" preserveAspectRatio="xMidYMid slice"/>
+    ${marketZone([0,160,155,180],  'shop-clothes',75, 420,'의전으로',   '14벌',  true)}
+    ${marketZone([160,145,140,195],'shop-flower', 225,420,'화수전으로', '38종',  true)}
+    ${marketZone([300,160,100,180],'shop-stone',  350,420,'목석방으로', '준비 중',false)}
     <g class="tapzone" data-act="go-garden" data-ax="344" data-ay="556" role="button" aria-label="나의 정원으로">
       <rect x="300" y="474" width="100" height="126" fill="transparent"/>
       <path d="M400 600 L356 512 L332 512 L380 600 Z" fill="#E4D6B4"/>
@@ -1139,7 +1099,7 @@ function drawMarket(){
 /* ── 장면 관리 ──────────────────────────── */
 const scene = document.getElementById('scene');
 const DRAW = { garden:drawGarden, seodang:drawSeodang, inside:drawInside, market:drawMarket };
-const FLOOR = { garden:[200,560,50,350], seodang:[440,586,24,376], inside:[470,586,24,376], market:[470,586,24,376] };
+const FLOOR = { garden:[200,560,50,350], seodang:[330,580,40,360], inside:[320,580,40,360], market:[370,580,50,350] };
 const NAVKEY = { garden:'garden', seodang:'seodang', inside:'seodang', market:'market' };
 let where='garden', walking=false, placingId=null;
 
@@ -1170,7 +1130,7 @@ function doAct(act){
   if(act==='study-myeongsim') return toast('명심보감은 곧 문을 엽니다');
   if(act==='shop-flower')  return openShop();
   if(act==='shop-clothes') return openClothes();
-  if(act==='shop-stone'||act==='shop-goods') return toast('아직 전을 열지 않았습니다');
+  if(act==='shop-stone') return toast('아직 전을 열지 않았습니다');
 }
 
 /* ── 손가락 처리: 걷기 · 끌기 · 놓기 ───── */
@@ -1617,7 +1577,7 @@ function packPreview(season){
 }
 let shopTab='spring';
 function openShop(){
-  openSheetRaw('운교장터 · 꽃전');
+  openSheetRaw('운교장터 · 화수전');
   renderShop();
 }
 function ownedCount(id){ return (S.owned && S.owned[id]) || 0; }
@@ -1692,13 +1652,13 @@ function wearCell(slot, id, mode){
     <div class="cost">${foot}</div></button>`;
 }
 
-/* ── 옷전 ───────────────────────────────── */
+/* ── 의전 ───────────────────────────────── */
 function openClothes(){
-  openSheetRaw('운교장터 · 옷전');
+  openSheetRaw('운교장터 · 의전');
   const n=WEAR_SLOTS.reduce((a,[s])=>a+Object.keys(WEAR[s]).length,0);
   sheetBody.innerHTML=`
     <div class="packhead">
-      <div class="strip" style="background:#7FA9C9"><h2>옷전</h2></div>
+      <div class="strip" style="background:#7FA9C9"><h2>의전</h2></div>
       <div class="sub">${n}벌 입고 · 옷장에 ${S.closet.length}벌</div>
     </div>
     ${WEAR_SLOTS.map(([s,label])=>`
@@ -1773,13 +1733,13 @@ function renderBag(){
           return `<p class="note" style="margin:14px 2px 8px;font-weight:700;color:#5C5346">${label}</p>
             <div class="grid">${ids.map(id=>wearCell(s,id,'closet')).join('')}</div>`;
         }).join('')
-      : `<p class="note">아직 가진 옷이 없습니다. 저잣거리 옷전에서 골라보세요.</p>`;
+      : `<p class="note">아직 가진 옷이 없습니다. 저잣거리 의전에서 골라보세요.</p>`;
     sheetBody.innerHTML = tabs + body +
       `<p class="note">학동이 입을 것들입니다. 두루마기는 다시 누르면 벗습니다.</p>`;
   } else {
     let body='';
     if(!ownedIds.length){
-      body=`<p class="note">아직 가진 물건이 없습니다. 저잣거리 꽃전에서 골라보세요.</p>`;
+      body=`<p class="note">아직 가진 물건이 없습니다. 저잣거리 화수전에서 골라보세요.</p>`;
     } else {
       body = SEASON_TABS.map(([k,label])=>{
         const ids=ownedIds.filter(id=>ITEMS[id] && ITEMS[id].season===k);
