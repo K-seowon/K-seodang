@@ -866,59 +866,39 @@ const P = S.prog;
 const metCount = ()=>Object.keys(P.char).length;
 
 /* ── 아바타 ─────────────────────────────── */
-const A = { git:'#FFFFFF', beoseon:'#F7F1E4', hair:'#2B2620', skin:'#F7DFC8', line:'#2B2620', cheek:'#EF7E8B' };
-
-/* 굵은 검정 선 화풍: 색을 어둡게/밝게 눌러서 그라데이션 없이 명암을 낸다 */
-function shade(hex, amt){
-  const n=parseInt(hex.replace('#',''),16);
-  const clamp=v=>Math.max(0,Math.min(255,Math.round(v)));
-  const r=clamp((n>>16&255)+amt), g=clamp((n>>8&255)+amt), b=clamp((n&255)+amt);
-  return '#'+(0x1000000+(r<<16)+(g<<8)+b).toString(16).slice(1);
-}
-/* 팔다리처럼 굵은 선 하나로 그리는 부위: 검정 선을 조금 굵게 깔고 그 위에 색을 얹어 윤곽선처럼 보이게 한다 */
-function limbBar(cx,y1,y2,w,c){
-  return `<path d="M${cx} ${y1} V${y2}" stroke="${A.line}" stroke-width="${w+3}" stroke-linecap="round"/>
-    <path d="M${cx} ${y1} V${y2}" stroke="${c}" stroke-width="${w}" stroke-linecap="round"/>`;
-}
+const A = { git:'#FFFFFF', beoseon:'#F7F1E4', hair:'#2B2620', skin:'#F7DFC8' };
 
 function shoeSVG(cx, sh){
-  if(!sh) return `<ellipse cx="${cx}" cy="-2" rx="6.2" ry="3.6" fill="${A.beoseon}" stroke="${A.line}" stroke-width="2.4"/>
-    <path d="M${cx-3} -3.2 q3 -1.6 6 0" fill="none" stroke="${shade(A.beoseon,-45)}" stroke-width="1.2" stroke-linecap="round"/>`;
+  if(!sh) return `<ellipse cx="${cx}" cy="-2" rx="6" ry="3.4" fill="${A.beoseon}" stroke="${A.hair}" stroke-width="1.4"/>`;
   const c=sh.c;
   if(sh.kind==='jang')
-    return `<rect x="${cx-4.8}" y="-15.5" width="9.6" height="14.5" rx="3" fill="${c}" stroke="${A.line}" stroke-width="2.4" stroke-linejoin="round"/>
-      <ellipse cx="${cx}" cy="-1" rx="7.2" ry="3.8" fill="${c}" stroke="${A.line}" stroke-width="2.4"/>
-      <path d="M${cx-4.6} -8 h9.2" stroke="${shade(c,-55)}" stroke-width="1.6"/>`;
+    return `<rect x="${cx-4.6}" y="-15" width="9.2" height="14" rx="3" fill="${c}"/>
+      <ellipse cx="${cx}" cy="-1" rx="7" ry="3.6" fill="${c}"/>
+      <path d="M${cx-4.6} -8 h9.2" stroke="rgba(0,0,0,.2)" stroke-width="1.4"/>`;
   if(sh.kind==='namak')
-    return `<rect x="${cx-7.2}" y="-7.8" width="14.4" height="5" rx="2" fill="${c}" stroke="${A.line}" stroke-width="2.2" stroke-linejoin="round"/>
-      <rect x="${cx-6}" y="-3.6" width="3" height="3.8" fill="${shade(c,-60)}"/>
-      <rect x="${cx+3}" y="-3.6" width="3" height="3.8" fill="${shade(c,-60)}"/>`;
+    return `<rect x="${cx-7}" y="-7.5" width="14" height="4.6" rx="2" fill="${c}"/>
+      <rect x="${cx-6}" y="-3.4" width="3" height="3.6" fill="#8A6A4E"/>
+      <rect x="${cx+3}" y="-3.4" width="3" height="3.6" fill="#8A6A4E"/>`;
   if(sh.kind==='jip')
-    return `<ellipse cx="${cx}" cy="-2" rx="6.8" ry="3.6" fill="${c}" stroke="${A.line}" stroke-width="2.2"/>
-      <path d="M${cx-4} -3 h8 M${cx-4} -1 h8" stroke="${shade(c,-55)}" stroke-width="1"/>`;
-  return `<ellipse cx="${cx}" cy="-2" rx="6.8" ry="3.8" fill="${c}" stroke="${A.line}" stroke-width="2.4"/>
-    <path d="M${cx-6.6} -3 q1.5 -3 4.5 -2.4" fill="none" stroke="${shade(c,-55)}" stroke-width="1.3" stroke-linecap="round"/>`;
+    return `<ellipse cx="${cx}" cy="-2" rx="6.6" ry="3.4" fill="${c}" stroke="#B39A66" stroke-width="1.2"/>
+      <path d="M${cx-4} -3 h8 M${cx-4} -1 h8" stroke="#B39A66" stroke-width="1"/>`;
+  return `<ellipse cx="${cx}" cy="-2" rx="6.6" ry="3.6" fill="${c}" stroke="${A.hair}" stroke-width="1.3"/>
+    <path d="M${cx-6.6} -3 q1.5 -3 4.5 -2.4" fill="none" stroke="${A.hair}" stroke-width="1.2"/>`;
 }
 function bottomSVG(bot){
   if(!bot) return '';
   if(bot.kind==='baji')
-    return `<path d="M-15 -14 q-2 -19 1 -23 h28 q3 4 1 23 h-10 q-1 -12 -4 -16 q-3 4 -4 16 Z" fill="${bot.c}" stroke="${A.line}" stroke-width="2.6" stroke-linejoin="round"/>
-      <path d="M-6 -31 q-3 8 -2 15" fill="none" stroke="${shade(bot.c,-45)}" stroke-width="2" stroke-linecap="round"/>
-      <path d="M6 -31 q3 8 2 15" fill="none" stroke="${shade(bot.c,-45)}" stroke-width="2" stroke-linecap="round"/>
-      <path d="M-14 -32 h28" stroke="${shade(bot.c,-30)}" stroke-width="1.6"/>`;
-  return `<path d="M-17 -14 q0 -23 17 -23 q17 0 17 23 Z" fill="${bot.c}" stroke="${A.line}" stroke-width="2.6" stroke-linejoin="round"/>
-    <path d="M-16 -19 q16 5 32 0" fill="none" stroke="${shade(bot.c,-35)}" stroke-width="1.8"/>
-    <path d="M-10 -10 q10 4 20 0" fill="none" stroke="${shade(bot.c,-30)}" stroke-width="1.6" opacity=".8"/>`;
+    return `<path d="M-14 -14 q-2 -18 1 -22 h26 q3 4 1 22 h-9 q-1 -11 -4 -15 q-3 4 -4 15 Z" fill="${bot.c}"/>
+      <path d="M-13 -30 h26" stroke="rgba(0,0,0,.12)" stroke-width="1.4"/>`;
+  return `<path d="M-16 -14 q0 -22 16 -22 q16 0 16 22 Z" fill="${bot.c}"/>
+    <path d="M-15 -17 q15 4 30 0" fill="none" stroke="rgba(0,0,0,.12)" stroke-width="1.4"/>`;
 }
 function outerSVG(out){
   if(!out) return '';
-  return `<path d="M-20 -9 q-3 -31 5 -44 q15 -6 30 0 q8 13 5 44 Z" fill="${out.c}" stroke="${A.line}" stroke-width="2.8" stroke-linejoin="round"/>
-    <path d="M-13 -21 q3 6 -1 11" fill="none" stroke="${shade(out.c,-40)}" stroke-width="1.8" stroke-linecap="round"/>
-    <path d="M13 -21 q-3 6 1 11" fill="none" stroke="${shade(out.c,-40)}" stroke-width="1.8" stroke-linecap="round"/>
-    <path d="M-9 -52 q9 7 9 16 q0 -9 9 -16" fill="none" stroke="${A.line}" stroke-width="7" stroke-linejoin="round"/>
+  return `<path d="M-19 -9 q-3 -30 5 -43 q14 -6 28 0 q8 13 5 43 Z" fill="${out.c}"/>
     <path d="M-9 -52 q9 7 9 16 q0 -9 9 -16" fill="none" stroke="${A.git}" stroke-width="4.5" stroke-linejoin="round"/>
-    <path d="M0 -36 q4 8 -1 15" fill="none" stroke="${A.line}" stroke-width="5" stroke-linecap="round"/>
-    <path d="M0 -36 q4 8 -1 15" fill="none" stroke="${A.git}" stroke-width="3" stroke-linecap="round"/>`;
+    <path d="M0 -36 q4 8 -1 15" fill="none" stroke="${A.git}" stroke-width="3" stroke-linecap="round"/>
+    <path d="M0 -9 v-30" stroke="rgba(0,0,0,.1)" stroke-width="1.4"/>`;
 }
 
 function avatarSVG(x,y){
@@ -930,34 +910,36 @@ function avatarSVG(x,y){
   const legC = bot.kind==='baji' ? bot.c : '#F1E8D8';
   const armC = out ? out.c : top.c;
   return `<g id="hakdong" transform="translate(${x},${y})">
-    <ellipse cx="0" cy="2" rx="18" ry="5.5" fill="rgba(43,36,28,.38)"/>
+    <ellipse cx="0" cy="2" rx="17" ry="5" fill="rgba(61,58,54,.16)"/>
     <g id="hakLegs">
-      ${limbBar(-9,-15,-4,8,legC)}
-      ${limbBar(9,-15,-4,8,legC)}
+      <path d="M-9 -14 v10" stroke="${legC}" stroke-width="8" stroke-linecap="round"/>
+      <path d="M9 -14 v10" stroke="${legC}" stroke-width="8" stroke-linecap="round"/>
       ${shoeSVG(-9, sh)}
       ${shoeSVG(9, sh)}
     </g>
     ${bottomSVG(bot)}
-    <path d="M-16 -36 q0 -17 16 -17 q16 0 16 17 q-16 7.5 -32 0 Z" fill="${top.c}" stroke="${A.line}" stroke-width="2.8" stroke-linejoin="round"/>
-    <path d="M-13 -42 q13 5 26 0" fill="none" stroke="${shade(top.c,-35)}" stroke-width="1.8" opacity=".85"/>
-    <path d="M-9 -52 q9 6 9 14 q0 -8 9 -14" fill="none" stroke="${A.line}" stroke-width="7.5" stroke-linejoin="round"/>
-    <path d="M-9 -52 q9 6 9 14 q0 -8 9 -14" fill="none" stroke="${A.git}" stroke-width="5" stroke-linejoin="round"/>
-    <path d="M0 -38 q3 6 -1 12" fill="none" stroke="${A.line}" stroke-width="5.2" stroke-linecap="round"/>
-    <path d="M0 -38 q3 6 -1 12" fill="none" stroke="${A.git}" stroke-width="3.2" stroke-linecap="round"/>
-    <circle cx="1" cy="-33" r="1.7" fill="${shade(A.git,-25)}"/>
+    <path d="M-15 -36 q0 -16 15 -16 q15 0 15 16 q-15 7 -30 0 Z" fill="${top.c}"/>
+    <path d="M-9 -52 q9 6 9 14 q0 -8 9 -14" fill="none" stroke="${A.git}" stroke-width="4.5" stroke-linejoin="round"/>
+    <path d="M0 -38 q3 6 -1 12" fill="none" stroke="${A.git}" stroke-width="3" stroke-linecap="round"/>
     ${outerSVG(out)}
-    ${limbBar(-15,-40,out?-26:-32,7,armC)}
-    ${limbBar(15,-40,out?-26:-32,7,armC)}
-    <circle cx="0" cy="-64" r="17" fill="${A.skin}" stroke="${A.line}" stroke-width="2.8"/>
-    <path d="M-17 -66 q0 -19 17 -19 q17 0 17 19 q-7 -8.5 -17 -8.5 q-10 0 -17 8.5 Z" fill="${A.hair}" stroke="${A.line}" stroke-width="2.8" stroke-linejoin="round"/>
-    <circle cx="-6" cy="-62" r="2.1" fill="${A.hair}"/><circle cx="6" cy="-62" r="2.1" fill="${A.hair}"/>
-    <ellipse cx="-11" cy="-57" rx="4" ry="2.6" fill="${A.cheek}" opacity=".85"/>
-    <ellipse cx="11" cy="-57" rx="4" ry="2.6" fill="${A.cheek}" opacity=".85"/>
-    <path d="M-3 -56 q3 2.4 6 0" fill="none" stroke="${A.line}" stroke-width="1.6" stroke-linecap="round"/>
+    <path d="M-15 -40 v${out?14:8}" stroke="${armC}" stroke-width="7" stroke-linecap="round"/>
+    <path d="M15 -40 v${out?14:8}" stroke="${armC}" stroke-width="7" stroke-linecap="round"/>
+    <circle cx="0" cy="-62" r="14" fill="${A.skin}"/>
+    <path d="M-14 -64 q0 -16 14 -16 q14 0 14 16 q-6 -7 -14 -7 q-8 0 -14 7 Z" fill="${A.hair}"/>
+    <circle cx="-5" cy="-60" r="1.9" fill="${A.hair}"/><circle cx="5" cy="-60" r="1.9" fill="${A.hair}"/>
+    <ellipse cx="-9" cy="-56" rx="3" ry="1.8" fill="#F3A9A0" opacity=".8"/>
+    <ellipse cx="9" cy="-56" rx="3" ry="1.8" fill="#F3A9A0" opacity=".8"/>
+    <path d="M-2.5 -55 q2.5 2 5 0" fill="none" stroke="${A.hair}" stroke-width="1.4" stroke-linecap="round"/>
   </g>`;
 }
 
 /* ── 공통 조각 ──────────────────────────── */
+function sky(){return `<rect width="400" height="600" fill="#FDF3E9"/>
+  <circle cx="332" cy="48" r="26" fill="#FFF3D8"/>
+  <ellipse cx="80" cy="54" rx="58" ry="17" fill="#FFFAF3"/>
+  <ellipse cx="222" cy="36" rx="44" ry="13" fill="#FFFAF3"/>`;}
+function hills(){return `<path d="M0 196 L94 152 L166 190 L248 156 L346 194 L400 174 V262 H0Z" fill="#AEBCA4"/>
+  <path d="M0 216 L114 176 L208 214 L298 180 L400 212 V262 H0Z" fill="#8FA88A"/>`;}
 const FALL = {
   petal:{ cols:['#F0A8BE','#FBD8E2'], rmin:4,   rmax:6.5, n:14, dur:[7,13] },
   leaf :{ cols:['#D9541F','#F0873A','#F7BE4C'], rmin:4, rmax:6, n:13, dur:[6,12] },
@@ -984,22 +966,47 @@ function signboard(x,y,w,label){
 }
 
 /* ── 장면 1 · 나의 정원 (빈 대지) ────────── */
-/* 위쪽 3분의 1 안에만 마을 그림을 깔고(원본 비율 그대로, 폭 맞춤),
-   그 아래 마당은 지금처럼 코드로 이어 그린다. 저잣거리는 그림
-   왼쪽, 서당은 그림 오른쪽에 있어 누르는 자리도 그리 맞춘다. */
 function village(){
-  const IMG_H = 400*724/2172; // 원본 비율(2172:724)대로 폭 400에 맞춘 높이 ≈133
+  // 대지를 가로지르는 길. 왼쪽 끝에 저잣거리, 오른쪽 끝에 서당
   return `<g>
-    <image href="bg/bg-village.png" xlink:href="bg/bg-village.png" x="0" y="0" width="400" height="${IMG_H.toFixed(2)}" preserveAspectRatio="xMidYMid meet"/>
-    <path d="M0 ${IMG_H.toFixed(0)} Q100 ${(IMG_H+12).toFixed(0)} 200 ${(IMG_H+5).toFixed(0)} Q300 ${(IMG_H-2).toFixed(0)} 400 ${(IMG_H+7).toFixed(0)} V600 H0 Z" fill="#D9C7A6"/>
+    <path d="M0 250 q100 -22 200 -16 q100 6 200 -12 L400 250 q-100 18 -200 12 q-100 -6 -200 16 Z" fill="#D9C7A6"/>
+    <g fill="#C7B392"><ellipse cx="46" cy="258" rx="8" ry="3"/><ellipse cx="130" cy="245" rx="8" ry="3"/>
+      <ellipse cx="196" cy="240" rx="8" ry="3"/><ellipse cx="330" cy="232" rx="8" ry="3"/></g>
+
+    <g aria-label="구름다리와 샘">
+      <path d="M262 234 C265 254, 261 268, 258 286 L242 286 C247 268, 251 254, 252 234 Z" fill="#7FB2AC"/>
+      <path d="M260 238 C262 256, 259 268, 257 284 L249 284 C252 268, 254 256, 254 238 Z" fill="#B6DED6"/>
+      <path d="M248 264 q8 -3 12 1" stroke="#E2F2EE" stroke-width="1.8" fill="none" stroke-linecap="round"/>
+      <path fill="#B5BDC7" fill-rule="evenodd"
+        d="M222 268 h70 v-22 q-35 -22 -70 -2 Z
+           M244 268 q0 -20 13 -20 q13 0 13 20 Z"/>
+      <path d="M218 248 q39 -25 78 -5 v9 q-39 -20 -78 5 Z" fill="#CFD6DE"/>
+      <path d="M218 244 q39 -25 78 -5" stroke="#8A9099" stroke-width="2.2" fill="none" stroke-linecap="round"/>
+      <g stroke="#8A9099" stroke-width="1.8">
+        <path d="M232 246 v6"/><path d="M248 238 v6"/><path d="M264 237 v6"/><path d="M280 241 v6"/></g>
+    </g>
+    <path d="M188 262 L176 322 L228 322 L214 258 Z" fill="#D9C7A6"/>
 
     <g class="tapzone" data-act="go-market" data-ax="150" data-ay="352" role="button" aria-label="저잣거리로 가기">
-      <rect x="0" y="26" width="172" height="96" fill="transparent"/>
+      <rect x="0" y="176" width="128" height="86" fill="transparent"/>
+      <rect x="14" y="228" width="42" height="26" fill="#C9B79A"/>
+      <rect x="62" y="230" width="42" height="24" fill="#C9B79A"/>
+      <path d="M8 226 h54 l-7 -18 h-40 Z" fill="#E48AA6"/>
+      <path d="M58 228 h52 l-7 -18 h-38 Z" fill="#C9A24A"/>
+      <rect x="20" y="196" width="70" height="20" rx="5" fill="#3D3A36"/>
+      <text x="55" y="211" text-anchor="middle" font-family="Gaegu, sans-serif" font-size="15" font-weight="700" fill="#F2E4CB">운교장터</text>
     </g>
 
     <g class="tapzone" data-act="go-seodang" data-ax="250" data-ay="352" role="button" aria-label="서당으로 가기">
-      <rect x="282" y="22" width="118" height="100" fill="transparent"/>
-      ${P.gu<GUJEOL.length?`<g class="badge-bob"><circle cx="388" cy="38" r="9" fill="#D9463F" stroke="#3D3A36" stroke-width="2.5"/></g>`:''}
+      <rect x="272" y="160" width="128" height="94" fill="transparent"/>
+      <rect x="296" y="216" width="86" height="36" fill="#EADCC2"/>
+      <g fill="#C9A87C" stroke="#8A6A4E" stroke-width="1.5"><rect x="306" y="224" width="22" height="26"/><rect x="336" y="224" width="22" height="26"/></g>
+      <rect x="292" y="212" width="94" height="8" rx="3" fill="#B08F6A"/>
+      <path d="M280 212 q59 -30 118 0 Z" fill="#6F6258"/>
+      <path d="M276 214 q63 -38 126 0 q-18 6 -63 6 q-45 0 -63 -6 Z" fill="#8B7D71"/>
+      <rect x="308" y="186" width="62" height="20" rx="5" fill="#3D3A36"/>
+      <text x="339" y="201" text-anchor="middle" font-family="Gaegu, sans-serif" font-size="13" font-weight="700" fill="#F2E4CB">운교서당</text>
+      ${P.gu<GUJEOL.length?`<g class="badge-bob"><circle cx="382" cy="186" r="9" fill="#D9463F" stroke="#3D3A36" stroke-width="2.5"/></g>`:''}
     </g>
   </g>`;
 }
@@ -1024,7 +1031,7 @@ function drawGarden(){
   const pool = mid.map(o=>({y:spotOf(o.iid)[1], html:place(o)}))
     .concat([{y:p.y, html:avatarSVG(p.x,p.y)}])
     .sort((a,b)=>a.y-b.y);
-  scene.innerHTML = village() + emptyLand()
+  scene.innerHTML = sky() + hills() + village() + emptyLand()
     + ground.map(place).join('')
     + pool.map(o=>o.html).join('')
     + air.map(o=> o.it.fall ? fallSVG(o.it.fall) : place(o)).join('');
@@ -1043,14 +1050,28 @@ function place(o){
 /* ── 장면 2 · 서당 마당 ─────────────────── */
 function drawSeodang(){
   const p = S.pos.seodang;
-  scene.innerHTML = `
-    <image href="bg/bg-seodang.png" xlink:href="bg/bg-seodang.png" x="0" y="0" width="400" height="600" preserveAspectRatio="xMidYMid slice"/>
-    <g class="tapzone" data-act="enter-seodang" data-ax="200" data-ay="274" role="button" aria-label="서당 안으로 들어가기">
-      <rect x="64" y="106" width="272" height="152" fill="transparent"/>
-      ${P.gu<GUJEOL.length?`<g class="badge-bob"><circle cx="282" cy="138" r="9" fill="#D9463F" stroke="#3D3A36" stroke-width="2.5"/></g>`:''}
-      <text x="200" y="290" text-anchor="middle" font-family="Gaegu, sans-serif" font-size="17" fill="#5C5346"
-        style="paint-order:stroke;stroke:#FBF3E4;stroke-width:5px;stroke-linejoin:round">문을 누르면 안으로 듭니다</text>
+  scene.innerHTML = sky() + hills() + `
+    <rect y="262" width="400" height="338" fill="#D9C7A6"/>
+    <path d="M0 300 q120 -12 220 4 q90 14 180 -4 v300 H0Z" fill="#CFB995"/>
+    <g class="tapzone" data-act="enter-seodang" data-ax="200" data-ay="466" role="button" aria-label="서당 안으로 들어가기">
+      <rect x="48" y="150" width="304" height="150" fill="transparent"/>
+      <rect x="72" y="288" width="256" height="14" rx="3" fill="#C4B4A0"/>
+      <rect x="80" y="216" width="240" height="76" fill="#EADCC2"/>
+      <rect x="106" y="230" width="52" height="58" rx="2" fill="#C9A87C" stroke="#8A6A4E" stroke-width="2"/>
+      <rect x="174" y="228" width="52" height="60" rx="2" fill="#5E4632"/>
+      <rect x="242" y="230" width="52" height="58" rx="2" fill="#C9A87C" stroke="#8A6A4E" stroke-width="2"/>
+      <g stroke="#8A6A4E" stroke-width="1.5"><path d="M106 250h52M106 270h52M242 250h52M242 270h52"/></g>
+      <rect x="84" y="212" width="232" height="10" rx="3" fill="#B08F6A"/>
+      <rect x="86" y="216" width="10" height="76" fill="#8A6A4E"/>
+      <rect x="304" y="216" width="10" height="76" fill="#8A6A4E"/>
+      <path d="M56 210 q144 -56 288 0 Z" fill="#6F6258"/>
+      <path d="M48 212 q152 -68 304 0 q-40 9 -152 9 q-112 0 -152 -9 Z" fill="#8B7D71"/>
+      <rect x="158" y="166" width="84" height="24" rx="5" fill="#3D3A36"/>
+      <text x="200" y="184" text-anchor="middle" font-family="Gaegu, sans-serif" font-size="17" font-weight="700" fill="#F2E4CB">운교서당</text>
+      ${P.gu<GUJEOL.length?`<g class="badge-bob"><circle cx="316" cy="176" r="9" fill="#D9463F" stroke="#3D3A36" stroke-width="2.5"/></g>`:''}
+      <text x="200" y="326" text-anchor="middle" font-family="Gaegu, sans-serif" font-size="17" fill="#6B6154">문을 누르면 안으로 듭니다</text>
     </g>
+    <g fill="#B7A17B"><ellipse cx="70" cy="420" rx="34" ry="9"/><ellipse cx="330" cy="440" rx="30" ry="8"/></g>
     <g class="tapzone" data-act="go-garden" data-ax="56" data-ay="556" role="button" aria-label="나의 정원으로">
       <rect x="0" y="474" width="100" height="126" fill="transparent"/>
       <path d="M0 600 L44 512 L68 512 L20 600 Z" fill="#E4D6B4"/>
@@ -1067,41 +1088,38 @@ function drawSeodang(){
 }
 
 /* ── 장면 3 · 서당 안 ───────────────────── */
-/* 학습 세 가지를 각자 딴 서안 위에 놓인 책 모양으로 그린다 */
-function bookDesk(cx, act, ax, ay, color, label, sub, ready, badge){
-  const bw=58, bh=34, by=311;               // 책
-  const dw=82, dy=347, dh=16;               // 서안 상판
-  const legY=dy+dh, legH=40;                // 서안 다리
-  const bx=cx-bw/2, dx=cx-dw/2;
-  const c = ready ? color : '#B9B2A4';
-  const halo='style="paint-order:stroke;stroke:#FBF3E4;stroke-width:4px;stroke-linejoin:round"';
-  return `<g class="tapzone" data-act="${act}" data-ax="${ax}" data-ay="${ay}" role="button" aria-label="${label}">
-    <rect x="${dx-10}" y="${by-38}" width="${dw+20}" height="190" fill="transparent"/>
-    <ellipse cx="${cx}" cy="${legY+legH+4}" rx="${dw/2+6}" ry="7" fill="rgba(43,36,28,.18)"/>
-    <rect x="${dx+7}" y="${legY}" width="9" height="${legH}" rx="2" fill="#8A6A4E" stroke="${A.line}" stroke-width="1.8"/>
-    <rect x="${dx+dw-16}" y="${legY}" width="9" height="${legH}" rx="2" fill="#8A6A4E" stroke="${A.line}" stroke-width="1.8"/>
-    <rect x="${dx}" y="${dy}" width="${dw}" height="${dh}" rx="3" fill="#B08F6A" stroke="${A.line}" stroke-width="2.4" stroke-linejoin="round"/>
-    <rect x="${dx}" y="${dy}" width="${dw}" height="6" rx="3" fill="#C9A87C"/>
-    <rect x="${bx+bw-9}" y="${by+3}" width="9" height="${bh-6}" rx="1.5" fill="#F7F1E4" stroke="${A.line}" stroke-width="1.6"/>
-    <g stroke="${shade('#F7F1E4',-35)}" stroke-width="1"><path d="M${bx+bw-6} ${by+8} h4 M${bx+bw-6} ${by+bh/2} h4 M${bx+bw-6} ${by+bh-8} h4"/></g>
-    <rect x="${bx}" y="${by}" width="${bw-6}" height="${bh}" rx="3" fill="${c}" stroke="${A.line}" stroke-width="2.6" stroke-linejoin="round"/>
-    <rect x="${bx+8}" y="${by+4}" width="${bw-22}" height="${bh-8}" rx="1.5" fill="${shade(c,ready?22:10)}"/>
-    <path d="M${bx+9} ${by+3} v${bh-6}" stroke="${shade(c,-45)}" stroke-width="2"/>
-    <path d="M${cx-3} ${by-7} h6 v13 l-3 -4 l-3 4 Z" fill="${shade(c,-20)}" stroke="${A.line}" stroke-width="1.4" stroke-linejoin="round"/>
-    ${badge&&ready&&P.gu<GUJEOL.length?`<g class="badge-bob"><circle cx="${bx+bw-2}" cy="${by-6}" r="8" fill="#D9463F" stroke="#3D3A36" stroke-width="2.2"/></g>`:''}
-    <text x="${cx}" y="${by-14}" text-anchor="middle" font-family="Gaegu, sans-serif" font-size="15" font-weight="700"
-      fill="${ready?'#3D3A36':'#9C917F'}" ${halo}>${label}</text>
-    <text x="${cx}" y="${legY+legH+24}" text-anchor="middle" font-family="Gaegu, sans-serif" font-size="12"
-      fill="${ready?'#7A6E5E':'#A99E8B'}" ${halo}>${sub}</text>
+function scroll(x, act, ax, label, sub, on){
+  return `<g class="tapzone" data-act="${act}" data-ax="${ax}" data-ay="500" role="button" aria-label="${label}">
+    <rect x="${x-6}" y="180" width="116" height="180" fill="transparent"/>
+    <rect x="${x}" y="188" width="104" height="10" rx="4" fill="#8A6A4E"/>
+    <rect x="${x+4}" y="196" width="96" height="140" fill="${on?'#F7EFDD':'#E6DCC8'}" stroke="${on?'#3D3A36':'#9C917F'}" stroke-width="3"/>
+    <rect x="${x}" y="332" width="104" height="10" rx="4" fill="#8A6A4E"/>
+    <text x="${x+52}" y="250" text-anchor="middle" font-family="Gaegu, sans-serif" font-size="21" font-weight="700" fill="${on?'#3D3A36':'#9C917F'}">${label}</text>
+    <text x="${x+52}" y="284" text-anchor="middle" font-family="Gaegu, sans-serif" font-size="15" fill="${on?'#7A6E5E':'#A99E8B'}">${sub}</text>
+    ${on&&P.gu<GUJEOL.length?`<g class="badge-bob"><circle cx="${x+98}" cy="200" r="9" fill="#D9463F" stroke="#3D3A36" stroke-width="2.5"/></g>`:''}
   </g>`;
 }
 function drawInside(){
   const p = S.pos.inside;
   scene.innerHTML = `
-    <image href="bg/bg-inside.png" xlink:href="bg/bg-inside.png" x="0" y="0" width="400" height="600" preserveAspectRatio="xMidYMid slice"/>
-    ${bookDesk(100,'study-cheonja',100,450,'#6E9A50','천자문',`${P.gu} / 125마디`,true,true)}
-    ${bookDesk(200,'study-myeongsim',200,450,'#8FA8B8','명심보감','곧 문 엽니다',false,false)}
-    ${bookDesk(300,'study-jok',300,450,'#C9A24A','글자 익힘책',`${metCount()}자 익힘`,true,true)}
+    <rect width="400" height="600" fill="#E9DCC0"/>
+    <rect y="0" width="400" height="360" fill="#DFCFAE"/>
+    <g stroke="#C4AE86" stroke-width="2"><path d="M0 120 H400M0 240 H400M100 0 V360M300 0 V360"/></g>
+    <rect y="352" width="400" height="16" fill="#8A6A4E"/>
+    <rect y="368" width="400" height="232" fill="#C9A87C"/>
+    <g stroke="#B08F6A" stroke-width="2"><path d="M0 404 H400M0 448 H400M0 496 H400M0 548 H400"/></g>
+    ${scroll(10,'study-cheonja',62,'천자문',`${P.gu} / 125마디`,true)}
+    ${scroll(148,'study-jok',200,'글자 익힘책',`${metCount()}자 익힘`,true)}
+    ${scroll(286,'study-myeongsim',338,'명심보감','곧 문 엽니다',false)}
+    <g>
+      <rect x="150" y="392" width="100" height="12" rx="4" fill="#96764F"/>
+      <rect x="150" y="386" width="100" height="8" rx="4" fill="#B08F6A"/>
+      <rect x="162" y="404" width="8" height="18" rx="3" fill="#7A5F45"/>
+      <rect x="230" y="404" width="8" height="18" rx="3" fill="#7A5F45"/>
+      <path d="M172 386 h34 v-11 h-34 Z" fill="#F7EFDD"/>
+      <rect x="214" y="378" width="5" height="8" rx="2" fill="#3D3A36"/>
+      <rect x="214" y="362" width="5" height="17" rx="2" fill="#B08F6A"/>
+    </g>
     <g class="tapzone" data-act="go-seodang" data-ax="340" data-ay="556" role="button" aria-label="마당으로 나가기">
       <rect x="288" y="470" width="112" height="130" fill="transparent"/>
       <rect x="316" y="500" width="72" height="86" rx="3" fill="#6F6258"/>
@@ -1113,33 +1131,32 @@ function drawInside(){
 }
 
 /* ── 장면 4 · 저잣거리 ──────────────────── */
-/* 전마다 좌판(차양+평상) 모양을 그려 그 안에 누름칸을 둔다 */
-function stallZone(x, act, label, sub, color, ready){
-  const c = ready ? color : '#B9B2A4';
-  return `<g class="tapzone" data-act="${act}" data-ax="${x+47}" data-ay="490" role="button" aria-label="${label}">
+function stall(x, act, ax, color, label, sub, ready){
+  return `<g class="tapzone" data-act="${act}" data-ax="${ax}" data-ay="490" role="button" aria-label="${label}">
     <rect x="${x}" y="280" width="94" height="158" fill="transparent"/>
-    <path d="M${x+1} 344 h92 l-10 -30 h-72 Z" fill="${c}" stroke="${A.line}" stroke-width="2.6" stroke-linejoin="round"/>
-    <path d="M${x+22} 344 L${x+29} 314 M${x+50} 344 L${x+54} 314 M${x+76} 344 L${x+77} 314"
-      stroke="${shade(c,ready?30:16)}" stroke-width="4" stroke-linecap="round"/>
-    <rect x="${x+8}" y="346" width="78" height="12" rx="3" fill="#8A6A4E" stroke="${A.line}" stroke-width="2.2" stroke-linejoin="round"/>
-    <rect x="${x+8}" y="352" width="78" height="56" fill="#C9B79A" stroke="${A.line}" stroke-width="2.4" stroke-linejoin="round"/>
-    <rect x="${x+12}" y="358" width="70" height="40" rx="3" fill="#EADCC2" stroke="${shade('#EADCC2',-30)}" stroke-width="1.6"/>
-    <rect x="${x+6}" y="408" width="7" height="26" rx="2" fill="#8A6A4E" stroke="${A.line}" stroke-width="1.8"/>
-    <rect x="${x+81}" y="408" width="7" height="26" rx="2" fill="#8A6A4E" stroke="${A.line}" stroke-width="1.8"/>
-    <rect x="${x+14}" y="286" width="66" height="24" rx="5" fill="#3D3A36" stroke="${A.line}" stroke-width="2"/>
+    <rect x="${x+8}" y="352" width="78" height="56" fill="#C9B79A"/>
+    <rect x="${x+8}" y="346" width="78" height="12" rx="3" fill="#8A6A4E"/>
+    <rect x="${x+12}" y="358" width="70" height="40" rx="3" fill="#EADCC2"/>
+    <path d="M${x+1} 344 h92 l-10 -30 h-72 Z" fill="${color}"/>
+    <g stroke="rgba(255,255,255,.5)" stroke-width="6">
+      <path d="M${x+22} 344 L${x+29} 314"/><path d="M${x+50} 344 L${x+54} 314"/><path d="M${x+76} 344 L${x+77} 314"/></g>
+    <rect x="${x+6}" y="408" width="7" height="26" fill="#8A6A4E"/>
+    <rect x="${x+81}" y="408" width="7" height="26" fill="#8A6A4E"/>
+    <rect x="${x+14}" y="286" width="66" height="24" rx="5" fill="#3D3A36"/>
     <text x="${x+47}" y="304" text-anchor="middle" font-family="Gaegu, sans-serif" font-size="17" font-weight="700" fill="#F2E4CB">${label}</text>
-    <text x="${x+47}" y="428" text-anchor="middle" font-family="Gaegu, sans-serif" font-size="15" fill="${ready?'#5C5346':'#9C917F'}"
-      style="paint-order:stroke;stroke:#FBF3E4;stroke-width:3px">${sub}</text>
+    <text x="${x+47}" y="428" text-anchor="middle" font-family="Gaegu, sans-serif" font-size="15" fill="${ready?'#5C5346':'#9C917F'}">${sub}</text>
   </g>`;
 }
 function drawMarket(){
   const p = S.pos.market;
-  scene.innerHTML = `
-    <image href="bg/bg-market.png" xlink:href="bg/bg-market.png" x="0" y="0" width="400" height="600" preserveAspectRatio="xMidYMid slice"/>
-    ${stallZone(4,  'shop-flower', '꽃전', '38종',   '#E48AA6',true)}
-    ${stallZone(102,'shop-clothes','옷전', '14벌',   '#7FA9C9',true)}
-    ${stallZone(200,'shop-stone',  '석물전','준비 중','#8FA8B8',false)}
-    ${stallZone(298,'shop-goods',  '물목전','준비 중','#C9A24A',false)}
+  scene.innerHTML = sky() + hills() + `
+    <rect y="262" width="400" height="338" fill="#D0BE9C"/>
+    <path d="M0 440 q200 -16 400 6 v154 H0Z" fill="#C2AE8A"/>
+    <g fill="#B7A17B"><ellipse cx="60" cy="510" rx="26" ry="8"/><ellipse cx="200" cy="540" rx="30" ry="9"/><ellipse cx="330" cy="506" rx="24" ry="8"/></g>
+    ${stall(4,  'shop-flower', 51,'#E48AA6','꽃전', '38종',  true)}
+    ${stall(102,'shop-clothes',149,'#7FA9C9','옷전', '14벌',  true)}
+    ${stall(200,'shop-stone',  247,'#8FA8B8','석물전','준비 중',false)}
+    ${stall(298,'shop-goods',  345,'#C9A24A','물목전','준비 중',false)}
     <g class="tapzone" data-act="go-garden" data-ax="344" data-ay="556" role="button" aria-label="나의 정원으로">
       <rect x="300" y="474" width="100" height="126" fill="transparent"/>
       <path d="M400 600 L356 512 L332 512 L380 600 Z" fill="#E4D6B4"/>
@@ -1152,7 +1169,7 @@ function drawMarket(){
 /* ── 장면 관리 ──────────────────────────── */
 const scene = document.getElementById('scene');
 const DRAW = { garden:drawGarden, seodang:drawSeodang, inside:drawInside, market:drawMarket };
-const FLOOR = { garden:[330,592,24,376], seodang:[280,584,32,368], inside:[420,590,30,370], market:[450,586,24,376] };
+const FLOOR = { garden:[330,592,24,376], seodang:[440,586,24,376], inside:[470,586,24,376], market:[470,586,24,376] };
 const NAVKEY = { garden:'garden', seodang:'seodang', inside:'seodang', market:'market' };
 let where='garden', walking=false, placingId=null;
 
