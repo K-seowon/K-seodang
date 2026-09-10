@@ -204,6 +204,7 @@ body{font-family:'Gaegu',system-ui,sans-serif;color:var(--ink);-webkit-font-smoo
     </div>
     <div class="plate"><svg class="pip" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9.5" fill="#E8A33C" stroke="#3D3A36" stroke-width="2.4"/><rect x="8.6" y="8.6" width="6.8" height="6.8" rx="1.2" fill="#FBF3E4" stroke="#3D3A36" stroke-width="2"/></svg><span class="num" id="coinTxt">0</span></div>
     <div class="plate" id="gemPlate" role="button" aria-label="엽전 바꾸기"><svg class="pip" viewBox="0 0 24 24" aria-hidden="true"><circle cx="17.5" cy="15" r="6" fill="#B5731F" stroke="#3D3A36" stroke-width="1.8"/><circle cx="15" cy="15" r="6.2" fill="#C9832A" stroke="#3D3A36" stroke-width="1.8"/><circle cx="12.5" cy="15" r="6.4" fill="#D9922F" stroke="#3D3A36" stroke-width="1.8"/><path d="M9 11.5 C9 5, 17 5, 16.5 10" fill="none" stroke="#8A6A4E" stroke-width="2.2" stroke-linecap="round"/><circle cx="9" cy="15" r="7" fill="#E8A33C" stroke="#3D3A36" stroke-width="2.2"/><rect x="6.7" y="12.7" width="4.6" height="4.6" rx="1" fill="#FBF3E4" stroke="#3D3A36" stroke-width="1.8"/></svg><span class="num" id="gemTxt">0</span></div>
+    <div class="plate" id="growPlate" aria-label="성장수"><svg class="pip" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3 C8 9 5 13 5 16.5 A7 7 0 0 0 19 16.5 C19 13 16 9 12 3 Z" fill="#7FC4EA" stroke="#3D3A36" stroke-width="2"/><ellipse cx="9.5" cy="14" rx="2" ry="3" fill="#BEE6F7"/></svg><span class="num" id="growTxt">0</span></div>
     <button class="plate" id="rankDemoBtn" aria-label="급수 시험(발표용)">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:18px;height:18px">
         <path d="M9 3h6M10 3v6l-5 9a2 2 0 0 0 2 3h10a2 2 0 0 0 2-3l-5-9V3"/><path d="M8.5 15h7"/>
@@ -738,6 +739,7 @@ const ITEMS = {
 const RAR_COLOR = {SR:'#E8A33C',R:'#6FA8C8',N:'#B3AEA6'};
 const COIN_SVG = `<svg class="pip" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9.5" fill="#E8A33C" stroke="#3D3A36" stroke-width="2.4"/><rect x="8.6" y="8.6" width="6.8" height="6.8" rx="1.2" fill="#FBF3E4" stroke="#3D3A36" stroke-width="2"/></svg>`;
 const BUNDLE_SVG = `<svg class="pip" viewBox="0 0 24 24" aria-hidden="true"><circle cx="17.5" cy="15" r="6" fill="#B5731F" stroke="#3D3A36" stroke-width="1.8"/><circle cx="15" cy="15" r="6.2" fill="#C9832A" stroke="#3D3A36" stroke-width="1.8"/><circle cx="12.5" cy="15" r="6.4" fill="#D9922F" stroke="#3D3A36" stroke-width="1.8"/><path d="M9 11.5 C9 5, 17 5, 16.5 10" fill="none" stroke="#8A6A4E" stroke-width="2.2" stroke-linecap="round"/><circle cx="9" cy="15" r="7" fill="#E8A33C" stroke="#3D3A36" stroke-width="2.2"/><rect x="6.7" y="12.7" width="4.6" height="4.6" rx="1" fill="#FBF3E4" stroke="#3D3A36" stroke-width="1.8"/></svg>`;
+const GROW_SVG = `<svg class="pip" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3 C8 9 5 13 5 16.5 A7 7 0 0 0 19 16.5 C19 13 16 9 12 3 Z" fill="#7FC4EA" stroke="#3D3A36" stroke-width="2"/><ellipse cx="9.5" cy="14" rx="2" ry="3" fill="#BEE6F7"/></svg>`;
 const PER_BUNDLE = 100;   // 엽전 백 닢을 실에 꿰면 한 꾸러미
 
 /* ── 계절 ───────────────────────────────
@@ -928,6 +930,7 @@ if(Array.isArray(S.owned)){
 if(!S.owned) S.owned={};
 if(!S.placed) S.placed=[];
 if(!S.seq) S.seq=0;
+if(S.growWater===undefined) S.growWater=0;
 if(!S.spot) S.spot={};
 if(!S.pos.inside) S.pos.inside={x:200,y:520};
 if(!S.closet) S.closet=START_WEAR.slice();
@@ -1584,10 +1587,12 @@ document.getElementById('waterBtn').addEventListener('click', ()=>{
 });
 const WATER_MS = 3200; // 물조리개가 기울었다 돌아오기까지 걸리는 시간
 function waterPlant(iid, name){
+  if(!(S.growWater>0)) return toast('성장수가 없습니다. 화수전에서 사거나 익혀서 모으세요.');
+  S.growWater--;
   waterFX=iid; drawScene();
-  toast(`${name}에 물을 주었습니다`);
+  toast(`${name}에 물을 주었습니다 · 성장수 ${S.growWater}방울 남음`);
   if(!S.growth) S.growth={};
-  S.growth[iid]=(S.growth[iid]||0)+1; save();
+  S.growth[iid]=(S.growth[iid]||0)+1; save(); syncHUD();
   const grew = S.growth[iid]%3===0;
   setTimeout(()=>{
     if(waterFX===iid){ waterFX=null; drawScene(); }
@@ -1665,6 +1670,7 @@ function stepBar(){
   return `<div class="studyhead">
       <span class="grade" style="background:${rk.color}">${rk.name}</span>
       <span class="coin">${COIN_SVG}${S.coin.toLocaleString()}</span>
+      <span class="coin">${GROW_SVG}${(S.growWater||0).toLocaleString()}</span>
     </div>
     <div class="steps">${STAGES.map((s,k)=>
       `<span class="${k<P.stage?'past':k===P.stage?'now':''}" ${k<P.stage?`data-stage="${k}"`:''}>${s.name}</span>`).join('')}</div>`;
@@ -1696,13 +1702,18 @@ function renderStudy(){
   const fn=[stSeongdok, stGeulja, stSori, stTteut, stBaesong][P.stage];
   fn(g);
 }
+const GROW_PER_GUJEOL = 3; // 한 마디를 배송까지 마치면 받는 성장수
 function passStage(g, coin){
-  if(coin){ S.coin+=coin; toast(`엽전 ${coin}냥`); }
+  const msg=[];
+  if(coin){ S.coin+=coin; msg.push(`엽전 ${coin}냥`); }
   P.stage++;
   if(P.stage>=STAGES.length){
     if(!P.done.includes(P.gu)) P.done.push(P.gu);
     P.gu++; P.stage=0; P.ci=0;
+    S.growWater=(S.growWater||0)+GROW_PER_GUJEOL;
+    msg.push(`성장수 ${GROW_PER_GUJEOL}방울`);
   }
+  if(msg.length) toast(msg.join(' · '));
   save(); syncHUD(); renderStudy();
 }
 
@@ -1916,11 +1927,12 @@ function runReview(list){
   let n=0, got=0;
   const step=()=>{
     if(n>=list.length){
-      S.coin+=got*20; save(); syncHUD();
+      S.coin+=got*20; S.growWater=(S.growWater||0)+got; save(); syncHUD();
       sheetBody.innerHTML=`<div class="hanja-card">
           <div class="hunum">${list.length}자 되짚었습니다.</div>
-          <div class="hint">맞힌 것 ${got}자 · 엽전 ${got*20}냥</div></div>
+          <div class="hint">맞힌 것 ${got}자 · 엽전 ${got*20}냥 · 성장수 ${got}방울</div></div>
         <button class="bigbtn" id="bk">글자 익힘책으로</button>`;
+      if(got) toast(`엽전 ${got*20}냥 · 성장수 ${got}방울`);
       document.getElementById('bk').addEventListener('click',renderJok);
       return;
     }
@@ -2249,6 +2261,7 @@ function renderBag(){
 function syncHUD(){
   document.getElementById('coinTxt').textContent=S.coin.toLocaleString();
   document.getElementById('gemTxt').textContent=S.gem.toLocaleString();
+  document.getElementById('growTxt').textContent=(S.growWater||0).toLocaleString();
   const rk = rankInfo(effCount());
   const gt = document.getElementById('gradeTxt');
   gt.textContent = rk.name; gt.style.background = rk.color;
