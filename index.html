@@ -1318,6 +1318,7 @@ function drawGarden(){
     + air.map(o=> o.it.fall ? fallSVG(o.it.fall) : place(o)).join('')
     + nameplateScene()
     + gukStagesPreview(); // 임시 확인용 — 크기 확인 후 이 줄과 위 함수들을 지운다
+}
 function spotOf(iid){ return S.spot[iid] || ITEMS[typeOf(iid)].at; }
 /* 물건은 바닥 기준점(spot)을 고정한 채 그 자리에서 SIZE_SCALE만큼
    커지거나 작아진다. ground(깔개·길)만은 화면을 꽉 채워야 하므로
