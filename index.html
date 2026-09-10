@@ -1139,7 +1139,7 @@ function drawMarket(){
 /* ── 장면 관리 ──────────────────────────── */
 const scene = document.getElementById('scene');
 const DRAW = { garden:drawGarden, seodang:drawSeodang, inside:drawInside, market:drawMarket };
-const FLOOR = { garden:[270,560,50,350], seodang:[440,586,24,376], inside:[470,586,24,376], market:[470,586,24,376] };
+const FLOOR = { garden:[200,560,50,350], seodang:[440,586,24,376], inside:[470,586,24,376], market:[470,586,24,376] };
 const NAVKEY = { garden:'garden', seodang:'seodang', inside:'seodang', market:'market' };
 let where='garden', walking=false, placingId=null;
 
@@ -1191,7 +1191,7 @@ scene.addEventListener('pointermove', e=>{
   if(!ptr.moved && Math.hypot(e.clientX-ptr.x, e.clientY-ptr.y)>6) ptr.moved=true;
   if(!drag || !ptr.moved) return;
   const p=svgPoint(e);
-  S.spot[drag.id] = [Math.round(clamp(p.x-drag.ox,16,384)), Math.round(clamp(p.y-drag.oy,300,596))];
+  S.spot[drag.id] = [Math.round(clamp(p.x-drag.ox,16,384)), Math.round(clamp(p.y-drag.oy,200,596))];
   const [x,y]=xyOf(drag.id);
   drag.g.setAttribute('transform',`translate(${x},${y})`);
 });
