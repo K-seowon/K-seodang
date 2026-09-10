@@ -992,8 +992,9 @@ function emptyLand(){
 function typeOf(iid){ return String(iid).split('__')[0]; }
 function newIid(id){ S.seq=(S.seq||0)+1; return `${id}__${S.seq}`; }
 function drawGarden(){
-  // 배경 그림 자체가 마당 바닥이라, 깔개류(ground 칸)는 이제 그리지 않는다
-  const list = S.placed.map(iid=>({iid,id:typeOf(iid),it:ITEMS[typeOf(iid)]})).filter(o=>o.it && o.it.slot!=='ground');
+  const list = S.placed.map(iid=>({iid,id:typeOf(iid),it:ITEMS[typeOf(iid)]})).filter(o=>o.it);
+  const ground = list.filter(o=>o.it.slot==='ground')
+    .sort((a,b)=>(a.it.gkind==='cover'?0:1)-(b.it.gkind==='cover'?0:1));
   const mid    = list.filter(o=>o.it.slot==='mid'||o.it.slot==='front');
   const air    = list.filter(o=>o.it.slot==='air');
   const p = S.pos.garden;
@@ -1001,6 +1002,7 @@ function drawGarden(){
     .concat([{y:p.y, html:avatarSVG(p.x,p.y)}])
     .sort((a,b)=>a.y-b.y);
   scene.innerHTML = village()
+    + ground.map(place).join('')
     + pool.map(o=>o.html).join('')
     + air.map(o=> o.it.fall ? fallSVG(o.it.fall) : place(o)).join('');
 }
