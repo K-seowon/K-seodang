@@ -1158,6 +1158,8 @@ function plumFruit(){ // 열매 맺은 나무 120x150
     + leaf(44,89,25) + leaf(82,91,23) + leaf(61,61,23)
     + fruit(40,78) + fruit(70,56) + fruit(88,80) + fruit(55,96);
 }
+/* 크기 확인이 끝난 매화 다섯 단계 그림. 아직 실제 아이템으로는
+   연결 전이라 목록만 남겨 두고, 정원에 늘어놓던 시험 배치는 걷음. */
 const PLUM_STAGES = [
   {name:'묘목',        w:40, h:50,  draw:plumSapling},
   {name:'어린나무',     w:70, h:90,  draw:plumYoung},
@@ -1165,17 +1167,6 @@ const PLUM_STAGES = [
   {name:'꽃 핀 나무',   w:120,h:150, draw:plumBloom},
   {name:'열매 맺은 나무',w:120,h:150, draw:plumFruit}
 ];
-/* 임시 확인용: 매화 다섯 단계를 같은 땅금에 나란히 세운다.
-   학동을 걸어서 옆에 세워보고 크기를 확인한 뒤 이 함수는 지운다. */
-function plumStagesPreview(){
-  const baseY=470, xs=[40,120,200,280,360];
-  return PLUM_STAGES.map((s,i)=>{
-    const cx=xs[i];
-    return `<g transform="translate(${cx},${baseY}) scale(${SIZE_SCALE}) translate(${-s.w/2},${-s.h})">${s.draw()}</g>
-      <text x="${cx}" y="${baseY+16}" text-anchor="middle" font-family="Gaegu, sans-serif" font-size="11" fill="#5C5346"
-        style="paint-order:stroke;stroke:#FBF3E4;stroke-width:3px">${s.name}</text>`;
-  }).join('');
-}
 
 /* 이름 팻말 — 돈으로 살 수 없고 학습으로만(급이 오르면) 바뀐다.
    나중에 이웃이 왔을 때 이 팻말로 급을 알아볼 수 있게 된다. */
@@ -1216,8 +1207,7 @@ function drawGarden(){
     + ground.map(place).join('')
     + pool.map(o=>o.html).join('')
     + air.map(o=> o.it.fall ? fallSVG(o.it.fall) : place(o)).join('')
-    + nameplateScene()
-    + plumStagesPreview(); // 임시 확인용 — 크기 확인 후 이 줄과 위 함수들을 지운다
+    + nameplateScene();
 }
 function spotOf(iid){ return S.spot[iid] || ITEMS[typeOf(iid)].at; }
 /* 물건은 바닥 기준점(spot)을 고정한 채 그 자리에서 SIZE_SCALE만큼
