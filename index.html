@@ -122,10 +122,12 @@ body{font-family:'Gaegu',system-ui,sans-serif;color:var(--ink);-webkit-font-smoo
 .swap span .pip{width:26px;height:26px}
 .swap b{font-size:26px;font-weight:700}
 .swap em{font-style:normal;font-size:26px;color:#7A6E5E}
+.studyhead{display:flex;align-items:center;gap:10px;margin-bottom:8px;font-size:15px}
+.studyhead .coin{display:inline-flex;align-items:center;gap:4px;font-weight:700;color:var(--ink)}
 .steps{display:flex;gap:4px;margin-bottom:12px}
 .steps span{flex:1;text-align:center;font-size:15px;padding:5px 0;border-radius:10px;
   border:2px solid #D6C7AC;color:#A99E8B;background:var(--hanji)}
-.steps span.past{background:#DCEAC8;border-color:var(--ink);color:#5C5346}
+.steps span.past{background:#DCEAC8;border-color:var(--ink);color:#5C5346;cursor:pointer}
 .steps span.now{background:var(--maehwa);border-color:var(--ink);color:var(--ink);font-weight:700}
 .grid8{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin:14px 0 6px}
 .grid8 .ja{background:var(--hanji);border:2px solid var(--ink);border-radius:10px;padding:6px 2px}
@@ -1659,8 +1661,23 @@ const shuffle = a => a.slice().sort(()=>Math.random()-.5);
 function openStudy(){ openSheetRaw('천자문'); renderStudy(); }
 
 function stepBar(){
-  return `<div class="steps">${STAGES.map((s,k)=>
-    `<span class="${k<P.stage?'past':k===P.stage?'now':''}">${s.name}</span>`).join('')}</div>`;
+  const rk = rankInfo(effCount());
+  return `<div class="studyhead">
+      <span class="grade" style="background:${rk.color}">${rk.name}</span>
+      <span class="coin">${COIN_SVG}${S.coin.toLocaleString()}</span>
+    </div>
+    <div class="steps">${STAGES.map((s,k)=>
+      `<span class="${k<P.stage?'past':k===P.stage?'now':''}" ${k<P.stage?`data-stage="${k}"`:''}>${s.name}</span>`).join('')}</div>`;
+}
+/* 지나온 단계를 누르면 그 단계로 돌아간다(앞으로는 못 건너뜀) */
+function bindStepBar(){
+  sheetBody.querySelectorAll('.steps span.past').forEach(el=>{
+    el.addEventListener('click', ()=>{
+      P.stage = +el.dataset.stage;
+      P.ci = 0;
+      save(); renderStudy();
+    });
+  });
 }
 function guTitle(g){ return `<div class="gu">${g.gu1}   ${g.gu2}</div>`; }
 
@@ -1701,6 +1718,7 @@ function stSeongdok(g){
     </div>
     <p class="note">소리 내어 두어 번 읽어 보세요. 여기서는 채점하지 않습니다.</p>
     <button class="bigbtn" id="go">다 읽었습니다</button>`;
+  bindStepBar();
   document.getElementById('go').addEventListener('click',()=>passStage(g,0));
 }
 
@@ -1718,6 +1736,7 @@ function stGeulja(g){
       autocomplete="off" autocapitalize="off" aria-label="음">
       <button class="bigbtn" id="ck" style="margin:0;width:auto;padding:14px 22px">확인</button></div>
     <div id="after"></div>`;
+  bindStepBar();
   const inp=document.getElementById('um');
   inp.focus();
   const check=()=>{
@@ -1776,6 +1795,7 @@ function stSori(g){
     <p class="note">빈자리에 들어갈 글자를 고르세요.</p>
     <div class="choices">${opts.map(x=>`<button class="choice ja-opt" data-c="${x.c}">${x.c}</button>`).join('')}</div>
     <div id="after"></div>`;
+  bindStepBar();
   sheetBody.querySelectorAll('.choice').forEach(b=>b.addEventListener('click',()=>{
     const ok=b.dataset.c===ans.c;
     sheetBody.querySelectorAll('.choice').forEach(x=>{
@@ -1806,6 +1826,7 @@ function stTteut(g){
     <div class="choices">${opts.map(x=>
       `<button class="choice" data-g="${x.g}">${x.mean}</button>`).join('')}</div>
     <div id="after"></div>`;
+  bindStepBar();
   sheetBody.querySelectorAll('.choice').forEach(b=>b.addEventListener('click',()=>{
     const ok=+b.dataset.g===g.g;
     sheetBody.querySelectorAll('.choice').forEach(x=>{
@@ -1834,6 +1855,7 @@ function stBaesong(g){
       <div class="pick">${pool.map(o=>
         `<button class="ja-opt" data-c="${o.c}" ${put.includes(o.c)?'disabled':''}>${o.c}</button>`).join('')}</div>
       <div id="after"></div>`;
+    bindStepBar();
     sheetBody.querySelectorAll('.pick button').forEach(b=>
       b.addEventListener('click',()=>tap(b.dataset.c)));
   };
