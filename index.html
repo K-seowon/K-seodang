@@ -831,12 +831,18 @@ Object.keys(ITEMS).forEach(id=>{ if(!ITEMS[id].season) ITEMS[id].season = SEASON
    계절과 상관없이 파는 것들이라 season을 매기지 않고, grow로만
    구분한다(목석방 계절 탭에는 안 뜨게). ------------------------- */
 Object.assign(ITEMS, {
-  seed_mh:{name:'매화씨',slot:'front',rar:'N',cur:'coin',amt:150,box:[30,20],at:[80,560],anchor:'bc',grow:'seed',season:'all',
+  seed_pr:{name:'패랭이꽃씨',slot:'front',rar:'N',cur:'coin',amt:60,box:[30,20],at:[40,560],anchor:'bc',grow:'seed',season:'all',
     svg:`<ellipse cx="15" cy="20" rx="13" ry="4" fill="rgba(43,36,28,.22)"/><ellipse cx="15" cy="15" rx="12" ry="5" fill="#8B6A4E" stroke="#2B2620" stroke-width="2.4"/><ellipse cx="15" cy="13" rx="8" ry="3" fill="#A9744F"/><path d="M15 13 v-4" stroke="#2B2620" stroke-width="2" stroke-linecap="round"/><circle cx="15" cy="8" r="3" fill="#F0A8BE" stroke="#2B2620" stroke-width="1.8"/>`},
-  seed_gu:{name:'국화씨',slot:'front',rar:'N',cur:'coin',amt:150,box:[30,20],at:[160,560],anchor:'bc',grow:'seed',season:'all',
+  seed_bs:{name:'봉선화씨',slot:'front',rar:'N',cur:'coin',amt:80,box:[30,20],at:[90,560],anchor:'bc',grow:'seed',season:'all',
+    svg:`<ellipse cx="15" cy="20" rx="13" ry="4" fill="rgba(43,36,28,.22)"/><ellipse cx="15" cy="15" rx="12" ry="5" fill="#8B6A4E" stroke="#2B2620" stroke-width="2.4"/><ellipse cx="15" cy="13" rx="8" ry="3" fill="#A9744F"/><path d="M15 13 v-4" stroke="#2B2620" stroke-width="2" stroke-linecap="round"/><circle cx="15" cy="8" r="3" fill="#D9463F" stroke="#2B2620" stroke-width="1.8"/>`},
+  seed_np:{name:'나팔꽃씨',slot:'front',rar:'N',cur:'coin',amt:90,box:[30,20],at:[140,560],anchor:'bc',grow:'seed',season:'all',
+    svg:`<ellipse cx="15" cy="20" rx="13" ry="4" fill="rgba(43,36,28,.22)"/><ellipse cx="15" cy="15" rx="12" ry="5" fill="#8B6A4E" stroke="#2B2620" stroke-width="2.4"/><ellipse cx="15" cy="13" rx="8" ry="3" fill="#A9744F"/><path d="M15 13 v-4" stroke="#2B2620" stroke-width="2" stroke-linecap="round"/><circle cx="15" cy="8" r="3" fill="#9B7FC7" stroke="#2B2620" stroke-width="1.8"/>`},
+  seed_gu:{name:'국화씨',slot:'front',rar:'N',cur:'coin',amt:100,box:[30,20],at:[190,560],anchor:'bc',grow:'seed',season:'all',
     svg:`<ellipse cx="15" cy="20" rx="13" ry="4" fill="rgba(43,36,28,.22)"/><ellipse cx="15" cy="15" rx="12" ry="5" fill="#8B6A4E" stroke="#2B2620" stroke-width="2.4"/><ellipse cx="15" cy="13" rx="8" ry="3" fill="#A9744F"/><path d="M15 13 v-4" stroke="#2B2620" stroke-width="2" stroke-linecap="round"/><circle cx="15" cy="8" r="3" fill="#F2C43C" stroke="#2B2620" stroke-width="1.8"/>`},
-  seed_jd:{name:'진달래씨',slot:'front',rar:'N',cur:'coin',amt:150,box:[30,20],at:[240,560],anchor:'bc',grow:'seed',season:'all',
-    svg:`<ellipse cx="15" cy="20" rx="13" ry="4" fill="rgba(43,36,28,.22)"/><ellipse cx="15" cy="15" rx="12" ry="5" fill="#8B6A4E" stroke="#2B2620" stroke-width="2.4"/><ellipse cx="15" cy="13" rx="8" ry="3" fill="#A9744F"/><path d="M15 13 v-4" stroke="#2B2620" stroke-width="2" stroke-linecap="round"/><circle cx="15" cy="8" r="3" fill="#E4749B" stroke="#2B2620" stroke-width="1.8"/>`},
+  seed_md:{name:'맨드라미씨',slot:'front',rar:'N',cur:'coin',amt:120,box:[30,20],at:[240,560],anchor:'bc',grow:'seed',season:'all',
+    svg:`<ellipse cx="15" cy="20" rx="13" ry="4" fill="rgba(43,36,28,.22)"/><ellipse cx="15" cy="15" rx="12" ry="5" fill="#8B6A4E" stroke="#2B2620" stroke-width="2.4"/><ellipse cx="15" cy="13" rx="8" ry="3" fill="#A9744F"/><path d="M15 13 v-4" stroke="#2B2620" stroke-width="2" stroke-linecap="round"/><circle cx="15" cy="8" r="3" fill="#B03040" stroke="#2B2620" stroke-width="1.8"/>`},
+  seed_mr:{name:'모란씨',slot:'front',rar:'N',cur:'coin',amt:150,box:[30,20],at:[290,560],anchor:'bc',grow:'seed',season:'all',
+    svg:`<ellipse cx="15" cy="20" rx="13" ry="4" fill="rgba(43,36,28,.22)"/><ellipse cx="15" cy="15" rx="12" ry="5" fill="#8B6A4E" stroke="#2B2620" stroke-width="2.4"/><ellipse cx="15" cy="13" rx="8" ry="3" fill="#A9744F"/><path d="M15 13 v-4" stroke="#2B2620" stroke-width="2" stroke-linecap="round"/><circle cx="15" cy="8" r="3" fill="#D9718F" stroke="#2B2620" stroke-width="1.8"/>`},
   sap_mh:{name:'매화나무 묘목',slot:'mid',rar:'R',cur:'coin',amt:700,box:[40,50],at:[180,540],anchor:'bc',grow:'sapling',season:'all',
     svg:`<ellipse cx="20" cy="50" rx="12.8" ry="2.3" fill="rgba(43,36,28,.28)"/><path d="M20 50 L20 24" stroke="#2B2620" stroke-width="5.6" stroke-linecap="round"/><path d="M20 50 L20 24" stroke="#8B6A4E" stroke-width="3" stroke-linecap="round"/><path d="M20 30 l-7 -6" stroke="#2B2620" stroke-width="4.6" stroke-linecap="round"/><path d="M20 30 l-7 -6" stroke="#8B6A4E" stroke-width="2" stroke-linecap="round"/><path d="M20 28 l7 -5" stroke="#2B2620" stroke-width="4.6" stroke-linecap="round"/><path d="M20 28 l7 -5" stroke="#8B6A4E" stroke-width="2" stroke-linecap="round"/><circle cx="11" cy="20" r="7" fill="#6E9A50" stroke="#2B2620" stroke-width="2.6"/><circle cx="13.9" cy="22.1" r="3.9" fill="#527E34"/><circle cx="22" cy="15" r="7.5" fill="#6E9A50" stroke="#2B2620" stroke-width="2.6"/><circle cx="24.1" cy="17.3" r="4.1" fill="#527E34"/><circle cx="28" cy="23" r="6.5" fill="#6E9A50" stroke="#2B2620" stroke-width="2.6"/><circle cx="29.8" cy="24.9" r="3.6" fill="#527E34"/>`},
   sap_gam:{name:'감나무 묘목',slot:'mid',rar:'R',cur:'coin',amt:700,box:[40,50],at:[100,540],anchor:'bc',grow:'sapling',season:'all',
@@ -1191,6 +1197,86 @@ const PLUM_STAGES = [
   {name:'열매 맺은 나무',w:120,h:150, draw:plumFruit}
 ];
 
+/* ── 국화(첫 화초) 다섯 단계 + 시든 모습 ─────
+   씨앗·새싹은 다른 화초와 비슷해도 되고, 떡잎부터 잎 모양(들쭉날쭉한
+   국화잎)을 살리고, 봉오리·꽃은 뚜렷이 구별한다. 시든 모습은 줄기가
+   처지고 색이 누렇게 빠진다. 크기는 씨앗 30x20 ~ 꽃 60x72(나무보다
+   작음) — 앞서 정한 화초 크기 기준을 그대로 따름. -------------- */
+function gukLeaf(cx,cy,rot,scale,color){
+  const sw=(2.4/scale).toFixed(2), sw2=(1.3/scale).toFixed(2);
+  return `<g transform="translate(${cx},${cy}) rotate(${rot}) scale(${scale})">
+    <path d="M0 0 Q-8 -4 -10 -12 Q-3 -9 0 -15 Q3 -9 10 -12 Q8 -4 0 0 Z" fill="${color}" stroke="${LINE}" stroke-width="${sw}" stroke-linejoin="round"/>
+    <path d="M0 -1 Q-2 -7 0 -13" fill="none" stroke="${shade(color,-30)}" stroke-width="${sw2}"/>
+  </g>`;
+}
+function petalRing(cx,cy,n,rx,ry,color){
+  let s='';
+  for(let i=0;i<n;i++) s+=`<ellipse cx="${cx}" cy="${(cy-ry).toFixed(1)}" rx="${rx}" ry="${ry}" fill="${color}" stroke="${LINE}" stroke-width="1.7" transform="rotate(${(360/n*i).toFixed(1)} ${cx} ${cy})"/>`;
+  return s;
+}
+function gukSeed(){ // 씨앗 30x20
+  return plantShadow(30,20)
+    + `<ellipse cx="15" cy="15" rx="12" ry="5" fill="#8B6A4E" stroke="${LINE}" stroke-width="2.4"/>
+       <ellipse cx="15" cy="13" rx="8" ry="3" fill="#A9744F"/>
+       <path d="M15 13 v-4" stroke="${LINE}" stroke-width="2" stroke-linecap="round"/>
+       <circle cx="15" cy="8" r="3" fill="#F2C43C" stroke="${LINE}" stroke-width="1.8"/>`;
+}
+function gukSprout(){ // 새싹 34x28
+  return plantShadow(34,28)
+    + woodLine('M17 28 L17 14',3,'#6E9A50')
+    + leafBlob(11,13,6,'#6E9A50') + leafBlob(23,13,6,'#6E9A50');
+}
+function gukCotyledon(){ // 떡잎 44x42 — 들쭉날쭉한 잎이 처음 보임
+  return plantShadow(44,42)
+    + woodLine('M22 42 L22 20',3.4,'#6E9A50')
+    + gukLeaf(13,23,-30,.6,'#6E9A50') + gukLeaf(31,23,30,.6,'#6E9A50') + gukLeaf(22,15,0,.6,'#6E9A50');
+}
+function gukBud(){ // 봉오리 52x60 — 잎이 늘고 끝에 아직 안 핀 꽃봉오리
+  return plantShadow(52,60)
+    + woodLine('M26 60 L26 18',4,'#6E9A50')
+    + gukLeaf(14,44,-25,.8,'#6E9A50') + gukLeaf(38,44,25,.8,'#6E9A50')
+    + gukLeaf(17,27,-15,.8,'#6E9A50') + gukLeaf(35,27,15,.8,'#6E9A50')
+    + `<ellipse cx="26" cy="12" rx="7" ry="9" fill="#8FB566" stroke="${LINE}" stroke-width="2.6"/>
+       <ellipse cx="28" cy="9" rx="4" ry="5.5" fill="${shade('#8FB566',22)}"/>
+       <path d="M20 8 q6 -6 12 0" fill="none" stroke="${shade('#8FB566',-25)}" stroke-width="1.4"/>`;
+}
+function gukFlower(){ // 꽃 60x72 — 여러 겹 노란 꽃잎
+  return plantShadow(60,72)
+    + woodLine('M30 72 L30 26',5,'#6E9A50')
+    + gukLeaf(16,56,-25,1,'#6E9A50') + gukLeaf(44,56,25,1,'#6E9A50')
+    + gukLeaf(19,38,-15,1,'#6E9A50') + gukLeaf(41,38,15,1,'#6E9A50')
+    + petalRing(30,12,14,4.2,13,'#F2C43C')
+    + petalRing(30,12,9,3.2,8,'#FBE29A')
+    + `<circle cx="30" cy="12" r="6" fill="#D9A93C" stroke="${LINE}" stroke-width="2.2"/>`;
+}
+function gukWither(){ // 시든 모습 60x72 — 줄기가 처지고 색이 누렇게 빠짐
+  return plantShadow(60,72)
+    + woodLine('M30 72 Q25 46 42 32',5,'#8A9A5E')
+    + gukLeaf(18,58,50,.85,'#A9A05A') + gukLeaf(34,50,70,.7,'#A9A05A')
+    + petalRing(42,32,12,3.4,9,'#C9B06A')
+    + `<circle cx="42" cy="32" r="5.5" fill="#B08F4A" stroke="${LINE}" stroke-width="2"/>`;
+}
+const GUK_STAGES = [
+  {name:'씨앗', w:30,h:20, draw:gukSeed},
+  {name:'새싹', w:34,h:28, draw:gukSprout},
+  {name:'떡잎', w:44,h:42, draw:gukCotyledon},
+  {name:'봉오리',w:52,h:60, draw:gukBud},
+  {name:'꽃',   w:60,h:72, draw:gukFlower},
+  {name:'시든 모습',w:60,h:72, draw:gukWither}
+];
+/* 임시 확인용: 국화 다섯 단계 + 시든 모습을 나무·학동 옆에 세운다.
+   크기를 확인한 뒤 나머지 다섯 화초를 같은 방식으로 만들고 이
+   임시 배치는 걷어낸다. */
+function gukStagesPreview(){
+  const baseY=560, xs=[30,75,120,175,235,300];
+  return GUK_STAGES.map((s,i)=>{
+    const cx=xs[i];
+    return `<g transform="translate(${cx},${baseY}) scale(${SIZE_SCALE}) translate(${-s.w/2},${-s.h})">${s.draw()}</g>
+      <text x="${cx}" y="${baseY+14}" text-anchor="middle" font-family="Gaegu, sans-serif" font-size="10" fill="#5C5346"
+        style="paint-order:stroke;stroke:#FBF3E4;stroke-width:3px">${s.name}</text>`;
+  }).join('');
+}
+
 /* 이름 팻말 — 돈으로 살 수 없고 학습으로만(급이 오르면) 바뀐다.
    나중에 이웃이 왔을 때 이 팻말로 급을 알아볼 수 있게 된다. */
 function nameplateSVG(){
@@ -1230,8 +1316,8 @@ function drawGarden(){
     + ground.map(place).join('')
     + pool.map(o=>o.html).join('')
     + air.map(o=> o.it.fall ? fallSVG(o.it.fall) : place(o)).join('')
-    + nameplateScene();
-}
+    + nameplateScene()
+    + gukStagesPreview(); // 임시 확인용 — 크기 확인 후 이 줄과 위 함수들을 지운다
 function spotOf(iid){ return S.spot[iid] || ITEMS[typeOf(iid)].at; }
 /* 물건은 바닥 기준점(spot)을 고정한 채 그 자리에서 SIZE_SCALE만큼
    커지거나 작아진다. ground(깔개·길)만은 화면을 꽉 채워야 하므로
@@ -1907,7 +1993,7 @@ function renderShop(){
   sheetBody.querySelectorAll('.cell').forEach(c=>c.addEventListener('click',()=>buy(c.dataset.id)));
 }
 /* ── 화수전: 씨앗 · 묘목 · 성장수 (계절 상관없이 상시 판매) ─── */
-const SEED_IDS=['seed_mh','seed_gu','seed_jd'];
+const SEED_IDS=['seed_pr','seed_bs','seed_np','seed_gu','seed_md','seed_mr'];
 const SAPLING_IDS=['sap_mh','sap_gam','sap_bam'];
 function openGrowShop(){
   openSheetRaw('운교장터 · 화수전');
