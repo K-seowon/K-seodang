@@ -1616,24 +1616,22 @@ function stGeulja(g){
     document.getElementById('ck').disabled=true;
     const after=document.getElementById('after');
     if(ok){
-      after.innerHTML=`<div class="verdict right">떠올렸습니다 — ${o.hun} ${o.um}</div>
-        <button class="bigbtn" id="nx">다음 글자</button>`;
-    } else {
-      const opts=shuffle([o, ...shuffle(CHEONJA.filter(x=>x.um!==o.um)).slice(0,3)]);
-      after.innerHTML=`<div class="verdict wrong">아직입니다. 보기에서 골라 보세요.</div>
-        <div class="choices">${opts.map(x=>
-          `<button class="choice" data-u="${x.um}">${o.hun} ${x.um}</button>`).join('')}</div>`;
-      after.querySelectorAll('.choice').forEach(b=>b.addEventListener('click',()=>{
-        after.querySelectorAll('.choice').forEach(x=>{
-          x.disabled=true; if(x.dataset.u===o.um) x.classList.add('right');
-        });
-        if(b.dataset.u!==o.um) b.classList.add('wrong');
-        after.insertAdjacentHTML('beforeend',`<button class="bigbtn" id="nx">다음 글자</button>`);
-        document.getElementById('nx').addEventListener('click',next);
-      }));
+      after.innerHTML=`<div class="verdict right">${o.hun} ${o.um}</div>`;
+      setTimeout(next, 500);
       return;
     }
-    document.getElementById('nx').addEventListener('click',next);
+    const opts=shuffle([o, ...shuffle(CHEONJA.filter(x=>x.um!==o.um)).slice(0,3)]);
+    after.innerHTML=`<div class="verdict wrong">아직입니다. 보기에서 골라 보세요.</div>
+      <div class="choices">${opts.map(x=>
+        `<button class="choice" data-u="${x.um}">${o.hun} ${x.um}</button>`).join('')}</div>`;
+    after.querySelectorAll('.choice').forEach(b=>b.addEventListener('click',()=>{
+      after.querySelectorAll('.choice').forEach(x=>{
+        x.disabled=true; if(x.dataset.u===o.um) x.classList.add('right');
+      });
+      if(b.dataset.u!==o.um) b.classList.add('wrong');
+      after.insertAdjacentHTML('beforeend',`<button class="bigbtn" id="nx">다음 글자</button>`);
+      document.getElementById('nx').addEventListener('click',next);
+    }));
   }
   function next(){
     P.ci++;
