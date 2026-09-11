@@ -888,9 +888,10 @@ function itemMedia(it){
 }
 
 /* 「매화 핀 언덕」 사철 샘플은 걷어내고, 지금 배경 그림과 어울리는
-   작은 것 두 가지만 남긴다 — 걷는 자리와 심을 자리를 넉넉히 비움 */
-const SAMPLE_PLACED = ['mhs_15','mhs_16'];
-const SAMPLE_SPOT = { mhs_15:[120,480], mhs_16:[280,320] };
+   작은 것들만 남긴다 — 걷는 자리와 심을 자리를 넉넉히 비움 */
+const SAMPLE_PLACED = ['mhs_15','mhs_16','seed_gu'];
+const SAMPLE_SPOT = { mhs_15:[120,480], mhs_16:[280,320], seed_gu:[220,556] };
+const SAMPLE_GROWTH = { seed_gu:12 }; // 12방울 = 국화가 꽃 단계까지 다 자란 모습
 
 /* ── 옷 ─────────────────────────────────
    slot   top(저고리) / bottom(치마·바지) / outer(두루마기) / shoes(신)
@@ -934,6 +935,7 @@ const S = load() || {
   owned: Object.fromEntries(SAMPLE_PLACED.map(id=>[id,1])),
   placed: SAMPLE_PLACED.slice(),
   spot: {...SAMPLE_SPOT},
+  growth: {...SAMPLE_GROWTH},
   seq: 0,
   locked: false,
   closet: START_WEAR.slice(),
@@ -953,6 +955,17 @@ if(S.growWater===undefined) S.growWater=0;
 if(!S.growth) S.growth={};
 if(!S.spot) S.spot={};
 if(!S.neighborWater) S.neighborWater={};
+// 국화를 debug용 미리보기 대신 정원 제자리에 심어 두는 것으로 바꾼 뒤,
+// 이미 저장돼 있던 자료에도 한 번만 자연스럽게 얹어준다.
+if(!S.sampleGukAdded){
+  if(!S.placed.includes('seed_gu')){
+    S.owned.seed_gu = (S.owned.seed_gu||0)+1;
+    S.placed.push('seed_gu');
+    S.spot.seed_gu = SAMPLE_SPOT.seed_gu;
+    S.growth.seed_gu = SAMPLE_GROWTH.seed_gu;
+  }
+  S.sampleGukAdded = true;
+}
 if(!S.pos.inside) S.pos.inside={x:200,y:520};
 if(!S.closet) S.closet=START_WEAR.slice();
 if(!S.wear) S.wear={ top:'jg_dahong', bottom:'ch_namsaek', outer:null, shoes:'sh_gomu' };
@@ -1330,18 +1343,6 @@ const GUK_STAGES = [
   {name:'꽃',   w:60,h:72, draw:gukFlower},
   {name:'시든 모습',w:60,h:72, draw:gukWither}
 ];
-/* 임시 확인용: 국화 다섯 단계 + 시든 모습을 나무·학동 옆에 세운다.
-   크기를 확인한 뒤 나머지 다섯 화초를 같은 방식으로 만들고 이
-   임시 배치는 걷어낸다. */
-function gukStagesPreview(){
-  const baseY=560, xs=[30,75,120,175,235,300];
-  return GUK_STAGES.map((s,i)=>{
-    const cx=xs[i];
-    return `<g transform="translate(${cx},${baseY}) scale(${SIZE_SCALE}) translate(${-s.w/2},${-s.h})">${s.draw()}</g>
-      <text x="${cx}" y="${baseY+14}" text-anchor="middle" font-family="Gaegu, sans-serif" font-size="10" fill="#5C5346"
-        style="paint-order:stroke;stroke:#FBF3E4;stroke-width:3px">${s.name}</text>`;
-  }).join('');
-}
 
 /* 이름 팻말 — 돈으로 살 수 없고 학습으로만(급이 오르면) 바뀐다.
    나중에 이웃이 왔을 때 이 팻말로 급을 알아볼 수 있게 된다. */
@@ -1388,7 +1389,7 @@ function drawGarden(){
     + air.map(o=> o.it.fall ? fallSVG(o.it.fall) : place(o)).join('')
     + (visiting
         ? nameplateScene(visiting.name, {color:RANKS[visiting.rankIdx].color, name:RANKS[visiting.rankIdx].name})
-        : nameplateScene() + gukStagesPreview()); // 임시 확인용 — 크기 확인 후 이 줄과 위 함수들을 지운다
+        : nameplateScene());
 }
 function spotOf(iid){
   const store = visiting ? (visiting.spot||{}) : S.spot;
@@ -1445,13 +1446,17 @@ function waterCanSVG(cx,cy){
   </g></g>`;
 }
 function waterFxSVG(w,h){
-  const cx=w*0.75, cy=-20;
-  const sx=(cx-32).toFixed(1), sy=(cy+20).toFixed(1); // 물뿌리개 머리(위 -32,20)의 실제 자리
+  // 물뿌리개 주둥이(물이 실제로 떨어지는 자리)를 식물 너비의 한가운데(w/2)에
+  // 맞춘다. 몸통(waterCanSVG의 translate 기준점)은 그 그림 그대로 주둥이보다
+  // 오른쪽 위로 32,20만큼 물러나 있으므로, 몸통 자리를 주둥이 자리 + (32,20)로
+  // 잡아주면 주둥이가 언제나 식물 크기와 상관없이 한가운데로 온다.
+  const sx=(w/2).toFixed(1), sy='0';
+  const cx=w/2+32, cy=-20;
   // 거의 수직으로 떨어지되, 안쪽/바깥쪽으로 살짝씩 퍼지도록 물방울마다
   // 다른 각도(fx: -1 안쪽 ~ 1 바깥쪽)를 준다
   const baseDdy=h*0.58, spread=w*0.16;
   const drop=(delay,jx,fx)=>{
-    const ddx=(fx*spread - w*0.012).toFixed(1);
+    const ddx=(fx*spread).toFixed(1);
     const ddy=(baseDdy + Math.abs(fx)*h*0.05).toFixed(1);
     return `<ellipse class="drop2" cx="${(+sx+jx).toFixed(1)}" cy="${sy}" rx="3" ry="4.2"
       fill="#7FC4EA" stroke="${LINE}" stroke-width="1.3" style="--ddx:${ddx}px;--ddy:${ddy}px;animation-delay:${delay}s"/>`;
@@ -2389,6 +2394,7 @@ function renderBag(){
   if(sb) sb.addEventListener('click',()=>{
     S.spot={...SAMPLE_SPOT};
     S.placed=SAMPLE_PLACED.filter(id=>ownedCount(id)>0);
+    Object.assign(S.growth, SAMPLE_GROWTH);
     save(); renderBag(); toast('샘플 배치로 되돌렸습니다');
   });
 }
