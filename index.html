@@ -143,9 +143,8 @@ body{font-family:'Gaegu',system-ui,sans-serif;color:var(--ink);-webkit-font-smoo
 .grid8 .ja b{display:block;font-size:32px;line-height:1.1;font-weight:700}
 .grid8 .ja span{display:block;font-size:14px;color:#7A6E5E;white-space:nowrap;overflow:hidden}
 .grid8.small .ja b{font-size:26px}
+.grid8 .ja.blank{background:var(--maehwa)}
 .mean{font-size:19px;margin-top:10px;line-height:1.5}
-.cloze{font-size:52px;font-weight:700;letter-spacing:.06em;margin:8px 0}
-.cloze i{font-style:normal;color:var(--maehwa-d)}
 .answer{display:flex;gap:8px;align-items:stretch;margin-top:12px}
 .answer input{flex:1;min-width:0;border:3px solid var(--ink);border-radius:16px;background:var(--hanji);
   font-family:inherit;font-size:30px;text-align:center;padding:8px}
@@ -651,7 +650,7 @@ const STAGES = [
 
   { id:'sori',     name:'소리',   mode:'cloze',
     scored:true,  coin:60,
-    desc:'네 자 구에서 빠진 한 자를 채운다.' },
+    desc:'여덟 자 중 빈칸 하나를 채운다.' },
 
   { id:'tteut',    name:'뜻',     mode:'meaning',
     scored:true,  coin:60,
@@ -2222,40 +2221,49 @@ function stGeulja(g){
   }
 }
 
-/* 3 소리 — 넉 자 구에서 빠진 한 자를 채운다 */
+/* 3 소리 — 여덟 자를 다 보여주고 그중 한 자만 가려 맞힌다.
+   앞 넉 자를 맞히면 곧장 뒤 넉 자로, 뒤 넉 자까지 맞히면 곧장 다음 단계로 넘어간다.
+   틀렸을 때만 "다시" 버튼을 보여주고 같은 문제를 다시 낸다. */
 function stSori(g){
-  const half=curCi()<1?0:1;
-  const phrase=half?g.gu2:g.gu1;
-  const base=half?4:0;
-  const k=Math.floor(Math.random()*4);
-  const ans=g.chars[base+k];
-  const shown=[...phrase].map((c,n)=>n===k?'<i>□</i>':c).join('');
-  const opts=shuffle([ans, ...shuffle(CHEONJA.filter(x=>x.c!==ans.c)).slice(0,3)]);
-  sheetBody.innerHTML=stepBar()+`
-    <div class="hanja-card">
-      <div class="hint">${half?'뒤':'앞'} 넉 자</div>
-      <div class="cloze">${shown}</div>
-      <div class="hunum">${ans.hun} ${ans.um}</div>
-    </div>
-    <p class="note">빈자리에 들어갈 글자를 고르세요.</p>
-    <div class="choices">${opts.map(x=>`<button class="choice ja-opt" data-c="${x.c}">${x.c}</button>`).join('')}</div>
-    <div id="after"></div>`;
-  bindStepBar();
-  sheetBody.querySelectorAll('.choice').forEach(b=>b.addEventListener('click',()=>{
-    const ok=b.dataset.c===ans.c;
-    sheetBody.querySelectorAll('.choice').forEach(x=>{
-      x.disabled=true; if(x.dataset.c===ans.c) x.classList.add('right');
-    });
-    if(!ok) b.classList.add('wrong');
-    markChar(P,ans.c,ok); save();
-    document.getElementById('after').innerHTML=
-      `<button class="bigbtn" id="nx">${ok?(half?'다음 단계로':'뒤 넉 자'):'다시'}</button>`;
-    document.getElementById('nx').addEventListener('click',()=>{
-      if(!ok) return renderStudy();
-      if(half){ setCi(0); passStage(g, STAGES[2].coin); }
-      else { setCi(1); save(); renderStudy(); }
-    });
-  }));
+  const draw=(half)=>{
+    const k=Math.floor(Math.random()*4);
+    const blankIndex=(half?4:0)+k;
+    const ans=g.chars[blankIndex];
+    const opts=shuffle([ans, ...shuffle(CHEONJA.filter(x=>x.c!==ans.c)).slice(0,3)]);
+    render(half, blankIndex, ans, opts);
+  };
+  const render=(half, blankIndex, ans, opts)=>{
+    sheetBody.innerHTML=stepBar()+`
+      <div class="hanja-card">
+        <div class="grid8">${g.chars.map((o,n)=>
+          `<div class="ja ${n===blankIndex?'blank':''}"><b>${n===blankIndex?'□':o.c}</b></div>`).join('')}</div>
+        <div class="hunum">${ans.hun} ${ans.um}</div>
+      </div>
+      <p class="note">빈자리에 들어갈 글자를 고르세요.</p>
+      <div class="choices">${opts.map(x=>`<button class="choice ja-opt" data-c="${x.c}">${x.c}</button>`).join('')}</div>
+      <div id="after"></div>`;
+    bindStepBar();
+    sheetBody.querySelectorAll('.choice').forEach(b=>b.addEventListener('click',()=>{
+      const ok=b.dataset.c===ans.c;
+      sheetBody.querySelectorAll('.choice').forEach(x=>{
+        x.disabled=true; if(x.dataset.c===ans.c) x.classList.add('right');
+      });
+      if(!ok) b.classList.add('wrong');
+      markChar(P,ans.c,ok); save();
+      if(ok){
+        document.getElementById('after').innerHTML=`<div class="verdict right">맞혔습니다</div>`;
+        setTimeout(()=>{
+          if(half){ setCi(0); passStage(g, STAGES[2].coin); }
+          else { setCi(1); save(); draw(1); }
+        }, 500);
+      } else {
+        document.getElementById('after').innerHTML=
+          `<div class="verdict wrong">아닙니다</div><button class="bigbtn" id="nx">다시</button>`;
+        document.getElementById('nx').addEventListener('click',()=>render(half, blankIndex, ans, opts));
+      }
+    }));
+  };
+  draw(curCi()<1?0:1);
 }
 
 /* 4 뜻 — 여덟 자 한 마디의 풀이를 고른다 */
