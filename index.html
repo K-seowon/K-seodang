@@ -84,7 +84,34 @@ body{font-family:'Gaegu',system-ui,sans-serif;color:var(--ink);-webkit-font-smoo
   .petal,.badge-bob{animation:none}
   .can,.drop2{animation:none;opacity:1}
   .plant-shake{animation:none}
+  .plate.flash{animation:none}
+  #rewardPop.show{animation:rewardFadeOnly 2s ease forwards}
 }
+
+/* ── 재화 얻음 표시 ─────────────────────────
+   화면 가운데쯤에 은은히 떠올랐다 위로 조금 올라가며 사라진다.
+   움직임을 줄이는 설정에서는 위치는 그대로 두고 글자만 옅게
+   나타났다 사라지게 한다(정보는 그대로 전해지도록). */
+#rewardPop{position:absolute;left:50%;top:42%;z-index:70;display:flex;gap:8px;
+  opacity:0;pointer-events:none;white-space:nowrap}
+#rewardPop.show{animation:rewardFloat 2s ease forwards}
+@keyframes rewardFloat{
+  0%{opacity:0;transform:translate(-50%,-42%) scale(.94)}
+  12%{opacity:1;transform:translate(-50%,-50%) scale(1)}
+  78%{opacity:1;transform:translate(-50%,-50%) scale(1)}
+  100%{opacity:0;transform:translate(-50%,-66%) scale(1)}
+}
+@keyframes rewardFadeOnly{
+  0%{opacity:0;transform:translate(-50%,-50%)}
+  12%{opacity:1;transform:translate(-50%,-50%)}
+  78%{opacity:1;transform:translate(-50%,-50%)}
+  100%{opacity:0;transform:translate(-50%,-50%)}
+}
+.rw-item{display:inline-flex;align-items:center;gap:6px;background:var(--hanji);
+  border:1.5px solid #8A7D6B;border-radius:14px;padding:8px 16px;
+  font-size:21px;font-weight:700;color:var(--ink);box-shadow:0 3px 10px rgba(61,58,54,.2)}
+@keyframes plateFlash{0%{background:var(--hanji)}30%{background:#FBE7A8}100%{background:var(--hanji)}}
+.plate.flash{animation:plateFlash .7s ease}
 
 #nav{position:relative;z-index:20;display:flex;background:var(--hanji);
   border-top:3px solid var(--ink);padding:6px 4px calc(env(safe-area-inset-bottom) + 6px)}
@@ -324,6 +351,7 @@ button.cell{cursor:pointer}
   </div>
 
   <div id="toast"></div>
+  <div id="rewardPop" aria-live="polite"></div>
   <audio id="bgmAudio" loop preload="none">
     <source src="sound/garden-bgm.mp3" type="audio/mpeg">
   </audio>
@@ -1072,6 +1100,7 @@ function showRankUp(rank, bonus){
         background:${rank.color};color:#fff;font-size:30px;font-weight:700;margin:10px 0 12px">${rank.name}</div>
       ${bonus?`<div class="hint">축하 엽전 <b>${bonus.toLocaleString()}</b>냥을 받았습니다</div>`:''}
     </div>`;
+  if(bonus) queueReward({coin:bonus});
 }
 /* 발표용: 실제 익힌 글자 수는 그대로 두고 화면에 보이는 급만 잠깐 올린다 */
 function openRankDemo(){ openSheetRaw('급수 시험 (발표용)'); renderRankDemo(); }
@@ -1800,15 +1829,15 @@ function waterPlant(iid, name){
   const oldCnt=S.growth[iid]||0, newCnt=oldCnt+1;
   S.growth[iid]=newCnt;
   const it=ITEMS[typeOf(iid)];
-  let laterMsg='';
+  let laterMsg='', laterBonus=0;
   if(it.grow){
     const oldStage=Math.min(4,Math.floor(oldCnt/3)), newStage=Math.min(4,Math.floor(newCnt/3));
     if(newStage>oldStage){
       const table = it.grow==='seed' ? GUK_STAGES : PLUM_STAGES;
       laterMsg = `${name} — ${table[newStage].name} 단계가 되었습니다`;
       if(newStage===4){
-        const bonus=GROW_BONUS[it.grow];
-        S.coin+=bonus; laterMsg += ` · 엽전 ${bonus}냥`;
+        laterBonus=GROW_BONUS[it.grow];
+        S.coin+=laterBonus; laterMsg += ` · 엽전 ${laterBonus}냥`;
       }
     }
   } else if(newCnt%3===0){
@@ -1818,6 +1847,7 @@ function waterPlant(iid, name){
   setTimeout(()=>{
     if(waterFX===iid){ waterFX=null; drawScene(); }
     if(laterMsg) toast(laterMsg);
+    if(laterBonus) queueReward({coin:laterBonus});
   }, WATER_MS);
 }
 /* 이웃의 화초·나무는 자라지 않지만, 하루 한 번 물을 주면 답례로
@@ -1994,22 +2024,25 @@ function passStage(g, coin){
     if(curStage()>=STAGES.length){
       S.growWater=(S.growWater||0)+REVIEW_GROW;
       save(); syncHUD();
+      queueReward({grow:REVIEW_GROW});
       toast(`복습을 마쳤습니다 · 성장수 ${REVIEW_GROW}방울`);
       return renderReviewDone(g);
     }
     save(); syncHUD(); renderStudy();
     return;
   }
-  const msg=[];
-  if(coin){ S.coin+=coin; msg.push(`엽전 ${coin}냥`); }
+  const msg=[]; const reward={};
+  if(coin){ S.coin+=coin; msg.push(`엽전 ${coin}냥`); reward.coin=coin; }
   P.stage++;
   if(P.stage>=STAGES.length){
     if(!P.done.includes(P.gu)) P.done.push(P.gu);
     P.gu++; P.stage=0; P.ci=0;
     S.growWater=(S.growWater||0)+GROW_PER_GUJEOL;
     msg.push(`성장수 ${GROW_PER_GUJEOL}방울`);
+    reward.grow=GROW_PER_GUJEOL;
   }
   if(msg.length) toast(msg.join(' · '));
+  queueReward(reward);
   save(); syncHUD(); renderStudy();
 }
 
@@ -2365,16 +2398,15 @@ function renderJok(){
   const rev=document.getElementById('rev');
   if(rev) rev.addEventListener('click',()=>runReview(due.slice(0,12)));
 }
+const DUE_CHAR_COIN=20, DUE_CHAR_GROW=1; // 되짚기에서 한 글자를 맞힐 때마다 즉시 준다
 function runReview(list){
   let n=0, got=0;
   const step=()=>{
     if(n>=list.length){
-      S.coin+=got*20; S.growWater=(S.growWater||0)+got; save(); syncHUD();
       sheetBody.innerHTML=`<div class="hanja-card">
           <div class="hunum">${list.length}자 되짚었습니다.</div>
-          <div class="hint">맞힌 것 ${got}자 · 엽전 ${got*20}냥 · 성장수 ${got}방울</div></div>
+          <div class="hint">맞힌 것 ${got}자 · 엽전 ${got*DUE_CHAR_COIN}냥 · 성장수 ${got}방울</div></div>
         <button class="bigbtn" id="bk">글자 익힘책으로</button>`;
-      if(got) toast(`엽전 ${got*20}냥 · 성장수 ${got}방울`);
       document.getElementById('bk').addEventListener('click',renderJok);
       return;
     }
@@ -2393,8 +2425,12 @@ function runReview(list){
     const check=()=>{
       const v=(inp.value||'').trim(); if(!v) return;
       const ok=v===o.um;
-      if(ok) got++;
-      markChar(P,o.c,ok); save();
+      if(ok){
+        got++;
+        S.coin+=DUE_CHAR_COIN; S.growWater=(S.growWater||0)+DUE_CHAR_GROW;
+        queueReward({coin:DUE_CHAR_COIN, grow:DUE_CHAR_GROW});
+      }
+      markChar(P,o.c,ok); save(); syncHUD();
       inp.disabled=true; document.getElementById('ck').disabled=true;
       document.getElementById('after').innerHTML=
         `<div class="verdict ${ok?'right':'wrong'}">${ok?'맞혔습니다':'아니요'} — ${o.hun} ${o.um}</div>
@@ -2707,11 +2743,54 @@ function renderBag(){
   });
 }
 
+/* ── 재화 얻음 표시 ─────────────────────────
+   화면 가운데쯤에 얻은 것을 잠깐 띄운다. 여럿이 거의 동시에 생기면
+   한 번에 하나씩 차례로 보여준다. */
+const rewardQueue=[];
+let rewardBusy=false;
+function queueReward(parts){
+  if(!parts || (!parts.coin && !parts.grow)) return;
+  rewardQueue.push(parts);
+  if(!rewardBusy) playNextReward();
+}
+function playNextReward(){
+  const el=document.getElementById('rewardPop');
+  const parts=rewardQueue.shift();
+  if(!parts){ rewardBusy=false; el.classList.remove('show'); return; }
+  rewardBusy=true;
+  el.innerHTML=[
+    parts.coin?`<span class="rw-item">${COIN_SVG}+${parts.coin.toLocaleString()}</span>`:'',
+    parts.grow?`<span class="rw-item">${GROW_SVG}+${parts.grow.toLocaleString()}</span>`:''
+  ].join('');
+  el.classList.remove('show'); void el.offsetWidth; el.classList.add('show');
+}
+document.getElementById('rewardPop').addEventListener('animationend', playNextReward);
+
+/* 위쪽 숫자를 한 번에 바꾸지 않고 짧게 세어 올라가듯(또는 내려가듯)
+   바꾸고, 그 자리를 잠깐 밝혔다 되돌린다. */
+function prefersReducedMotion(){
+  return window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+}
+function animateNumber(el, to){
+  const from=parseInt((el.textContent||'0').replace(/,/g,''),10) || 0;
+  if(from===to) return;
+  const plate=el.closest('.plate');
+  if(plate){ plate.classList.remove('flash'); void plate.offsetWidth; plate.classList.add('flash'); }
+  if(prefersReducedMotion()){ el.textContent=to.toLocaleString(); return; }
+  const dur=500, start=performance.now();
+  (function tick(now){
+    const t=Math.min(1, (now-start)/dur);
+    const eased=1-Math.pow(1-t,3);
+    el.textContent=Math.round(from+(to-from)*eased).toLocaleString();
+    if(t<1) requestAnimationFrame(tick); else el.textContent=to.toLocaleString();
+  })(start);
+}
+
 /* ── 공용 ───────────────────────────────── */
 function syncHUD(){
-  document.getElementById('coinTxt').textContent=S.coin.toLocaleString();
-  document.getElementById('gemTxt').textContent=S.gem.toLocaleString();
-  document.getElementById('growTxt').textContent=(S.growWater||0).toLocaleString();
+  animateNumber(document.getElementById('coinTxt'), S.coin);
+  animateNumber(document.getElementById('gemTxt'), S.gem);
+  animateNumber(document.getElementById('growTxt'), S.growWater||0);
   const rk = rankInfo(effCount());
   const gt = document.getElementById('gradeTxt');
   gt.textContent = rk.name; gt.style.background = rk.color;
