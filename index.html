@@ -1083,7 +1083,7 @@ function checkRankUp(){
 }
 function showRankUp(rank, bonus){
   openSheetRaw('급이 올랐습니다!');
-  sheetBody.innerHTML = `
+  sheetBody.innerHTML = resBarHTML() + `
     <div class="hanja-card" style="padding:30px 16px">
       <div class="hint" style="margin-top:0">학동의 급이 올랐습니다</div>
       <div style="display:inline-block;padding:9px 26px;border-radius:16px;border:3px solid #3D3A36;
@@ -2425,7 +2425,7 @@ function runReview(list){
       return;
     }
     const o=list[n];
-    sheetBody.innerHTML=`
+    sheetBody.innerHTML= resBarHTML() + `
       <div class="hanja-card">
         <div class="hint">되짚기 ${n+1} / ${list.length}</div>
         <div class="hanja">${o.c}</div>
@@ -2790,6 +2790,17 @@ function reducedMotionReward(parts){
 const REWARD_UNIT={coin:'전', grow:'방울'};
 const REWARD_TARGET={coin:'coinPlate', grow:'growPlate'};
 const REWARD_TXT={coin:'coinTxt', grow:'growTxt'};
+/* 가게·서당 화면이 덮개(overlay)로 떠 있을 때는 맨 위 진짜 표시가 그
+   덮개에 가려 안 보인다. 그럴 때는 지금 펼쳐진 화면 자기 것(.studyhead
+   안의 전·성장수 표시)으로 날아가게 하고, 덮개가 없을 때만(정원에서
+   물 줄 때 등) 진짜 위쪽 표시로 날아가게 한다. */
+function rewardTargetEl(kind){
+  if(overlay.classList.contains('on')){
+    const spans=sheetBody.querySelectorAll('.studyhead .coin');
+    if(spans.length>=2) return kind==='coin' ? spans[0] : spans[1];
+  }
+  return document.getElementById(REWARD_TARGET[kind]);
+}
 /* 엽전(또는 물방울) 한 번의 오고 감: 가운데 글자 → 흩어져 날아감 → 마지막이
    닿으면 위쪽 숫자가 세어 오른다. */
 function flightPhase(kind, amount){
@@ -2812,7 +2823,7 @@ function flightPhase(kind, amount){
 
     const fx=document.getElementById('rewardFX');
     const origin=rewardOrigin();
-    const target=appPoint(document.getElementById(REWARD_TARGET[kind]));
+    const target=appPoint(rewardTargetEl(kind));
     const dx=target.x-origin.x, dy=target.y-origin.y;
     let lastDone;
     for(let i=0;i<n;i++){
