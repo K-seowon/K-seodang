@@ -181,6 +181,15 @@ body{font-family:'Gaegu',system-ui,sans-serif;color:var(--ink);-webkit-font-smoo
 .jokchars{font-size:22px;letter-spacing:.08em;color:#C4B8A2;word-break:break-all}
 .jokchars .met{color:var(--ink);font-weight:700}
 
+.gugroup{margin-bottom:10px}
+.grouphead{display:flex;align-items:center;gap:8px;width:100%;text-align:left;
+  border:2.5px solid var(--ink);border-radius:14px;background:var(--hanji-2);
+  padding:10px 12px;font-family:inherit;cursor:pointer;margin-bottom:8px}
+.grouphead.open{background:var(--hanji)}
+.grouphead .grouptitle{font-size:17px;font-weight:700}
+.grouphead .groupsub{flex:1;text-align:right;font-size:14px;color:#7A6E5E}
+.grouphead .chev{width:18px;height:18px;flex:0 0 auto;transition:transform .15s ease}
+.grouphead.open .chev{transform:rotate(180deg)}
 .gulist{display:flex;flex-direction:column;gap:8px;margin-bottom:4px}
 .gurow{display:flex;align-items:center;gap:10px;width:100%;text-align:left;
   border:2.5px solid var(--ink);border-radius:14px;background:var(--hanji-2);
@@ -2035,8 +2044,11 @@ function passStage(g, coin){
    천자문 두루마리를 누르면 여기부터 보여준다. 마친 마디는 복습으로
    다시 들어갈 수 있고, 지금 마디는 눈에 띄게 보이며, 아직 안 간
    마디는 잠겨 있다. 열 마디씩 묶어 스크롤로 내려볼 수 있다. */
+let openGroups=new Set();
 function openGujeolList(){
   studyMode='normal';
+  const curGroup = P.gu<GUJEOL.length ? Math.floor(P.gu/10) : -1;
+  openGroups = new Set(curGroup>=0 ? [curGroup] : []);
   openSheetRaw('천자문');
   renderGujeolList();
 }
@@ -2046,6 +2058,7 @@ function gujeolStatus(g){
   return 'locked';
 }
 const LOCK_SVG='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:18px;height:18px;flex:0 0 auto;color:#9C917F"><rect x="4" y="11" width="16" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg>';
+const CHEV_SVG='<svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg>';
 function gujeolRowHTML(g){
   const st=gujeolStatus(g.g);
   const badge = st==='current' ? '<span class="badge2 now">지금</span>'
@@ -2065,9 +2078,25 @@ function renderGujeolList(){
       : `${P.done.length}마디 마침 · 지금 ${P.gu+1}번째 마디를 익히는 중`}</p>
     ${groups.map((grp,gi)=>{
       const startNum=gi*10+1, endNum=Math.min((gi+1)*10, GUJEOL.length);
-      return `<p class="note" style="margin:14px 2px 8px;font-weight:700;color:#5C5346">${startNum}~${endNum}마디</p>
-        <div class="gulist">${grp.map(gujeolRowHTML).join('')}</div>`;
+      const isOpen=openGroups.has(gi);
+      const hasCurrent=grp.some(g=>g.g===P.gu) && !finished;
+      const doneCount=grp.filter(g=>P.done.includes(g.g)).length;
+      const groupSub = hasCurrent ? '지금 익히는 중' : `${doneCount}/${grp.length}마침`;
+      return `<div class="gugroup">
+        <button class="grouphead ${isOpen?'open':''}" data-gi="${gi}">
+          <span class="grouptitle">${startNum}~${endNum}마디</span>
+          <span class="groupsub">${groupSub}</span>
+          ${CHEV_SVG}
+        </button>
+        ${isOpen?`<div class="gulist">${grp.map(gujeolRowHTML).join('')}</div>`:''}
+      </div>`;
     }).join('')}`;
+  sheetBody.querySelectorAll('.grouphead').forEach(el=>
+    el.addEventListener('click',()=>{
+      const gi=+el.dataset.gi;
+      if(openGroups.has(gi)) openGroups.delete(gi); else openGroups.add(gi);
+      renderGujeolList();
+    }));
   sheetBody.querySelectorAll('.gurow:not([disabled])').forEach(el=>
     el.addEventListener('click',()=>enterGujeol(+el.dataset.g)));
 }
