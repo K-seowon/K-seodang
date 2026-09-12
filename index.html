@@ -2239,12 +2239,12 @@ function stGeulja(g){
       <div class="choices">${opts.map(x=>
         `<button class="choice" data-u="${x.um}">${o.hun} ${x.um}</button>`).join('')}</div>`;
     after.querySelectorAll('.choice').forEach(b=>b.addEventListener('click',()=>{
-      after.querySelectorAll('.choice').forEach(x=>{
-        x.disabled=true; if(x.dataset.u===o.um) x.classList.add('right');
-      });
-      if(b.dataset.u!==o.um) b.classList.add('wrong');
-      after.insertAdjacentHTML('beforeend',`<button class="bigbtn" id="nx">다음 글자</button>`);
-      document.getElementById('nx').addEventListener('click',next);
+      const okPick=b.dataset.u===o.um;
+      if(!okPick){ b.disabled=true; b.classList.add('wrong'); return; } // 틀리면 남은 보기에서 다시 고른다
+      after.querySelectorAll('.choice').forEach(x=>x.disabled=true);
+      b.classList.add('right');
+      after.insertAdjacentHTML('beforeend', `<div class="verdict right">${o.hun} ${o.um}</div>`);
+      setTimeout(next, 500);
     }));
   }
   function next(){
@@ -2318,11 +2318,10 @@ function stTteut(g){
     sheetBody.querySelectorAll('.choice').forEach(x=>{
       x.disabled=true; if(+x.dataset.g===g.g) x.classList.add('right');
     });
-    if(!ok) b.classList.add('wrong');
-    document.getElementById('after').innerHTML=
-      `<button class="bigbtn" id="nx">${ok?'배송으로':'다시'}</button>`;
-    document.getElementById('nx').addEventListener('click',()=>
-      ok?passStage(g,STAGES[3].coin):renderStudy());
+    if(ok){ setTimeout(()=>passStage(g,STAGES[3].coin), 500); return; }
+    b.classList.add('wrong');
+    document.getElementById('after').innerHTML=`<button class="bigbtn" id="nx">다시</button>`;
+    document.getElementById('nx').addEventListener('click', renderStudy);
   }));
 }
 
@@ -2432,10 +2431,16 @@ function runReview(list){
       }
       markChar(P,o.c,ok); save(); syncHUD();
       inp.disabled=true; document.getElementById('ck').disabled=true;
-      document.getElementById('after').innerHTML=
-        `<div class="verdict ${ok?'right':'wrong'}">${ok?'맞혔습니다':'아니요'} — ${o.hun} ${o.um}</div>
-         <button class="bigbtn" id="nx">다음</button>`;
-      document.getElementById('nx').addEventListener('click',()=>{ n++; step(); });
+      const goNext=()=>{ n++; step(); };
+      if(ok){
+        document.getElementById('after').innerHTML=`<div class="verdict right">맞혔습니다 — ${o.hun} ${o.um}</div>`;
+        setTimeout(goNext, 500);
+      } else {
+        document.getElementById('after').innerHTML=
+          `<div class="verdict wrong">아니요 — ${o.hun} ${o.um}</div>
+           <button class="bigbtn" id="nx">다음</button>`;
+        document.getElementById('nx').addEventListener('click', goNext);
+      }
     };
     document.getElementById('ck').addEventListener('click',check);
     inp.addEventListener('keydown',e=>{ if(e.key==='Enter') check(); });
