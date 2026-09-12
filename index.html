@@ -35,7 +35,7 @@ body{font-family:'Gaegu',system-ui,sans-serif;color:var(--ink);-webkit-font-smoo
 .bar>i{display:block;height:100%;background:var(--maehwa);width:0%}
 .pip{width:22px;height:22px;flex:0 0 auto;display:block}
 .cost .pip{width:17px;height:17px}
-#gemPlate{pointer-events:auto;cursor:pointer}
+#topupBtn{pointer-events:auto;cursor:pointer;color:var(--ink)}
 #bgmBtn,#helpBtn{display:none;pointer-events:auto;cursor:pointer;color:var(--ink)}
 #bgmBtn.on,#helpBtn.on{display:flex}
 #bgmBtn.muted{opacity:.5}
@@ -153,11 +153,6 @@ body{font-family:'Gaegu',system-ui,sans-serif;color:var(--ink);-webkit-font-smoo
 .subbtn.done{background:#DCEAC8;cursor:default}
 .subbtn:disabled{cursor:default}
 .note{font-size:17px;color:#7A6E5E;margin:10px 2px 0;line-height:1.5}
-.swap{display:flex;align-items:center;justify-content:center;gap:14px;font-size:20px}
-.swap span{display:flex;align-items:center;gap:5px}
-.swap span .pip{width:26px;height:26px}
-.swap b{font-size:26px;font-weight:700}
-.swap em{font-style:normal;font-size:26px;color:#7A6E5E}
 .studyhead{display:flex;align-items:center;gap:10px;margin-bottom:8px;font-size:15px}
 .studyhead .coin{display:inline-flex;align-items:center;gap:4px;font-weight:700;color:var(--ink)}
 .steps{display:flex;gap:4px;margin-bottom:12px}
@@ -230,11 +225,6 @@ button.cell{cursor:pointer}
 .cell .thumb{width:100%;aspect-ratio:1;display:block;background:#FBF0E6;border-radius:9px}
 .cell .cname{font-size:16px;margin-top:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .cell .cost{font-size:16px;font-weight:700;display:flex;align-items:center;justify-content:center;gap:4px}
-.paybar{display:flex;gap:4px;margin-top:4px}
-.paybtn{flex:1;min-width:0;border:2px solid var(--ink);border-radius:10px;background:var(--hanji);
-  font-family:inherit;font-size:14px;font-weight:700;padding:4px 2px;cursor:pointer;color:var(--ink);
-  display:flex;align-items:center;justify-content:center;gap:2px}
-.paybtn .pip{width:14px;height:14px}
 
 .cell.owned{opacity:.55;cursor:default}
 .cell.placed{background:#DCEAC8}
@@ -277,7 +267,11 @@ button.cell{cursor:pointer}
       <span class="bar"><i id="progBar"></i></span>
     </div>
     <div class="plate"><svg class="pip" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9.5" fill="#E8A33C" stroke="#3D3A36" stroke-width="2.4"/><rect x="8.6" y="8.6" width="6.8" height="6.8" rx="1.2" fill="#FBF3E4" stroke="#3D3A36" stroke-width="2"/></svg><span class="num" id="coinTxt">0</span></div>
-    <div class="plate" id="gemPlate" role="button" aria-label="엽전 바꾸기"><svg class="pip" viewBox="0 0 24 24" aria-hidden="true"><circle cx="17.5" cy="15" r="6" fill="#B5731F" stroke="#3D3A36" stroke-width="1.8"/><circle cx="15" cy="15" r="6.2" fill="#C9832A" stroke="#3D3A36" stroke-width="1.8"/><circle cx="12.5" cy="15" r="6.4" fill="#D9922F" stroke="#3D3A36" stroke-width="1.8"/><path d="M9 11.5 C9 5, 17 5, 16.5 10" fill="none" stroke="#8A6A4E" stroke-width="2.2" stroke-linecap="round"/><circle cx="9" cy="15" r="7" fill="#E8A33C" stroke="#3D3A36" stroke-width="2.2"/><rect x="6.7" y="12.7" width="4.6" height="4.6" rx="1" fill="#FBF3E4" stroke="#3D3A36" stroke-width="1.8"/></svg><span class="num" id="gemTxt">0</span></div>
+    <button class="plate" id="topupBtn" aria-label="전 충전">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" style="width:16px;height:16px">
+        <path d="M12 5v14M5 12h14"/>
+      </svg>
+    </button>
     <div class="plate" id="growPlate" aria-label="성장수"><svg class="pip" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3 C8 9 5 13 5 16.5 A7 7 0 0 0 19 16.5 C19 13 16 9 12 3 Z" fill="#7FC4EA" stroke="#3D3A36" stroke-width="2"/><ellipse cx="9.5" cy="14" rx="2" ry="3" fill="#BEE6F7"/></svg><span class="num" id="growTxt">0</span></div>
     <button class="plate" id="bgmBtn" aria-label="배경음악 켜고 끄기">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" id="bgmIcon">
@@ -673,19 +667,19 @@ const STAGES = [
     desc:'여덟 자를 소리 내어 읽고 뜻을 훑는다. 채점하지 않는다.' },
 
   { id:'geulja',   name:'글자',   mode:'recall',
-    scored:true,  coin:80,  perChar:true,
+    scored:true,  coin:0,  perChar:true,
     desc:'한 자씩 음을 직접 적는다. 못 적으면 그때 보기를 준다.' },
 
   { id:'sori',     name:'소리',   mode:'cloze',
-    scored:true,  coin:60,
+    scored:true,  coin:0,
     desc:'여덟 자 중 빈칸 하나를 채운다.' },
 
   { id:'tteut',    name:'뜻',     mode:'meaning',
-    scored:true,  coin:60,
+    scored:true,  coin:0,
     desc:'여덟 자 한 마디의 풀이를 고른다.' },
 
   { id:'baesong',  name:'배송',   mode:'order',
-    scored:true,  coin:120, gate:true,
+    scored:true,  coin:0, gate:true,
     desc:'책을 덮고 여덟 자를 차례대로 놓는다. 통과해야 다음 마디로 간다.' }
 ];
 
@@ -778,67 +772,58 @@ const BOOKS = {
    at     「매화 핀 언덕」 샘플 배치 좌표
    ------------------------------------- */
 const ITEMS = {
-  mhs_04:{name:'디딤돌 길',slot:'ground',rar:'N',cur:'coin',amt:500,box:[400,300],at:[0,600],fixed:true,
+  mhs_04:{name:'디딤돌 길',slot:'ground',rar:'N',cur:'coin',amt:3,box:[400,300],at:[0,600],fixed:true,
     svg:`<path d="M200 2 C186 42 214 72 200 106 C186 142 214 172 200 208 C188 242 210 268 200 300" stroke="#E4D6B8" stroke-width="24" fill="none" stroke-linecap="round"/><g fill="#BCA786"><ellipse cx="199" cy="18" rx="13" ry="6"/><ellipse cx="194" cy="52" rx="13" ry="6"/><ellipse cx="205" cy="86" rx="13" ry="6"/><ellipse cx="198" cy="120" rx="13" ry="6"/><ellipse cx="204" cy="154" rx="13" ry="6"/><ellipse cx="196" cy="188" rx="13" ry="6"/><ellipse cx="203" cy="222" rx="13" ry="6"/><ellipse cx="199" cy="256" rx="13" ry="6"/><ellipse cx="201" cy="288" rx="13" ry="6"/></g>`},
 
-  mhs_12:{name:'싸리 울타리',slot:'mid',rar:'N',cur:'coin',amt:450,box:[200,60],at:[104,352],anchor:'bc',
+  mhs_12:{name:'싸리 울타리',slot:'mid',rar:'N',cur:'coin',amt:3,box:[200,60],at:[104,352],anchor:'bc',
     svg:`<g stroke="#B08F6A" stroke-width="5" stroke-linecap="round"><path d="M12 56 V10"/><path d="M38 58 V8"/><path d="M64 56 V10"/><path d="M90 58 V8"/><path d="M116 56 V10"/><path d="M142 58 V8"/><path d="M168 56 V10"/><path d="M190 58 V12"/></g><g stroke="#96764F" stroke-width="4" stroke-linecap="round"><path d="M4 22 H196"/><path d="M4 44 H196"/></g>`},
 
-  mhs_23:{name:'사립문',slot:'mid',rar:'R',cur:'coin',amt:900,box:[88,92],at:[204,358],anchor:'bc',
+  mhs_23:{name:'사립문',slot:'mid',rar:'R',cur:'coin',amt:8,box:[88,92],at:[204,358],anchor:'bc',
     svg:`<g stroke="#8A6A4E" stroke-width="7" stroke-linecap="round"><path d="M8 90 V22"/><path d="M80 90 V22"/></g><rect x="0" y="12" width="88" height="10" rx="4" fill="#7A5F45"/><path d="M0 12 q44 -14 88 0 Z" fill="#96764F"/><g stroke="#C9A87C" stroke-width="4" stroke-linecap="round"><path d="M22 84 V30"/><path d="M36 84 V30"/><path d="M50 84 V30"/><path d="M64 84 V30"/></g><g stroke="#B08F6A" stroke-width="3.5" stroke-linecap="round"><path d="M16 42 H70"/><path d="M16 68 H70"/></g>`},
 
-  mhs_24:{name:'기와 담장',slot:'mid',rar:'SR',cur:'coin',amt:1800,box:[190,70],at:[318,352],anchor:'bc',
+  mhs_24:{name:'기와 담장',slot:'mid',rar:'SR',cur:'coin',amt:20,box:[190,70],at:[318,352],anchor:'bc',
     svg:`<rect y="18" width="190" height="52" fill="#D9C6B0"/><rect y="6" width="190" height="14" rx="5" fill="#9C8874"/><path d="M0 34h190M0 52h190" stroke="#CDBAA3" stroke-width="1.5"/><g fill="#8A7563"><circle cx="12" cy="12" r="6"/><circle cx="40" cy="12" r="6"/><circle cx="68" cy="12" r="6"/><circle cx="96" cy="12" r="6"/><circle cx="124" cy="12" r="6"/><circle cx="152" cy="12" r="6"/><circle cx="178" cy="12" r="6"/></g>`},
 
-  mhs_07:{name:'늙은 매화나무',slot:'mid',rar:'SR',cur:'gem',amt:24,box:[150,170],at:[96,466],anchor:'bc',plant:true,
+  mhs_07:{name:'늙은 매화나무',slot:'mid',rar:'SR',cur:'coin',amt:24,box:[150,170],at:[96,466],anchor:'bc',plant:true,
     svg:`<path d="M78 168 q9 -60 -4 -92 q-10 -24 -34 -38" stroke="#7A5F45" stroke-width="12" fill="none" stroke-linecap="round"/><path d="M74 96 q28 -14 42 -44 M70 126 q-24 -10 -36 -30" stroke="#7A5F45" stroke-width="9" fill="none" stroke-linecap="round"/><g fill="#F0A8BE"><circle cx="36" cy="46" r="25"/><circle cx="78" cy="26" r="27"/><circle cx="116" cy="54" r="23"/><circle cx="60" cy="74" r="23"/><circle cx="108" cy="94" r="21"/><circle cx="26" cy="86" r="17"/></g><g fill="#FBD8E2"><circle cx="78" cy="22" r="11"/><circle cx="38" cy="42" r="9"/><circle cx="108" cy="90" r="9"/><circle cx="60" cy="70" r="8"/></g><g fill="#FFFFFF"><circle cx="78" cy="20" r="4"/><circle cx="38" cy="40" r="3.5"/></g>`},
 
-  mhs_08:{name:'어린 홍매',slot:'mid',rar:'R',cur:'coin',amt:1400,box:[96,120],at:[336,444],anchor:'bc',plant:true,
+  mhs_08:{name:'어린 홍매',slot:'mid',rar:'R',cur:'coin',amt:11,box:[96,120],at:[336,444],anchor:'bc',plant:true,
     svg:`<path d="M48 118 q3 -40 0 -56" stroke="#8B6A55" stroke-width="7" fill="none" stroke-linecap="round"/><path d="M48 76 q17 -10 25 -23 M48 88 q-14 -6 -22 -17" stroke="#8B6A55" stroke-width="5" fill="none" stroke-linecap="round"/><g fill="#E2789A"><circle cx="28" cy="44" r="16"/><circle cx="56" cy="32" r="17"/><circle cx="74" cy="52" r="14"/><circle cx="40" cy="64" r="14"/></g><g fill="#F5AFC6"><circle cx="56" cy="29" r="7"/><circle cx="29" cy="41" r="6"/></g>`},
 
-  mhs_09:{name:'백매 가지',slot:'mid',rar:'R',cur:'coin',amt:1300,box:[120,100],at:[266,476],anchor:'bc',plant:true,
+  mhs_09:{name:'백매 가지',slot:'mid',rar:'R',cur:'coin',amt:10,box:[120,100],at:[266,476],anchor:'bc',plant:true,
     svg:`<path d="M4 92 q34 -14 56 -36 q17 -18 56 -22" stroke="#7A5F45" stroke-width="7" fill="none" stroke-linecap="round"/><path d="M38 68 q8 -18 4 -28 M76 42 q10 -16 8 -24" stroke="#7A5F45" stroke-width="4" fill="none" stroke-linecap="round"/><g fill="#FFFFFF"><circle cx="28" cy="72" r="12"/><circle cx="50" cy="54" r="13"/><circle cx="76" cy="38" r="12"/><circle cx="102" cy="26" r="11"/><circle cx="42" cy="34" r="10"/></g><g fill="#F0A8BE"><circle cx="50" cy="54" r="4"/><circle cx="76" cy="38" r="4"/><circle cx="28" cy="72" r="3.5"/></g>`},
 
-  mhs_22:{name:'그네',slot:'mid',rar:'SR',cur:'gem',amt:20,box:[112,156],at:[60,558],anchor:'bc',
+  mhs_22:{name:'그네',slot:'mid',rar:'SR',cur:'coin',amt:23,box:[112,156],at:[60,558],anchor:'bc',
     svg:`<path d="M10 154 L48 26 M102 154 L64 26" stroke="#8A6A4E" stroke-width="8" fill="none" stroke-linecap="round"/><path d="M22 100 L90 100" stroke="#96764F" stroke-width="5" stroke-linecap="round"/><rect x="34" y="20" width="44" height="10" rx="4" fill="#7A5F45"/><g stroke="#C9A87C" stroke-width="3.5" stroke-linecap="round"><path d="M46 30 V106"/><path d="M66 30 V106"/></g><rect x="38" y="106" width="36" height="10" rx="4" fill="#B08F6A"/><g fill="#F0A8BE"><circle cx="34" cy="24" r="6"/><circle cx="78" cy="24" r="6"/></g><g fill="#FBD8E2"><circle cx="34" cy="24" r="2.6"/><circle cx="78" cy="24" r="2.6"/></g>`},
 
-  mhs_21:{name:'작은 연못',slot:'front',rar:'SR',cur:'gem',amt:18,box:[136,68],at:[104,558],anchor:'bc',
+  mhs_21:{name:'작은 연못',slot:'front',rar:'SR',cur:'coin',amt:21,box:[136,68],at:[104,558],anchor:'bc',
     svg:`<ellipse cx="68" cy="48" rx="66" ry="19" fill="#94A86E"/><ellipse cx="68" cy="44" rx="58" ry="16" fill="#6FA8A0"/><ellipse cx="68" cy="42" rx="54" ry="14" fill="#8FC6BC"/><g fill="#A79684"><ellipse cx="12" cy="46" rx="9" ry="5"/><ellipse cx="34" cy="56" rx="10" ry="5"/><ellipse cx="102" cy="54" rx="10" ry="5"/><ellipse cx="124" cy="44" rx="9" ry="5"/></g><g fill="#4E9A6E"><ellipse cx="40" cy="40" rx="13" ry="5"/><ellipse cx="92" cy="47" rx="12" ry="4.5"/></g><path d="M24 46 q14 -3 26 1 M78 36 q14 -3 24 1" stroke="#C4E4DC" stroke-width="2" fill="none" stroke-linecap="round"/><g fill="#F0A8BE"><circle cx="66" cy="36" r="5"/><circle cx="58" cy="40" r="4"/><circle cx="74" cy="40" r="4"/></g><circle cx="66" cy="36" r="2" fill="#FBD8E2"/>`},
 
-  mhs_10:{name:'진달래 덤불',slot:'mid',rar:'N',cur:'coin',amt:600,box:[90,60],at:[352,502],anchor:'bc',plant:true,
+  mhs_10:{name:'진달래 덤불',slot:'mid',rar:'N',cur:'coin',amt:4,box:[90,60],at:[352,502],anchor:'bc',plant:true,
     svg:`<ellipse cx="45" cy="40" rx="42" ry="20" fill="#6E9A50"/><ellipse cx="45" cy="33" rx="37" ry="16" fill="#8AB566"/><g fill="#E4749B"><circle cx="20" cy="28" r="7"/><circle cx="46" cy="19" r="7.5"/><circle cx="70" cy="30" r="7"/><circle cx="32" cy="42" r="6.5"/><circle cx="60" cy="44" r="6.5"/></g><g fill="#F7A9C3"><circle cx="46" cy="19" r="3.4"/><circle cx="20" cy="28" r="3"/></g>`},
 
-  mhs_11:{name:'개나리 덤불',slot:'mid',rar:'N',cur:'coin',amt:600,box:[90,60],at:[44,516],anchor:'bc',plant:true,
+  mhs_11:{name:'개나리 덤불',slot:'mid',rar:'N',cur:'coin',amt:4,box:[90,60],at:[44,516],anchor:'bc',plant:true,
     svg:`<ellipse cx="45" cy="42" rx="42" ry="18" fill="#6E9A50"/><ellipse cx="45" cy="35" rx="37" ry="15" fill="#8AB566"/><g fill="#F2C43C"><circle cx="18" cy="30" r="6.5"/><circle cx="42" cy="20" r="7"/><circle cx="66" cy="28" r="6.5"/><circle cx="30" cy="44" r="6"/><circle cx="58" cy="44" r="6"/></g><g fill="#FBE29A"><circle cx="42" cy="20" r="3"/><circle cx="18" cy="30" r="2.8"/></g>`},
 
-  mhs_15:{name:'나무 평상',slot:'front',rar:'R',cur:'gem',amt:12,box:[100,46],at:[316,556],anchor:'bc',
+  mhs_15:{name:'나무 평상',slot:'front',rar:'R',cur:'coin',amt:10,box:[100,46],at:[316,556],anchor:'bc',
     svg:`<rect x="4" y="14" width="92" height="12" rx="4" fill="#B08F6A"/><rect x="4" y="9" width="92" height="9" rx="4" fill="#C9A87C"/><rect x="14" y="26" width="8" height="20" rx="3" fill="#96764F"/><rect x="78" y="26" width="8" height="20" rx="3" fill="#96764F"/><g fill="#F0A8BE"><ellipse cx="30" cy="7" rx="4.5" ry="3"/><ellipse cx="68" cy="6" rx="4.5" ry="3"/></g>`},
 
-  mhs_13:{name:'돌물확',slot:'front',rar:'R',cur:'gem',amt:10,box:[80,44],at:[150,586],anchor:'bc',
+  mhs_13:{name:'돌물확',slot:'front',rar:'R',cur:'coin',amt:9,box:[80,44],at:[150,586],anchor:'bc',
     svg:`<ellipse cx="40" cy="34" rx="34" ry="15" fill="#A79684"/><ellipse cx="40" cy="27" rx="34" ry="15" fill="#C4B4A0"/><ellipse cx="40" cy="25" rx="26" ry="11" fill="#8FB6C4"/><ellipse cx="40" cy="23" rx="26" ry="11" fill="#A9CDD8"/><g fill="#F0A8BE"><ellipse cx="30" cy="20" rx="4.5" ry="3"/><ellipse cx="49" cy="25" rx="4.5" ry="3"/></g>`},
 
-  mhs_16:{name:'삿갓 장독',slot:'front',rar:'N',cur:'coin',amt:550,box:[70,60],at:[250,592],anchor:'bc',
+  mhs_16:{name:'삿갓 장독',slot:'front',rar:'N',cur:'coin',amt:3,box:[70,60],at:[250,592],anchor:'bc',
     media:'img',src:'items/jangdok.png',
     svg:`<path d="M20 56 q-9 -22 3 -32 q9 -8 18 0 q12 10 3 32 Z" fill="#5C3F2C"/><path d="M20 56 q-7 -22 5 -30 q8 -7 15 0 q12 8 5 30 Z" fill="#7C5942"/><path d="M10 24 q23 -16 46 0 Z" fill="#D9B96A"/><path d="M8 25 q25 -20 50 0 q-13 5 -25 5 q-12 0 -25 -5 Z" fill="#E8CD8A"/>`},
 
-  mhs_20:{name:'서안과 붓',slot:'front',rar:'N',cur:'coin',amt:900,box:[80,54],at:[316,596],anchor:'bc',
+  mhs_20:{name:'서안과 붓',slot:'front',rar:'N',cur:'coin',amt:5,box:[80,54],at:[316,596],anchor:'bc',
     svg:`<rect x="8" y="24" width="64" height="10" rx="4" fill="#96764F"/><rect x="8" y="19" width="64" height="8" rx="4" fill="#B08F6A"/><rect x="16" y="34" width="6" height="20" rx="2" fill="#7A5F45"/><rect x="58" y="34" width="6" height="20" rx="2" fill="#7A5F45"/><path d="M18 19 h26 v-9 h-26 Z" fill="#F2E7D2"/><rect x="50" y="13" width="4.5" height="7" rx="1.6" fill="#3D3A36"/><rect x="50" y="0" width="4.5" height="14" rx="2" fill="#B08F6A"/><ellipse cx="62" cy="18" rx="9" ry="4" fill="#5C6B72"/><ellipse cx="62" cy="16" rx="9" ry="4" fill="#7D8C93"/>`},
 
-  mhs_17:{name:'호랑나비',slot:'air',rar:'R',cur:'gem',amt:9,box:[80,70],at:[300,392],
+  mhs_17:{name:'호랑나비',slot:'air',rar:'R',cur:'coin',amt:8,box:[80,70],at:[300,392],
     svg:`<g stroke="#C9738F" stroke-width="2" fill="#FBD3E0"><path d="M24 34 q-14 -16 -3 -23 q11 -6 6 18"/><path d="M24 34 q14 -16 3 -23 q-11 -6 -6 18"/></g><line x1="24" y1="13" x2="24" y2="34" stroke="#B85A78" stroke-width="2"/><g stroke="#E0A03C" stroke-width="2" fill="#FCE9AF"><path d="M56 60 q-12 -14 -2 -20 q9 -5 5 16"/><path d="M56 60 q12 -14 2 -20 q-9 -5 -5 16"/></g><line x1="56" y1="42" x2="56" y2="60" stroke="#C98A2C" stroke-width="2"/>`}
 };
 const RAR_COLOR = {SR:'#E8A33C',R:'#6FA8C8',N:'#B3AEA6'};
 const COIN_SVG = `<svg class="pip" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9.5" fill="#E8A33C" stroke="#3D3A36" stroke-width="2.4"/><rect x="8.6" y="8.6" width="6.8" height="6.8" rx="1.2" fill="#FBF3E4" stroke="#3D3A36" stroke-width="2"/></svg>`;
-const BUNDLE_SVG = `<svg class="pip" viewBox="0 0 24 24" aria-hidden="true"><circle cx="17.5" cy="15" r="6" fill="#B5731F" stroke="#3D3A36" stroke-width="1.8"/><circle cx="15" cy="15" r="6.2" fill="#C9832A" stroke="#3D3A36" stroke-width="1.8"/><circle cx="12.5" cy="15" r="6.4" fill="#D9922F" stroke="#3D3A36" stroke-width="1.8"/><path d="M9 11.5 C9 5, 17 5, 16.5 10" fill="none" stroke="#8A6A4E" stroke-width="2.2" stroke-linecap="round"/><circle cx="9" cy="15" r="7" fill="#E8A33C" stroke="#3D3A36" stroke-width="2.2"/><rect x="6.7" y="12.7" width="4.6" height="4.6" rx="1" fill="#FBF3E4" stroke="#3D3A36" stroke-width="1.8"/></svg>`;
 const GROW_SVG = `<svg class="pip" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3 C8 9 5 13 5 16.5 A7 7 0 0 0 19 16.5 C19 13 16 9 12 3 Z" fill="#7FC4EA" stroke="#3D3A36" stroke-width="2"/><ellipse cx="9.5" cy="14" rx="2" ry="3" fill="#BEE6F7"/></svg>`;
-const PER_BUNDLE = 100;   // 엽전 백 닢을 실에 꿰면 한 꾸러미
-/* 무엇이든 엽전으로도 꾸러미로도 살 수 있게, 물건의 정가(cur/amt)를
-   다른 쪽 값으로 환산한다. 꾸러미→엽전은 그대로 백 곱, 엽전→꾸러미는
-   내림 없이 올림(모자라게 되지 않도록). */
-function priceOf(it, cur){
-  if(cur==='coin') return it.cur==='coin' ? it.amt : it.amt*PER_BUNDLE;
-  return it.cur==='gem' ? it.amt : Math.ceil(it.amt/PER_BUNDLE);
-}
 
 /* ── 계절 ───────────────────────────────
    all(사철) / spring / summer / autumn / winter
@@ -857,74 +842,74 @@ ITEMS.mhs_04.gkind = 'path';
 
 Object.assign(ITEMS, {
 /* ── 봄 ─────────────────────────────── */
-spr_08:{name:'흩날리는 꽃비',slot:'air',rar:'SR',cur:'gem',amt:26,box:[80,80],at:[0,0],fall:'petal',
+spr_08:{name:'흩날리는 꽃비',slot:'air',rar:'SR',cur:'coin',amt:28,box:[80,80],at:[0,0],fall:'petal',
   svg:`<g fill="#F0A8BE"><ellipse cx="18" cy="16" rx="6" ry="4" transform="rotate(-30 18 16)"/><ellipse cx="52" cy="12" rx="6.5" ry="4.2" transform="rotate(20 52 12)"/><ellipse cx="30" cy="42" rx="6" ry="4" transform="rotate(35 30 42)"/><ellipse cx="62" cy="48" rx="6" ry="4" transform="rotate(-25 62 48)"/><ellipse cx="20" cy="68" rx="6" ry="4" transform="rotate(15 20 68)"/><ellipse cx="52" cy="72" rx="5.5" ry="3.6" transform="rotate(-35 52 72)"/></g><g fill="#FBD8E2"><ellipse cx="40" cy="28" rx="5" ry="3.4"/><ellipse cx="68" cy="30" rx="4.5" ry="3"/><ellipse cx="12" cy="46" rx="4.5" ry="3"/></g>`},
 
 /* ── 여름 ───────────────────────────── */
-sum_06:{name:'여름 풀밭',slot:'ground',rar:'N',cur:'coin',amt:600,box:[400,300],at:[0,600],fixed:true,gkind:'cover',
+sum_06:{name:'여름 풀밭',slot:'ground',rar:'N',cur:'coin',amt:4,box:[400,300],at:[0,600],fixed:true,gkind:'cover',
   svg:`<rect width="400" height="300" fill="#8FBF6A"/><path d="M0 46 q110 -16 210 4 q90 18 190 -6 v256 H0Z" fill="#7FB25C"/><g fill="#71A551"><ellipse cx="70" cy="120" rx="46" ry="13"/><ellipse cx="300" cy="92" rx="40" ry="11"/><ellipse cx="180" cy="252" rx="52" ry="14"/></g><g stroke="#5E9145" stroke-width="2.5" fill="none" stroke-linecap="round"><path d="M40 180 q-4 -14 2 -20"/><path d="M120 240 q4 -14 -2 -18"/><path d="M280 200 q-4 -12 2 -16"/><path d="M340 268 q4 -14 -2 -18"/></g><g fill="#F5F1E0"><circle cx="96" cy="196" r="3.5"/><circle cx="248" cy="164" r="3.5"/><circle cx="322" cy="240" r="3.5"/></g>`},
 
-sum_01:{name:'파초',slot:'mid',rar:'R',cur:'coin',amt:1500,box:[120,152],at:[280,500],anchor:'bc',plant:true,
+sum_01:{name:'파초',slot:'mid',rar:'R',cur:'coin',amt:12,box:[120,152],at:[280,500],anchor:'bc',plant:true,
   svg:`<path d="M60 150 v-48" stroke="#4A7D3E" stroke-width="10" fill="none" stroke-linecap="round"/><path d="M60 104 q-38 -8 -56 -38 q34 -6 56 28 Z" fill="#4E9A4A"/><path d="M60 108 q38 -12 54 -42 q-34 -4 -54 32 Z" fill="#5CAC55"/><path d="M60 80 q-40 4 -56 -20 q34 -10 56 4 Z" fill="#3F8A3E"/><path d="M60 84 q40 0 54 -26 q-34 -8 -54 12 Z" fill="#4E9A4A"/><path d="M60 58 q-18 -20 -14 -44 q18 14 18 42 Z" fill="#5CAC55"/><path d="M60 60 q20 -18 20 -40 q-16 10 -20 38 Z" fill="#6ABA60"/>`},
 
-sum_02:{name:'대숲',slot:'mid',rar:'N',cur:'coin',amt:800,box:[140,186],at:[340,436],anchor:'bc',plant:true,
+sum_02:{name:'대숲',slot:'mid',rar:'N',cur:'coin',amt:5,box:[140,186],at:[340,436],anchor:'bc',plant:true,
   svg:`<g stroke="#5C9A6B" stroke-width="6" fill="none" stroke-linecap="round"><path d="M22 184 q4 -84 -2 -126"/><path d="M52 184 q6 -74 0 -110"/><path d="M84 184 q4 -88 -2 -130"/><path d="M116 184 q6 -70 2 -102"/></g><g stroke="#4A8558" stroke-width="2"><path d="M15 130h12M15 96h12M45 138h12M45 104h12M77 126h12M77 92h12M109 134h12"/></g><g fill="#4E8F62"><ellipse cx="8" cy="60" rx="16" ry="4.5" transform="rotate(-24 8 60)"/><ellipse cx="34" cy="74" rx="16" ry="4.5" transform="rotate(18 34 74)"/><ellipse cx="24" cy="98" rx="15" ry="4" transform="rotate(-16 24 98)"/><ellipse cx="68" cy="52" rx="16" ry="4.5" transform="rotate(22 68 52)"/><ellipse cx="62" cy="84" rx="15" ry="4" transform="rotate(-20 62 84)"/><ellipse cx="104" cy="70" rx="15" ry="4" transform="rotate(26 104 70)"/><ellipse cx="128" cy="96" rx="14" ry="4" transform="rotate(-14 128 96)"/></g>`},
 
-sum_03:{name:'연꽃 못',slot:'front',rar:'SR',cur:'gem',amt:26,box:[170,84],at:[110,568],anchor:'bc',
+sum_03:{name:'연꽃 못',slot:'front',rar:'SR',cur:'coin',amt:29,box:[170,84],at:[110,568],anchor:'bc',
   svg:`<ellipse cx="85" cy="60" rx="84" ry="23" fill="#94A86E"/><ellipse cx="85" cy="55" rx="74" ry="20" fill="#4E8F8A"/><ellipse cx="85" cy="52" rx="70" ry="18" fill="#79BFB6"/><g fill="#A79684"><ellipse cx="14" cy="58" rx="10" ry="5"/><ellipse cx="44" cy="70" rx="11" ry="5"/><ellipse cx="128" cy="68" rx="11" ry="5"/><ellipse cx="156" cy="56" rx="10" ry="5"/></g><g fill="#3E8461"><ellipse cx="46" cy="50" rx="18" ry="7"/><ellipse cx="112" cy="58" rx="17" ry="6.5"/><ellipse cx="80" cy="66" rx="16" ry="6"/></g><g fill="#4E9A6E"><ellipse cx="46" cy="48" rx="18" ry="7"/><ellipse cx="112" cy="56" rx="17" ry="6.5"/><ellipse cx="80" cy="64" rx="16" ry="6"/></g><g><path d="M66 44 q0 -12 1 -18" stroke="#5FA05F" stroke-width="3" fill="none"/><g fill="#F0A9C4"><ellipse cx="67" cy="22" rx="5" ry="12"/><ellipse cx="58" cy="26" rx="4" ry="11" transform="rotate(-26 58 26)"/><ellipse cx="76" cy="26" rx="4" ry="11" transform="rotate(26 76 26)"/></g><ellipse cx="67" cy="24" rx="3" ry="8" fill="#FDE4EC"/></g><g><path d="M124 48 q0 -10 1 -14" stroke="#5FA05F" stroke-width="2.5" fill="none"/><g fill="#F6C0D4"><ellipse cx="125" cy="32" rx="4" ry="9"/><ellipse cx="118" cy="35" rx="3.4" ry="8" transform="rotate(-26 118 35)"/><ellipse cx="132" cy="35" rx="3.4" ry="8" transform="rotate(26 132 35)"/></g></g>`},
 
-sum_04:{name:'수국 덤불',slot:'mid',rar:'N',cur:'coin',amt:700,box:[104,78],at:[338,542],anchor:'bc',plant:true,
+sum_04:{name:'수국 덤불',slot:'mid',rar:'N',cur:'coin',amt:5,box:[104,78],at:[338,542],anchor:'bc',plant:true,
   svg:`<ellipse cx="52" cy="56" rx="48" ry="21" fill="#4A7D3E"/><ellipse cx="52" cy="48" rx="42" ry="17" fill="#63A052"/><g fill="#7E93C9"><circle cx="24" cy="36" r="12"/><circle cx="54" cy="24" r="14"/><circle cx="82" cy="38" r="12"/></g><g fill="#A3B4DD"><circle cx="20" cy="32" r="4"/><circle cx="28" cy="40" r="4"/><circle cx="49" cy="20" r="4.5"/><circle cx="59" cy="28" r="4.5"/><circle cx="78" cy="34" r="4"/><circle cx="86" cy="42" r="4"/></g><g fill="#D8B7D9"><circle cx="24" cy="42" r="3.6"/><circle cx="58" cy="18" r="4"/><circle cx="80" cy="44" r="3.6"/></g>`},
 
-sum_05:{name:'못가 정자',slot:'mid',rar:'SR',cur:'gem',amt:32,box:[160,150],at:[110,482],anchor:'bc',
+sum_05:{name:'못가 정자',slot:'mid',rar:'SR',cur:'coin',amt:30,box:[160,150],at:[110,482],anchor:'bc',
   svg:`<rect x="24" y="118" width="112" height="18" rx="3" fill="#C9B79A"/><rect x="24" y="112" width="112" height="9" rx="3" fill="#8E7A5E"/><rect x="34" y="136" width="9" height="14" fill="#7A5F45"/><rect x="117" y="136" width="9" height="14" fill="#7A5F45"/><rect x="36" y="56" width="8" height="58" fill="#A88C6A"/><rect x="116" y="56" width="8" height="58" fill="#A88C6A"/><rect x="76" y="56" width="8" height="58" fill="#B99C79"/><path d="M12 58 q68 -42 136 0 Z" fill="#5D6B75"/><path d="M4 60 q76 -52 152 0 q-18 9 -76 9 q-58 0 -76 -9 Z" fill="#6E7E8A"/><path d="M80 14 q-38 14 -66 42 M80 14 q38 14 66 42" stroke="#5D6B75" stroke-width="2.5" fill="none"/><circle cx="80" cy="12" r="5" fill="#5D6B75"/><path d="M36 76 h88" stroke="#B99C79" stroke-width="4"/>`},
 
-sum_07:{name:'고추잠자리',slot:'air',rar:'R',cur:'coin',amt:900,box:[86,60],at:[240,396],
+sum_07:{name:'고추잠자리',slot:'air',rar:'R',cur:'coin',amt:9,box:[86,60],at:[240,396],
   svg:`<g stroke="#8FC6C6" stroke-width="1.6" fill="#CDECEC"><ellipse cx="34" cy="20" rx="15" ry="4.5" transform="rotate(-14 34 20)"/><ellipse cx="34" cy="27" rx="13" ry="4" transform="rotate(12 34 27)"/></g><line x1="34" y1="23" x2="58" y2="28" stroke="#D9553F" stroke-width="2.5" stroke-linecap="round"/><circle cx="32" cy="23" r="4" fill="#D9553F"/><g stroke="#A9CDD8" stroke-width="1.4" fill="#DDF0F2"><ellipse cx="60" cy="46" rx="11" ry="3.4" transform="rotate(-16 60 46)"/><ellipse cx="60" cy="51" rx="10" ry="3" transform="rotate(14 60 51)"/></g><line x1="60" y1="48" x2="78" y2="52" stroke="#E08A4C" stroke-width="2" stroke-linecap="round"/><circle cx="59" cy="48" r="3" fill="#E08A4C"/>`},
 
 /* ── 가을 ───────────────────────────── */
-aut_06:{name:'낙엽 바닥',slot:'ground',rar:'N',cur:'coin',amt:600,box:[400,300],at:[0,600],fixed:true,gkind:'cover',
+aut_06:{name:'낙엽 바닥',slot:'ground',rar:'N',cur:'coin',amt:4,box:[400,300],at:[0,600],fixed:true,gkind:'cover',
   svg:`<rect width="400" height="300" fill="#DCC894"/><path d="M0 48 q100 -14 190 6 q90 20 210 -4 v250 H0Z" fill="#CEB77E"/><path d="M0 150 q120 -12 220 8 q80 16 180 2 v140 H0Z" fill="#C0A76C"/><g fill="#D9541F"><path d="M46 96 l7 -6 l6 7 l-7 6 Z"/><path d="M186 186 l7 -6 l6 7 l-7 6 Z"/><path d="M290 132 l7 -6 l6 7 l-7 6 Z"/></g><g fill="#F0873A"><path d="M104 214 l7 -6 l6 7 l-7 6 Z"/><path d="M254 66 l7 -6 l6 7 l-7 6 Z"/><path d="M340 240 l7 -6 l6 7 l-7 6 Z"/></g><g fill="#F7BE4C"><path d="M62 268 l6 -5 l5 6 l-6 5 Z"/><path d="M162 118 l6 -5 l5 6 l-6 5 Z"/><path d="M348 160 l6 -5 l5 6 l-6 5 Z"/></g>`},
 
-aut_01:{name:'단풍나무',slot:'mid',rar:'SR',cur:'gem',amt:24,box:[156,168],at:[104,472],anchor:'bc',plant:true,
+aut_01:{name:'단풍나무',slot:'mid',rar:'SR',cur:'coin',amt:25,box:[156,168],at:[104,472],anchor:'bc',plant:true,
   svg:`<path d="M82 166 q7 -56 -2 -84 q-8 -22 -28 -36" stroke="#7A5540" stroke-width="12" fill="none" stroke-linecap="round"/><path d="M78 96 q26 -14 42 -40 M76 124 q-22 -8 -34 -24" stroke="#7A5540" stroke-width="8" fill="none" stroke-linecap="round"/><g fill="#D9541F"><circle cx="40" cy="52" r="24"/><circle cx="82" cy="30" r="26"/><circle cx="122" cy="52" r="22"/><circle cx="58" cy="80" r="22"/><circle cx="108" cy="88" r="21"/><circle cx="30" cy="88" r="16"/></g><g fill="#F0873A"><circle cx="82" cy="26" r="12"/><circle cx="42" cy="48" r="10"/><circle cx="108" cy="84" r="10"/><circle cx="58" cy="76" r="9"/><circle cx="122" cy="48" r="8"/></g><g fill="#F7BE4C"><circle cx="82" cy="22" r="5"/><circle cx="42" cy="44" r="4.5"/><circle cx="108" cy="80" r="4.5"/></g>`},
 
-aut_02:{name:'감나무',slot:'mid',rar:'R',cur:'coin',amt:1600,box:[130,142],at:[312,448],anchor:'bc',plant:true,
+aut_02:{name:'감나무',slot:'mid',rar:'R',cur:'coin',amt:13,box:[130,142],at:[312,448],anchor:'bc',plant:true,
   svg:`<path d="M66 140 q-5 -42 2 -62 q5 -18 20 -28" stroke="#6F5A3E" stroke-width="8" fill="none" stroke-linecap="round"/><path d="M68 88 q20 -8 32 -22 M66 102 q-18 -6 -28 -20" stroke="#6F5A3E" stroke-width="6" fill="none" stroke-linecap="round"/><g fill="#5E8A3C"><circle cx="34" cy="52" r="20"/><circle cx="66" cy="34" r="22"/><circle cx="98" cy="52" r="19"/><circle cx="46" cy="76" r="19"/><circle cx="88" cy="76" r="19"/></g><g fill="#6F9E45"><circle cx="66" cy="30" r="11"/><circle cx="38" cy="70" r="9"/><circle cx="94" cy="70" r="9"/></g><g fill="#EE8C22"><circle cx="38" cy="58" r="9"/><circle cx="80" cy="44" r="9.5"/><circle cx="62" cy="80" r="9"/><circle cx="104" cy="60" r="8"/></g><g fill="#F5A93F"><circle cx="36" cy="56" r="3.6"/><circle cx="78" cy="42" r="3.8"/><circle cx="60" cy="78" r="3.6"/></g><g fill="#4A7030"><rect x="34" y="50" width="8" height="2.6" rx="1.3"/><rect x="76" y="36" width="8" height="2.6" rx="1.3"/><rect x="58" y="72" width="8" height="2.6" rx="1.3"/></g>`},
 
-aut_03:{name:'억새',slot:'mid',rar:'N',cur:'coin',amt:550,box:[110,96],at:[58,524],anchor:'bc',plant:true,
+aut_03:{name:'억새',slot:'mid',rar:'N',cur:'coin',amt:3,box:[110,96],at:[58,524],anchor:'bc',plant:true,
   svg:`<g stroke="#A8894F" stroke-width="3" fill="none" stroke-linecap="round"><path d="M32 94 q-3 -42 -8 -60"/><path d="M50 94 q3 -44 5 -62"/><path d="M70 96 q8 -38 16 -56"/><path d="M18 96 q-10 -32 -16 -48"/></g><g fill="#E8D7B0"><ellipse cx="24" cy="28" rx="7" ry="17" transform="rotate(-8 24 28)"/><ellipse cx="55" cy="24" rx="7" ry="18" transform="rotate(6 55 24)"/><ellipse cx="86" cy="36" rx="6.5" ry="16" transform="rotate(18 86 36)"/><ellipse cx="2" cy="44" rx="6" ry="14" transform="rotate(-20 2 44)"/></g><g fill="#F5EBD4"><ellipse cx="24" cy="22" rx="4" ry="9"/><ellipse cx="55" cy="18" rx="4" ry="9"/></g>`},
 
-aut_04:{name:'국화 화분',slot:'front',rar:'N',cur:'coin',amt:650,box:[86,74],at:[124,566],anchor:'bc',plant:true,
+aut_04:{name:'국화 화분',slot:'front',rar:'N',cur:'coin',amt:5,box:[86,74],at:[124,566],anchor:'bc',plant:true,
   svg:`<ellipse cx="43" cy="70" rx="24" ry="7" fill="#A88650"/><path d="M23 70 l4 -22 h32 l4 22 Z" fill="#B5744A"/><path d="M23 70 l3 -20 h30 l3 20 Z" fill="#C98B5C"/><rect x="19" y="44" width="48" height="8" rx="3" fill="#A85F3C"/><g fill="#F2C43C"><circle cx="30" cy="30" r="9"/><circle cx="50" cy="24" r="9.5"/><circle cx="42" cy="40" r="8.5"/><circle cx="62" cy="36" r="7.5"/></g><g fill="#FBE29A"><circle cx="30" cy="30" r="4"/><circle cx="50" cy="24" r="4.2"/><circle cx="42" cy="40" r="3.8"/></g><path d="M24 42 q-7 -7 -9 -16 M64 44 q7 -6 9 -14" stroke="#6F9E45" stroke-width="3" fill="none" stroke-linecap="round"/>`},
 
-aut_05:{name:'장독대',slot:'front',rar:'R',cur:'coin',amt:1500,box:[140,86],at:[318,572],anchor:'bc',
+aut_05:{name:'장독대',slot:'front',rar:'R',cur:'coin',amt:12,box:[140,86],at:[318,572],anchor:'bc',
   svg:`<ellipse cx="70" cy="80" rx="68" ry="12" fill="#C4B4A0"/><rect x="8" y="66" width="124" height="12" rx="4" fill="#A79684"/><g><path d="M22 68 q-8 -22 2 -32 q8 -8 17 -8 q9 0 17 8 q10 10 2 32 Z" fill="#4E3628"/><path d="M22 68 q-6 -22 4 -30 q7 -7 15 -7 q8 0 15 7 q10 8 4 30 Z" fill="#7C5942"/><ellipse cx="41" cy="28" rx="15" ry="5" fill="#3D2A20"/></g><g><path d="M74 68 q-7 -18 1 -26 q6 -6 13 -6 q7 0 13 6 q8 8 1 26 Z" fill="#4E3628"/><path d="M74 68 q-5 -18 3 -24 q5 -5 11 -5 q6 0 11 5 q8 6 3 24 Z" fill="#95704F"/><ellipse cx="88" cy="36" rx="12" ry="4" fill="#3D2A20"/></g><g><path d="M110 68 q-5 -14 1 -20 q5 -5 10 -5 q5 0 10 5 q6 6 1 20 Z" fill="#4E3628"/><ellipse cx="121" cy="43" rx="10" ry="3.4" fill="#3D2A20"/></g>`},
 
-aut_07:{name:'지는 낙엽',slot:'air',rar:'R',cur:'gem',amt:22,box:[80,80],at:[0,0],fall:'leaf',
+aut_07:{name:'지는 낙엽',slot:'air',rar:'R',cur:'coin',amt:14,box:[80,80],at:[0,0],fall:'leaf',
   svg:`<g fill="#D9541F"><path d="M16 18 l8 -7 l7 8 l-8 7 Z"/><path d="M56 30 l8 -7 l7 8 l-8 7 Z"/><path d="M28 58 l8 -7 l7 8 l-8 7 Z"/></g><g fill="#F0873A"><path d="M46 12 l7 -6 l6 7 l-7 6 Z"/><path d="M14 44 l7 -6 l6 7 l-7 6 Z"/><path d="M62 62 l7 -6 l6 7 l-7 6 Z"/></g><g fill="#F7BE4C"><path d="M38 38 l6 -5 l5 6 l-6 5 Z"/><path d="M66 46 l6 -5 l5 6 l-6 5 Z"/></g>`},
 
 /* ── 겨울 ───────────────────────────── */
-win_06:{name:'눈밭',slot:'ground',rar:'N',cur:'coin',amt:600,box:[400,300],at:[0,600],fixed:true,gkind:'cover',
+win_06:{name:'눈밭',slot:'ground',rar:'N',cur:'coin',amt:4,box:[400,300],at:[0,600],fixed:true,gkind:'cover',
   svg:`<rect width="400" height="300" fill="#F4F8FC"/><path d="M0 46 q110 -16 210 6 q90 18 190 -4 v252 H0Z" fill="#FFFFFF"/><path d="M0 156 q120 -14 230 8 q70 14 170 0 v136 H0Z" fill="#E7EEF6"/><g fill="#DAE4EF"><ellipse cx="70" cy="112" rx="42" ry="11"/><ellipse cx="300" cy="88" rx="36" ry="9"/><ellipse cx="180" cy="248" rx="48" ry="12"/></g><g stroke="#C9D6E4" stroke-width="2" fill="none" stroke-linecap="round"><path d="M40 200 q22 -6 44 2"/><path d="M240 168 q26 -6 50 2"/><path d="M120 262 q26 -6 50 2"/></g>`},
 
-win_01:{name:'눈 덮인 소나무',slot:'mid',rar:'SR',cur:'gem',amt:24,box:[156,180],at:[100,480],anchor:'bc',plant:true,
+win_01:{name:'눈 덮인 소나무',slot:'mid',rar:'SR',cur:'coin',amt:26,box:[156,180],at:[100,480],anchor:'bc',plant:true,
   svg:`<path d="M78 178 q5 -54 -2 -86" stroke="#6B5040" stroke-width="10" fill="none" stroke-linecap="round"/><path d="M76 122 q-24 -8 -40 -24 M78 102 q26 -12 42 -30 M74 148 q-22 -4 -34 -18" stroke="#6B5040" stroke-width="7" fill="none" stroke-linecap="round"/><g fill="#2F5B45"><ellipse cx="34" cy="94" rx="28" ry="13"/><ellipse cx="120" cy="70" rx="30" ry="14"/><ellipse cx="40" cy="132" rx="26" ry="12"/><ellipse cx="78" cy="48" rx="32" ry="15"/><ellipse cx="112" cy="116" rx="24" ry="11"/></g><g fill="#3E7357"><ellipse cx="34" cy="92" rx="28" ry="12"/><ellipse cx="120" cy="68" rx="30" ry="13"/><ellipse cx="40" cy="130" rx="26" ry="11"/><ellipse cx="78" cy="46" rx="32" ry="14"/><ellipse cx="112" cy="114" rx="24" ry="10"/></g><g fill="#FFFFFF"><ellipse cx="34" cy="84" rx="24" ry="7"/><ellipse cx="120" cy="60" rx="26" ry="7"/><ellipse cx="40" cy="122" rx="22" ry="6"/><ellipse cx="78" cy="37" rx="28" ry="8"/><ellipse cx="112" cy="106" rx="20" ry="6"/></g>`},
 
-win_02:{name:'동백나무',slot:'mid',rar:'R',cur:'coin',amt:1500,box:[116,126],at:[328,454],anchor:'bc',plant:true,
+win_02:{name:'동백나무',slot:'mid',rar:'R',cur:'coin',amt:13,box:[116,126],at:[328,454],anchor:'bc',plant:true,
   svg:`<path d="M58 124 q-4 -34 0 -50 M58 96 q16 -8 24 -18 M58 108 q-14 -8 -22 -16" stroke="#6B5040" stroke-width="6" fill="none" stroke-linecap="round"/><g fill="#2F5B45"><ellipse cx="30" cy="66" rx="22" ry="14"/><ellipse cx="80" cy="58" rx="24" ry="15"/><ellipse cx="56" cy="42" rx="24" ry="14"/><ellipse cx="54" cy="84" rx="24" ry="13"/></g><g fill="#3E7357"><ellipse cx="30" cy="64" rx="22" ry="13"/><ellipse cx="80" cy="56" rx="24" ry="14"/><ellipse cx="56" cy="40" rx="24" ry="13"/><ellipse cx="54" cy="82" rx="24" ry="12"/></g><g fill="#C8384A"><circle cx="34" cy="52" r="8"/><circle cx="76" cy="42" r="8.5"/><circle cx="68" cy="76" r="8"/><circle cx="28" cy="82" r="7"/><circle cx="92" cy="70" r="6.5"/></g><g fill="#E8626F"><circle cx="34" cy="52" r="3.6"/><circle cx="76" cy="42" r="3.8"/><circle cx="68" cy="76" r="3.6"/></g><g fill="#F5D356"><circle cx="34" cy="52" r="1.7"/><circle cx="76" cy="42" r="1.8"/><circle cx="68" cy="76" r="1.7"/></g><g fill="#FFFFFF"><ellipse cx="56" cy="32" rx="20" ry="6"/><ellipse cx="84" cy="48" rx="16" ry="5"/></g>`},
 
-win_03:{name:'석등',slot:'front',rar:'R',cur:'coin',amt:1400,box:[76,116],at:[334,548],anchor:'bc',
+win_03:{name:'석등',slot:'front',rar:'R',cur:'coin',amt:11,box:[76,116],at:[334,548],anchor:'bc',
   media:'img',src:'items/lantern.png',
   svg:`<ellipse cx="38" cy="112" rx="28" ry="8" fill="#C6CEDA"/><rect x="26" y="80" width="24" height="30" rx="2" fill="#9AA3B0"/><rect x="18" y="70" width="40" height="12" rx="3" fill="#AEB7C3"/><rect x="20" y="40" width="36" height="30" rx="3" fill="#AEB7C3"/><rect x="26" y="46" width="24" height="20" rx="2" fill="#F5D356"/><path d="M12 40 q26 -16 52 0 Z" fill="#7C8492"/><path d="M10 38 q28 -20 56 0 q-15 5 -28 5 q-13 0 -28 -5 Z" fill="#FFFFFF"/><rect x="31" y="26" width="14" height="7" rx="2" fill="#9AA3B0"/><ellipse cx="38" cy="25" rx="10" ry="4" fill="#FFFFFF"/>`},
 
-win_04:{name:'눈사람',slot:'front',rar:'N',cur:'coin',amt:500,box:[74,84],at:[246,584],anchor:'bc',
+win_04:{name:'눈사람',slot:'front',rar:'N',cur:'coin',amt:3,box:[74,84],at:[246,584],anchor:'bc',
   svg:`<ellipse cx="37" cy="80" rx="22" ry="7" fill="#DCE5EE"/><circle cx="37" cy="62" r="17" fill="#FFFFFF" stroke="#DCE5EE" stroke-width="1.5"/><circle cx="37" cy="34" r="12" fill="#FFFFFF" stroke="#DCE5EE" stroke-width="1.5"/><circle cx="33" cy="32" r="2" fill="#4A5462"/><circle cx="41" cy="32" r="2" fill="#4A5462"/><path d="M37 36 l7 3 l-7 2 Z" fill="#EE8C22"/><path d="M23 34 q14 -9 28 0 Z" fill="#C8384A"/><path d="M22 20 q15 -6 30 0 l-4 -9 h-22 Z" fill="#3D3A36"/><path d="M18 60 q-10 -5 -15 -13 M56 60 q10 -5 15 -13" stroke="#6B5040" stroke-width="2.5" fill="none" stroke-linecap="round"/><g fill="#4A5462"><circle cx="37" cy="56" r="2"/><circle cx="37" cy="66" r="2"/></g>`},
 
-win_05:{name:'눈 쌓인 장독대',slot:'front',rar:'N',cur:'coin',amt:900,box:[140,92],at:[86,590],anchor:'bc',
+win_05:{name:'눈 쌓인 장독대',slot:'front',rar:'N',cur:'coin',amt:5,box:[140,92],at:[86,590],anchor:'bc',
   svg:`<ellipse cx="70" cy="86" rx="68" ry="12" fill="#C6CEDA"/><rect x="8" y="70" width="124" height="12" rx="4" fill="#AEB7C3"/><g><path d="M22 72 q-8 -22 2 -32 q8 -8 17 -8 q9 0 17 8 q10 10 2 32 Z" fill="#4E3628"/><path d="M22 72 q-6 -22 4 -30 q7 -7 15 -7 q8 0 15 7 q10 8 4 30 Z" fill="#7C5942"/><ellipse cx="41" cy="32" rx="15" ry="5" fill="#3D2A20"/><ellipse cx="41" cy="28" rx="16" ry="6" fill="#FFFFFF"/></g><g><path d="M74 72 q-7 -18 1 -26 q6 -6 13 -6 q7 0 13 6 q8 8 1 26 Z" fill="#4E3628"/><path d="M74 72 q-5 -18 3 -24 q5 -5 11 -5 q6 0 11 5 q8 6 3 24 Z" fill="#95704F"/><ellipse cx="88" cy="40" rx="12" ry="4" fill="#3D2A20"/><ellipse cx="88" cy="36" rx="13" ry="5" fill="#FFFFFF"/></g><g><path d="M110 72 q-5 -14 1 -20 q5 -5 10 -5 q5 0 10 5 q6 6 1 20 Z" fill="#4E3628"/><ellipse cx="121" cy="43" rx="11" ry="4" fill="#FFFFFF"/></g><rect x="8" y="66" width="124" height="7" rx="3" fill="#FFFFFF"/>`},
 
-win_07:{name:'내리는 눈',slot:'air',rar:'R',cur:'gem',amt:22,box:[80,80],at:[0,0],fall:'snow',
+win_07:{name:'내리는 눈',slot:'air',rar:'R',cur:'coin',amt:15,box:[80,80],at:[0,0],fall:'snow',
   svg:`<g fill="#FFFFFF" stroke="#D8E4EF" stroke-width="1"><circle cx="18" cy="16" r="5"/><circle cx="52" cy="12" r="4"/><circle cx="34" cy="36" r="5.5"/><circle cx="66" cy="34" r="4"/><circle cx="16" cy="52" r="4.5"/><circle cx="48" cy="58" r="5"/><circle cx="70" cy="66" r="3.6"/><circle cx="28" cy="70" r="4"/></g>`}
 });
 Object.keys(ITEMS).forEach(id=>{ if(!ITEMS[id].season) ITEMS[id].season = SEASON[id] || (id.slice(0,3)==='sum'?'summer':id.slice(0,3)==='aut'?'autumn':id.slice(0,3)==='win'?'winter':'spring'); });
@@ -933,23 +918,23 @@ Object.keys(ITEMS).forEach(id=>{ if(!ITEMS[id].season) ITEMS[id].season = SEASON
    계절과 상관없이 파는 것들이라 season을 매기지 않고, grow로만
    구분한다(목석방 계절 탭에는 안 뜨게). ------------------------- */
 Object.assign(ITEMS, {
-  seed_pr:{name:'패랭이꽃씨',slot:'front',rar:'N',cur:'coin',amt:60,box:[30,20],at:[40,560],anchor:'bc',grow:'seed',season:'all',
+  seed_pr:{name:'패랭이꽃씨',slot:'front',rar:'N',cur:'coin',amt:1,pack:3,box:[30,20],at:[40,560],anchor:'bc',grow:'seed',season:'all',
     svg:`<ellipse cx="15" cy="20" rx="13" ry="4" fill="rgba(43,36,28,.22)"/><ellipse cx="15" cy="15" rx="12" ry="5" fill="#8B6A4E" stroke="#2B2620" stroke-width="2.4"/><ellipse cx="15" cy="13" rx="8" ry="3" fill="#A9744F"/><path d="M15 13 v-4" stroke="#2B2620" stroke-width="2" stroke-linecap="round"/><circle cx="15" cy="8" r="3" fill="#F0A8BE" stroke="#2B2620" stroke-width="1.8"/>`},
-  seed_bs:{name:'봉선화씨',slot:'front',rar:'N',cur:'coin',amt:80,box:[30,20],at:[90,560],anchor:'bc',grow:'seed',season:'all',
+  seed_bs:{name:'봉선화씨',slot:'front',rar:'N',cur:'coin',amt:1,pack:3,box:[30,20],at:[90,560],anchor:'bc',grow:'seed',season:'all',
     svg:`<ellipse cx="15" cy="20" rx="13" ry="4" fill="rgba(43,36,28,.22)"/><ellipse cx="15" cy="15" rx="12" ry="5" fill="#8B6A4E" stroke="#2B2620" stroke-width="2.4"/><ellipse cx="15" cy="13" rx="8" ry="3" fill="#A9744F"/><path d="M15 13 v-4" stroke="#2B2620" stroke-width="2" stroke-linecap="round"/><circle cx="15" cy="8" r="3" fill="#D9463F" stroke="#2B2620" stroke-width="1.8"/>`},
-  seed_np:{name:'나팔꽃씨',slot:'front',rar:'N',cur:'coin',amt:90,box:[30,20],at:[140,560],anchor:'bc',grow:'seed',season:'all',
+  seed_np:{name:'나팔꽃씨',slot:'front',rar:'N',cur:'coin',amt:1,pack:3,box:[30,20],at:[140,560],anchor:'bc',grow:'seed',season:'all',
     svg:`<ellipse cx="15" cy="20" rx="13" ry="4" fill="rgba(43,36,28,.22)"/><ellipse cx="15" cy="15" rx="12" ry="5" fill="#8B6A4E" stroke="#2B2620" stroke-width="2.4"/><ellipse cx="15" cy="13" rx="8" ry="3" fill="#A9744F"/><path d="M15 13 v-4" stroke="#2B2620" stroke-width="2" stroke-linecap="round"/><circle cx="15" cy="8" r="3" fill="#9B7FC7" stroke="#2B2620" stroke-width="1.8"/>`},
-  seed_gu:{name:'국화씨',slot:'front',rar:'N',cur:'coin',amt:100,box:[30,20],at:[190,560],anchor:'bc',grow:'seed',season:'all',
+  seed_gu:{name:'국화씨',slot:'front',rar:'N',cur:'coin',amt:1,pack:3,box:[30,20],at:[190,560],anchor:'bc',grow:'seed',season:'all',
     svg:`<ellipse cx="15" cy="20" rx="13" ry="4" fill="rgba(43,36,28,.22)"/><ellipse cx="15" cy="15" rx="12" ry="5" fill="#8B6A4E" stroke="#2B2620" stroke-width="2.4"/><ellipse cx="15" cy="13" rx="8" ry="3" fill="#A9744F"/><path d="M15 13 v-4" stroke="#2B2620" stroke-width="2" stroke-linecap="round"/><circle cx="15" cy="8" r="3" fill="#F2C43C" stroke="#2B2620" stroke-width="1.8"/>`},
-  seed_md:{name:'맨드라미씨',slot:'front',rar:'N',cur:'coin',amt:120,box:[30,20],at:[240,560],anchor:'bc',grow:'seed',season:'all',
+  seed_md:{name:'맨드라미씨',slot:'front',rar:'N',cur:'coin',amt:1,pack:3,box:[30,20],at:[240,560],anchor:'bc',grow:'seed',season:'all',
     svg:`<ellipse cx="15" cy="20" rx="13" ry="4" fill="rgba(43,36,28,.22)"/><ellipse cx="15" cy="15" rx="12" ry="5" fill="#8B6A4E" stroke="#2B2620" stroke-width="2.4"/><ellipse cx="15" cy="13" rx="8" ry="3" fill="#A9744F"/><path d="M15 13 v-4" stroke="#2B2620" stroke-width="2" stroke-linecap="round"/><circle cx="15" cy="8" r="3" fill="#B03040" stroke="#2B2620" stroke-width="1.8"/>`},
-  seed_mr:{name:'모란씨',slot:'front',rar:'N',cur:'coin',amt:150,box:[30,20],at:[290,560],anchor:'bc',grow:'seed',season:'all',
+  seed_mr:{name:'모란씨',slot:'front',rar:'N',cur:'coin',amt:2,pack:3,box:[30,20],at:[290,560],anchor:'bc',grow:'seed',season:'all',
     svg:`<ellipse cx="15" cy="20" rx="13" ry="4" fill="rgba(43,36,28,.22)"/><ellipse cx="15" cy="15" rx="12" ry="5" fill="#8B6A4E" stroke="#2B2620" stroke-width="2.4"/><ellipse cx="15" cy="13" rx="8" ry="3" fill="#A9744F"/><path d="M15 13 v-4" stroke="#2B2620" stroke-width="2" stroke-linecap="round"/><circle cx="15" cy="8" r="3" fill="#D9718F" stroke="#2B2620" stroke-width="1.8"/>`},
-  sap_mh:{name:'매화나무 묘목',slot:'mid',rar:'R',cur:'coin',amt:700,box:[40,50],at:[180,540],anchor:'bc',grow:'sapling',season:'all',
+  sap_mh:{name:'매화나무 묘목',slot:'mid',rar:'R',cur:'coin',amt:4,box:[40,50],at:[180,540],anchor:'bc',grow:'sapling',season:'all',
     svg:`<ellipse cx="20" cy="50" rx="12.8" ry="2.3" fill="rgba(43,36,28,.28)"/><path d="M20 50 L20 24" stroke="#2B2620" stroke-width="5.6" stroke-linecap="round"/><path d="M20 50 L20 24" stroke="#8B6A4E" stroke-width="3" stroke-linecap="round"/><path d="M20 30 l-7 -6" stroke="#2B2620" stroke-width="4.6" stroke-linecap="round"/><path d="M20 30 l-7 -6" stroke="#8B6A4E" stroke-width="2" stroke-linecap="round"/><path d="M20 28 l7 -5" stroke="#2B2620" stroke-width="4.6" stroke-linecap="round"/><path d="M20 28 l7 -5" stroke="#8B6A4E" stroke-width="2" stroke-linecap="round"/><circle cx="11" cy="20" r="7" fill="#6E9A50" stroke="#2B2620" stroke-width="2.6"/><circle cx="13.9" cy="22.1" r="3.9" fill="#527E34"/><circle cx="22" cy="15" r="7.5" fill="#6E9A50" stroke="#2B2620" stroke-width="2.6"/><circle cx="24.1" cy="17.3" r="4.1" fill="#527E34"/><circle cx="28" cy="23" r="6.5" fill="#6E9A50" stroke="#2B2620" stroke-width="2.6"/><circle cx="29.8" cy="24.9" r="3.6" fill="#527E34"/>`},
-  sap_gam:{name:'감나무 묘목',slot:'mid',rar:'R',cur:'coin',amt:700,box:[40,50],at:[100,540],anchor:'bc',grow:'sapling',season:'all',
+  sap_gam:{name:'감나무 묘목',slot:'mid',rar:'R',cur:'coin',amt:3,box:[40,50],at:[100,540],anchor:'bc',grow:'sapling',season:'all',
     svg:`<ellipse cx="20" cy="50" rx="12.8" ry="2.3" fill="rgba(43,36,28,.28)"/><path d="M20 50 L20 24" stroke="#2B2620" stroke-width="5.6" stroke-linecap="round"/><path d="M20 50 L20 24" stroke="#8B6A4E" stroke-width="3" stroke-linecap="round"/><path d="M20 30 l-7 -6" stroke="#2B2620" stroke-width="4.6" stroke-linecap="round"/><path d="M20 30 l-7 -6" stroke="#8B6A4E" stroke-width="2" stroke-linecap="round"/><path d="M20 28 l7 -5" stroke="#2B2620" stroke-width="4.6" stroke-linecap="round"/><path d="M20 28 l7 -5" stroke="#8B6A4E" stroke-width="2" stroke-linecap="round"/><circle cx="11" cy="20" r="7" fill="#7FA94A" stroke="#2B2620" stroke-width="2.6"/><circle cx="13.9" cy="22.1" r="3.9" fill="#5C7D33"/><circle cx="22" cy="15" r="7.5" fill="#7FA94A" stroke="#2B2620" stroke-width="2.6"/><circle cx="24.1" cy="17.3" r="4.1" fill="#5C7D33"/><circle cx="28" cy="23" r="6.5" fill="#7FA94A" stroke="#2B2620" stroke-width="2.6"/><circle cx="29.8" cy="24.9" r="3.6" fill="#5C7D33"/>`},
-  sap_bam:{name:'밤나무 묘목',slot:'mid',rar:'R',cur:'coin',amt:700,box:[40,50],at:[260,540],anchor:'bc',grow:'sapling',season:'all',
+  sap_bam:{name:'밤나무 묘목',slot:'mid',rar:'R',cur:'coin',amt:2,box:[40,50],at:[260,540],anchor:'bc',grow:'sapling',season:'all',
     svg:`<ellipse cx="20" cy="50" rx="12.8" ry="2.3" fill="rgba(43,36,28,.28)"/><path d="M20 50 L20 24" stroke="#2B2620" stroke-width="5.6" stroke-linecap="round"/><path d="M20 50 L20 24" stroke="#8B6A4E" stroke-width="3" stroke-linecap="round"/><path d="M20 30 l-7 -6" stroke="#2B2620" stroke-width="4.6" stroke-linecap="round"/><path d="M20 30 l-7 -6" stroke="#8B6A4E" stroke-width="2" stroke-linecap="round"/><path d="M20 28 l7 -5" stroke="#2B2620" stroke-width="4.6" stroke-linecap="round"/><path d="M20 28 l7 -5" stroke="#8B6A4E" stroke-width="2" stroke-linecap="round"/><circle cx="11" cy="20" r="7" fill="#5E8A3C" stroke="#2B2620" stroke-width="2.6"/><circle cx="13.9" cy="22.1" r="3.9" fill="#3F5F27"/><circle cx="22" cy="15" r="7.5" fill="#5E8A3C" stroke="#2B2620" stroke-width="2.6"/><circle cx="24.1" cy="17.3" r="4.1" fill="#3F5F27"/><circle cx="28" cy="23" r="6.5" fill="#5E8A3C" stroke="#2B2620" stroke-width="2.6"/><circle cx="29.8" cy="24.9" r="3.6" fill="#3F5F27"/>`}
 });
 
@@ -981,26 +966,26 @@ const SAMPLE_GROWTH = { seed_gu:12 }; // 12방울 = 국화가 꽃 단계까지 �
    ------------------------------------- */
 const WEAR = {
   top: {
-    jg_dahong:{name:'다홍 저고리', c:'#D94A3D', rar:'N', cur:'coin', amt:600},
-    jg_baek  :{name:'흰 저고리',   c:'#F7F1E4', rar:'N', cur:'coin', amt:400},
-    jg_yeondu:{name:'연두 저고리', c:'#8AB566', rar:'N', cur:'coin', amt:600},
-    jg_jaju  :{name:'자주 저고리', c:'#8E4462', rar:'R', cur:'coin', amt:1200}
+    jg_dahong:{name:'다홍 저고리', c:'#D94A3D', rar:'N', cur:'coin', amt:7},
+    jg_baek  :{name:'흰 저고리',   c:'#F7F1E4', rar:'N', cur:'coin', amt:6},
+    jg_yeondu:{name:'연두 저고리', c:'#8AB566', rar:'N', cur:'coin', amt:7},
+    jg_jaju  :{name:'자주 저고리', c:'#8E4462', rar:'R', cur:'coin', amt:12}
   },
   bottom: {
-    ch_namsaek:{name:'남색 치마', kind:'chima', c:'#2E4A7D', rar:'N', cur:'coin', amt:700},
-    ch_bunhong:{name:'분홍 치마', kind:'chima', c:'#E08CA6', rar:'R', cur:'coin', amt:1300},
-    ba_jaet   :{name:'잿빛 바지', kind:'baji',  c:'#8A8578', rar:'N', cur:'coin', amt:700},
-    ba_huin   :{name:'흰 바지',   kind:'baji',  c:'#EFE7D6', rar:'N', cur:'coin', amt:500}
+    ch_namsaek:{name:'남색 치마', kind:'chima', c:'#2E4A7D', rar:'N', cur:'coin', amt:8},
+    ch_bunhong:{name:'분홍 치마', kind:'chima', c:'#E08CA6', rar:'R', cur:'coin', amt:14},
+    ba_jaet   :{name:'잿빛 바지', kind:'baji',  c:'#8A8578', rar:'N', cur:'coin', amt:8},
+    ba_huin   :{name:'흰 바지',   kind:'baji',  c:'#EFE7D6', rar:'N', cur:'coin', amt:6}
   },
   outer: {
-    du_huin:{name:'흰 두루마기',   c:'#F2E9D8', rar:'R',  cur:'coin', amt:1600},
-    du_ok  :{name:'옥색 두루마기', c:'#A9CDD8', rar:'SR', cur:'gem',  amt:16}
+    du_huin:{name:'흰 두루마기',   c:'#F2E9D8', rar:'R',  cur:'coin', amt:18},
+    du_ok  :{name:'옥색 두루마기', c:'#A9CDD8', rar:'SR', cur:'coin',  amt:25}
   },
   shoes: {
-    sh_gomu :{name:'고무신',   kind:'gomu',  c:'#F5F1E6', rar:'N', cur:'coin', amt:300},
-    sh_jip  :{name:'짚신',     kind:'jip',   c:'#D9C08A', rar:'N', cur:'coin', amt:200},
-    sh_namak:{name:'나막신',   kind:'namak', c:'#B08F6A', rar:'R', cur:'coin', amt:900},
-    sh_jang :{name:'가죽 장화', kind:'jang',  c:'#5C4130', rar:'R', cur:'coin', amt:1400}
+    sh_gomu :{name:'고무신',   kind:'gomu',  c:'#F5F1E6', rar:'N', cur:'coin', amt:5},
+    sh_jip  :{name:'짚신',     kind:'jip',   c:'#D9C08A', rar:'N', cur:'coin', amt:5},
+    sh_namak:{name:'나막신',   kind:'namak', c:'#B08F6A', rar:'R', cur:'coin', amt:10},
+    sh_jang :{name:'가죽 장화', kind:'jang',  c:'#5C4130', rar:'R', cur:'coin', amt:16}
   }
 };
 const WEAR_SLOTS = [['top','저고리'],['bottom','치마·바지'],['outer','두루마기'],['shoes','신']];
@@ -1012,7 +997,7 @@ function findWear(id){
 /* ── 저장 상태 ─────────────────────────── */
 const START_WEAR = ['jg_dahong','ch_namsaek','sh_gomu'];
 const S = load() || {
-  coin: 2400, gem: 12,
+  coin: 10,
   prog: { gu:0, stage:0, ci:0, done:[], char:{} },
   owned: Object.fromEntries(SAMPLE_PLACED.map(id=>[id,1])),
   placed: SAMPLE_PLACED.slice(),
@@ -1036,6 +1021,10 @@ if(!S.seq) S.seq=0;
 if(S.growWater===undefined) S.growWater=0;
 if(S.bgmOn===undefined) S.bgmOn=true;
 if(S.seenSeodangIntro===undefined) S.seenSeodangIntro=false;
+if(S.dueTally===undefined) S.dueTally=0;
+// 재화를 "전" 하나로 통일하면서 꾸러미(gem)는 없앤다. 예전 자료에 남아 있으면
+// 그 개수만큼 전으로 접어 넣고 지운다.
+if(S.gem!==undefined){ S.coin=(S.coin||0)+S.gem; delete S.gem; }
 if(!S.growth) S.growth={};
 if(!S.spot) S.spot={};
 if(!S.neighborWater) S.neighborWater={};
@@ -1060,15 +1049,15 @@ const metCount = ()=>Object.keys(P.char).length;
 
 /* ── 학동의 급 ───────────────────────────
    정원이 자라는 모습에 빗댄 이름. 익힌 글자 수(화면에 보이는 수 =
-   실제 + 발표용 보정)로 매긴다. 급이 오르면 축하와 함께 엽전을 준다.
+   실제 + 발표용 보정)로 매긴다. 급이 오르면 축하와 함께 전을 준다.
    ------------------------------------- */
 const RANKS = [
   {name:'씨앗', min:0,   color:'#8B6A4E', bonus:0},
-  {name:'새싹', min:50,  color:'#6FAE55', bonus:300},
-  {name:'떡잎', min:150, color:'#3F9142', bonus:500},
-  {name:'연두', min:350, color:'#9CB93C', bonus:800},
-  {name:'초록', min:600, color:'#2A6B33', bonus:1200},
-  {name:'열매', min:850, color:'#C0392B', bonus:2000}
+  {name:'새싹', min:50,  color:'#6FAE55', bonus:5},
+  {name:'떡잎', min:150, color:'#3F9142', bonus:10},
+  {name:'연두', min:350, color:'#9CB93C', bonus:20},
+  {name:'초록', min:600, color:'#2A6B33', bonus:30},
+  {name:'열매', min:850, color:'#C0392B', bonus:50}
 ];
 function effCount(){ return metCount() + (S.demoBoost||0); }
 function rankOf(n){ let idx=0; for(let i=0;i<RANKS.length;i++) if(n>=RANKS[i].min) idx=i; return idx; }
@@ -1098,7 +1087,7 @@ function showRankUp(rank, bonus){
       <div class="hint" style="margin-top:0">학동의 급이 올랐습니다</div>
       <div style="display:inline-block;padding:9px 26px;border-radius:16px;border:3px solid #3D3A36;
         background:${rank.color};color:#fff;font-size:30px;font-weight:700;margin:10px 0 12px">${rank.name}</div>
-      ${bonus?`<div class="hint">축하 엽전 <b>${bonus.toLocaleString()}</b>냥을 받았습니다</div>`:''}
+      ${bonus?`<div class="hint">축하 <b>${bonus.toLocaleString()}</b>전을 받았습니다</div>`:''}
     </div>`;
   if(bonus) queueReward({coin:bonus});
 }
@@ -1819,7 +1808,7 @@ document.getElementById('waterBtn').addEventListener('click', ()=>{
   toast(watering ? '화초나 나무를 눌러 물을 주세요' : '물뿌리개를 거두었습니다');
 });
 const WATER_MS = 3200; // 물조리개가 기울었다 돌아오기까지 걸리는 시간
-const GROW_BONUS = { seed:200, sapling:400 }; // 씨앗이 꽃을 피우면/묘목이 열매를 맺으면 주는 엽전
+const GROW_BONUS = { seed:3, sapling:5 }; // 씨앗이 꽃을 피우면(3전)/묘목이 열매를 맺으면(5전) 주는 전
 function waterPlant(iid, name){
   if(!(S.growWater>0)) return toast('성장수가 없습니다. 서당에서 익혀서 모으세요.');
   S.growWater--;
@@ -1837,7 +1826,7 @@ function waterPlant(iid, name){
       laterMsg = `${name} — ${table[newStage].name} 단계가 되었습니다`;
       if(newStage===4){
         laterBonus=GROW_BONUS[it.grow];
-        S.coin+=laterBonus; laterMsg += ` · 엽전 ${laterBonus}냥`;
+        S.coin+=laterBonus; laterMsg += ` · ${laterBonus}전`;
       }
     }
   } else if(newCnt%3===0){
@@ -1851,7 +1840,7 @@ function waterPlant(iid, name){
   }, WATER_MS);
 }
 /* 이웃의 화초·나무는 자라지 않지만, 하루 한 번 물을 주면 답례로
-   엽전을 받는다. 자리표(iid)별로 오늘 날짜를 적어 두어, 이웃마다
+   전을 받는다. 자리표(iid)별로 오늘 날짜를 적어 두어, 이웃마다
    화초마다 하루 한 번만 답례를 받게 한다. */
 function waterNeighborPlant(nb, iid, name){
   if(!S.neighborWater) S.neighborWater={};
@@ -1860,9 +1849,10 @@ function waterNeighborPlant(nb, iid, name){
   if(done[iid]===today){ toast('오늘은 이미 물을 주었습니다'); return; }
   done[iid]=today; S.neighborWater[nb.id]=done;
   waterFX=iid; drawScene();
-  const bonus=50;
+  const bonus=1;
   S.coin+=bonus; save(); syncHUD();
-  toast(`${name}에 물을 주었습니다 · 답례로 엽전 ${bonus}냥을 받았습니다`);
+  queueReward({coin:bonus});
+  toast(`${name}에 물을 주었습니다 · 답례로 ${bonus}전을 받았습니다`);
   setTimeout(()=>{ if(waterFX===iid){ waterFX=null; drawScene(); } }, WATER_MS);
 }
 
@@ -1909,7 +1899,7 @@ function closeSheet(){
   }
 }
 document.getElementById('closeSheet').addEventListener('click', closeSheet);
-document.getElementById('gemPlate').addEventListener('click', openExchange);
+document.getElementById('topupBtn').addEventListener('click', openTopUp);
 document.getElementById('rankDemoBtn').addEventListener('click', openRankDemo);
 
 document.querySelectorAll('#nav button').forEach(b=>{
@@ -2017,7 +2007,8 @@ function renderStudy(){
   fn(g);
 }
 const GROW_PER_GUJEOL = 3; // 한 마디를 배송까지 마치면 받는 성장수
-const REVIEW_GROW = 2;     // 복습에서 배송까지 마치면 받는 성장수(엽전은 안 줌)
+const GUJEOL_COIN = 1;     // 한 마디를 배송까지 마치면 받는 전(단계별로는 안 준다)
+const REVIEW_GROW = 2;     // 복습에서 배송까지 마치면 받는 성장수(전은 안 줌)
 function passStage(g, coin){
   if(studyMode==='review'){
     setStage(curStage()+1);
@@ -2032,13 +2023,15 @@ function passStage(g, coin){
     return;
   }
   const msg=[]; const reward={};
-  if(coin){ S.coin+=coin; msg.push(`엽전 ${coin}냥`); reward.coin=coin; }
+  if(coin){ S.coin+=coin; msg.push(`${coin}전`); reward.coin=(reward.coin||0)+coin; }
   P.stage++;
   if(P.stage>=STAGES.length){
     if(!P.done.includes(P.gu)) P.done.push(P.gu);
     P.gu++; P.stage=0; P.ci=0;
+    S.coin+=GUJEOL_COIN;
     S.growWater=(S.growWater||0)+GROW_PER_GUJEOL;
-    msg.push(`성장수 ${GROW_PER_GUJEOL}방울`);
+    msg.push(`${GUJEOL_COIN}전 · 성장수 ${GROW_PER_GUJEOL}방울`);
+    reward.coin=(reward.coin||0)+GUJEOL_COIN;
     reward.grow=GROW_PER_GUJEOL;
   }
   if(msg.length) toast(msg.join(' · '));
@@ -2112,17 +2105,17 @@ function renderReviewDone(g){
 
 /* ── 들이기 화면의 소리 내어 읽기 ─────────────
    발음의 정확함은 가리지 않는다. 마이크로 잠깐 들어서 소리를 냈는지만
-   확인하고, 냈으면 엽전을 조금 더 준다. 마이크가 없는 기기에서는
+   확인하고, 냈으면 전을 조금 더 준다. 마이크가 없는 기기에서는
    버튼 자체를 숨기고, 권한을 거부해도 학습은 그대로 이어진다. */
-const MIC_BONUS = 20;
+const MIC_BONUS = 1;
 function micSupported(){
   return !!(navigator.mediaDevices && navigator.mediaDevices.getUserMedia);
 }
 const MIC_ICON = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="2" width="6" height="12" rx="3"/><path d="M5 10v1a7 7 0 0 0 14 0v-1"/><path d="M12 18v4M8 22h8"/></svg>';
 function micRowHTML(){
-  if(!micSupported() || studyMode==='review') return ''; // 복습에서는 엽전을 주지 않는다
+  if(!micSupported() || studyMode==='review') return ''; // 복습에서는 전을 주지 않는다
   if(P.readAloudGu===P.gu)
-    return `<button class="subbtn done" disabled>${MIC_ICON}소리 내어 읽었습니다 · 엽전 ${MIC_BONUS}냥 받음</button>`;
+    return `<button class="subbtn done" disabled>${MIC_ICON}소리 내어 읽었습니다 · ${MIC_BONUS}전 받음</button>`;
   return `<button class="subbtn" id="micBtn">${MIC_ICON}소리 내어 읽기</button>`;
 }
 let stopActiveMic=null;
@@ -2166,7 +2159,7 @@ function bindMicBtn(){
     listenForVoice(heard=>{
       if(heard===true){
         S.coin+=MIC_BONUS; P.readAloudGu=P.gu; save(); syncHUD();
-        toast(`소리 내어 읽었습니다 · 엽전 ${MIC_BONUS}냥`);
+        toast(`소리 내어 읽었습니다 · ${MIC_BONUS}전`);
         renderStudy();
       } else {
         toast(heard===null ? '마이크를 쓸 수 없습니다. 그냥 넘어가도 됩니다.'
@@ -2397,14 +2390,15 @@ function renderJok(){
   const rev=document.getElementById('rev');
   if(rev) rev.addEventListener('click',()=>runReview(due.slice(0,12)));
 }
-const DUE_CHAR_COIN=20, DUE_CHAR_GROW=1; // 되짚기에서 한 글자를 맞힐 때마다 즉시 준다
+const DUE_CHAR_GROW=1;   // 되짚기에서 한 글자를 맞힐 때마다 즉시 주는 성장수
+const DUE_TALLY_GOAL=5;  // 다섯 글자를 맞힐 때마다 전 하나로 바꿔 준다(0.2전씩 대신)
 function runReview(list){
-  let n=0, got=0;
+  let n=0, got=0, earnedCoin=0;
   const step=()=>{
     if(n>=list.length){
       sheetBody.innerHTML=`<div class="hanja-card">
           <div class="hunum">${list.length}자 되짚었습니다.</div>
-          <div class="hint">맞힌 것 ${got}자 · 엽전 ${got*DUE_CHAR_COIN}냥 · 성장수 ${got}방울</div></div>
+          <div class="hint">맞힌 것 ${got}자${earnedCoin?` · ${earnedCoin}전`:''} · 성장수 ${got}방울</div></div>
         <button class="bigbtn" id="bk">글자 익힘책으로</button>`;
       document.getElementById('bk').addEventListener('click',renderJok);
       return;
@@ -2426,8 +2420,13 @@ function runReview(list){
       const ok=v===o.um;
       if(ok){
         got++;
-        S.coin+=DUE_CHAR_COIN; S.growWater=(S.growWater||0)+DUE_CHAR_GROW;
-        queueReward({coin:DUE_CHAR_COIN, grow:DUE_CHAR_GROW});
+        S.growWater=(S.growWater||0)+DUE_CHAR_GROW;
+        const reward={grow:DUE_CHAR_GROW};
+        S.dueTally=(S.dueTally||0)+1;
+        if(S.dueTally>=DUE_TALLY_GOAL){
+          S.dueTally=0; S.coin+=1; earnedCoin+=1; reward.coin=1;
+        }
+        queueReward(reward);
       }
       markChar(P,o.c,ok); save(); syncHUD();
       inp.disabled=true; document.getElementById('ck').disabled=true;
@@ -2484,17 +2483,16 @@ function packPreview(season){
       aria-label="${PACK_NAME[season]} 꾸민 모습">
     <rect x="0" y="258" width="400" height="40" fill="#C6D89C"/>${emptyLand()}${ground.map(placeAt).join('')}${body.map(placeAt).join('')}${airHtml}</svg>`;
 }
-/* 저잣거리·가게 화면 위쪽에 늘 붙는 재화 표시(엽전·꾸러미·성장수) */
+/* 저잣거리·가게 화면 위쪽에 늘 붙는 재화 표시(전·성장수) */
 function resBarHTML(){
   return `<div class="studyhead">
     <span class="coin">${COIN_SVG}${S.coin.toLocaleString()}</span>
-    <span class="coin">${BUNDLE_SVG}${S.gem.toLocaleString()}</span>
     <span class="coin">${GROW_SVG}${(S.growWater||0).toLocaleString()}</span>
   </div>`;
 }
-function bindPayBtns(){
-  sheetBody.querySelectorAll('.paybtn').forEach(b=>
-    b.addEventListener('click',()=>buy(b.dataset.id,b.dataset.cur)));
+function bindShopCells(){
+  sheetBody.querySelectorAll('.cell[data-id]').forEach(c=>
+    c.addEventListener('click',()=>buy(c.dataset.id)));
 }
 let shopTab='spring';
 let activeShopRender=null; // buy()가 지금 열려 있는 상점 화면을 다시 그릴 수 있게
@@ -2520,7 +2518,7 @@ function renderShop(){
     <p class="note">산 물건은 정원보따리에 들어갑니다. 정원에 놓는 것은 보따리에서 고르세요.</p>`;
   sheetBody.querySelectorAll('.tabs button').forEach(b=>
     b.addEventListener('click',()=>{ shopTab=b.dataset.tab; renderShop(); sheetBody.scrollTop=0; }));
-  bindPayBtns();
+  bindShopCells();
 }
 /* ── 화수전: 씨앗 · 묘목 (계절 상관없이 상시 판매) ─── */
 const SEED_IDS=['seed_pr','seed_bs','seed_np','seed_gu','seed_md','seed_mr'];
@@ -2542,7 +2540,7 @@ function renderGrowShop(){
     <div class="grid">${SAPLING_IDS.map(id=>cellHTML(id,'shop')).join('')}</div>
     <p class="note">산 것은 정원보따리에 들어갑니다. 정원에 심는 것은 보따리에서 고르세요.</p>
     <p class="note">성장수는 서당에서 글을 익혀야만 모입니다.</p>`;
-  bindPayBtns();
+  bindShopCells();
 }
 function cellHTML(id,mode){
   const it=ITEMS[id], cnt=ownedCount(id), onCnt=placedCount(id);
@@ -2554,24 +2552,19 @@ function cellHTML(id,mode){
     ${tag}
     <svg class="thumb" viewBox="${(w-m)/2} ${(h-m)/2} ${m} ${m}">${itemMedia(it)}</svg>
     <div class="cname">${it.name}</div>`;
-  if(mode==='shop') return `<div class="cell">
+  const foot = mode==='shop'
+    ? `${COIN_SVG}${it.amt.toLocaleString()}전${it.pack?` · ${it.pack}개`:''}`
+    : (onCnt<cnt?'정원에 놓기':'거두기');
+  return `<button class="cell ${mode==='bag'&&onCnt?'placed':''}" data-id="${id}">
     ${body}
-    <div class="paybar">
-      <button class="paybtn" data-id="${id}" data-cur="coin">${COIN_SVG}${priceOf(it,'coin').toLocaleString()}</button>
-      <button class="paybtn" data-id="${id}" data-cur="gem">${BUNDLE_SVG}${priceOf(it,'gem').toLocaleString()}</button>
-    </div></div>`;
-  return `<button class="cell ${onCnt?'placed':''}" data-id="${id}">
-    ${body}
-    <div class="cost">${onCnt<cnt?'정원에 놓기':'거두기'}</div></button>`;
+    <div class="cost">${foot}</div></button>`;
 }
-function buy(id, cur){
+function buy(id){
   const it=ITEMS[id];
-  cur = cur==='gem' ? 'gem' : 'coin';
-  const price = priceOf(it, cur);
-  const bag = cur==='coin' ? S.coin : S.gem;
-  if(bag<price) return toast(cur==='coin'?'엽전이 모자랍니다':'꾸러미가 모자랍니다');
-  if(cur==='coin') S.coin-=price; else S.gem-=price;
-  S.owned[id]=(S.owned[id]||0)+1; save(); syncHUD();
+  if(S.coin<it.amt) return toast('전이 모자랍니다');
+  S.coin-=it.amt;
+  S.owned[id]=(S.owned[id]||0)+(it.pack||1);
+  save(); syncHUD();
   if(activeShopRender) activeShopRender();
   toast(`${it.name} — 정원보따리에 넣었습니다 (${S.owned[id]}개)`);
 }
@@ -2594,26 +2587,14 @@ function wearThumb(slot, g){
 }
 function wearCell(slot, id, mode){
   const g=WEAR[slot][id], has=S.closet.includes(id), on=S.wear[slot]===id;
-  if(mode==='shop'){
-    if(has) return `<div class="cell owned">
-      <span class="rar" style="background:${RAR_COLOR[g.rar]}">${g.rar}</span>
-      ${wearThumb(slot,g)}
-      <div class="cname">${g.name}</div>
-      <div class="cost">보유 중</div></div>`;
-    return `<div class="cell">
-      <span class="rar" style="background:${RAR_COLOR[g.rar]}">${g.rar}</span>
-      ${wearThumb(slot,g)}
-      <div class="cname">${g.name}</div>
-      <div class="paybar">
-        <button class="paybtn" data-w="${id}" data-cur="coin">${COIN_SVG}${priceOf(g,'coin').toLocaleString()}</button>
-        <button class="paybtn" data-w="${id}" data-cur="gem">${BUNDLE_SVG}${priceOf(g,'gem').toLocaleString()}</button>
-      </div></div>`;
-  }
-  return `<button class="cell ${on?'placed':''}" data-w="${id}">
+  const foot = mode==='shop'
+    ? (has?'보유 중':`${COIN_SVG}${g.amt.toLocaleString()}전`)
+    : (on?'입는 중':'입기');
+  return `<button class="cell ${mode==='shop'&&has?'owned':''} ${mode==='closet'&&on?'placed':''}" data-w="${id}">
     <span class="rar" style="background:${RAR_COLOR[g.rar]}">${g.rar}</span>
     ${wearThumb(slot,g)}
     <div class="cname">${g.name}</div>
-    <div class="cost">${on?'입는 중':'입기'}</div></button>`;
+    <div class="cost">${foot}</div></button>`;
 }
 
 /* ── 의전 ───────────────────────────────── */
@@ -2629,17 +2610,13 @@ function openClothes(){
       <p class="note" style="margin:14px 2px 8px;font-weight:700;color:#5C5346">${label}</p>
       <div class="grid">${Object.keys(WEAR[s]).map(id=>wearCell(s,id,'shop')).join('')}</div>`).join('')}
     <p class="note">산 옷은 학동보따리에 들어갑니다. 입는 것은 학동보따리에서 고르세요.</p>`;
-  sheetBody.querySelectorAll('.paybtn').forEach(b=>
-    b.addEventListener('click',()=>buyWear(b.dataset.w,b.dataset.cur)));
+  sheetBody.querySelectorAll('.cell').forEach(c=>c.addEventListener('click',()=>buyWear(c.dataset.w)));
 }
-function buyWear(id, cur){
+function buyWear(id){
   const g=findWear(id);
   if(S.closet.includes(id)) return toast('이미 옷장에 있습니다');
-  cur = cur==='gem' ? 'gem' : 'coin';
-  const price = priceOf(g, cur);
-  const bag = cur==='coin' ? S.coin : S.gem;
-  if(bag<price) return toast(cur==='coin'?'엽전이 모자랍니다':'꾸러미가 모자랍니다');
-  if(cur==='coin') S.coin-=price; else S.gem-=price;
+  if(S.coin<g.amt) return toast('전이 모자랍니다');
+  S.coin-=g.amt;
   S.closet.push(id); save(); syncHUD(); openClothes();
   toast(`${g.name} — 학동보따리에 넣었습니다`);
 }
@@ -2651,33 +2628,20 @@ function equip(id){
   toast(S.wear[g.slot]===id ? `${g.name}를 입었습니다` : `${g.name}를 벗었습니다`);
 }
 
-/* ── 엽전 바꾸기 ────────────────────────── */
-function openExchange(){
-  openSheetRaw('엽전 바꾸기');
-  renderExchange();
-}
-function renderExchange(){
-  const can=Math.floor(S.coin/PER_BUNDLE);
-  const opts=[1,5,10,can].filter((v,i,a)=>v>0&&a.indexOf(v)===i&&v<=can);
+/* ── 전 충전(자리만 준비) ───────────────────
+   지금은 결제를 만들지 않는다. 나중에 실제 구매를 붙일 자리만
+   마련해 둔다. 1전은 국수 한 그릇 값, 유료로는 10전에 1만 원. */
+function openTopUp(){
+  openSheetRaw('전 충전');
   sheetBody.innerHTML=`
     <div class="hanja-card" style="padding:18px 16px">
-      <div class="swap">
-        <span>${COIN_SVG}<b>${PER_BUNDLE}</b>닢</span>
-        <em>→</em>
-        <span>${BUNDLE_SVG}<b>1</b>꾸러미</span>
-      </div>
-      <div class="hint">가진 엽전 ${S.coin.toLocaleString()}닢 · 꾸러미 ${S.gem}개</div>
+      <div class="hint" style="margin-top:0">가진 전 <b>${S.coin.toLocaleString()}</b></div>
+      <p class="note" style="margin-top:10px">1전은 국수 한 그릇 값입니다.</p>
     </div>
-    <p class="note">엽전 백 닢을 실에 꿰면 한 꾸러미가 됩니다. 귀한 물건은 꾸러미로만 삽니다.</p>
-    ${can?`<div class="choices">${opts.map(v=>
-      `<button class="choice" data-n="${v}">${v}꾸러미로 바꾸기 <span style="color:#7A6E5E">— 엽전 ${(v*PER_BUNDLE).toLocaleString()}닢</span></button>`).join('')}</div>`
-      :`<p class="note">아직 백 닢이 모이지 않았습니다. 서당에서 더 익히면 모입니다.</p>`}`;
-  sheetBody.querySelectorAll('.choice').forEach(b=>b.addEventListener('click',()=>{
-    const n=+b.dataset.n, cost=n*PER_BUNDLE;
-    if(S.coin<cost) return toast('엽전이 모자랍니다');
-    S.coin-=cost; S.gem+=n; save(); syncHUD(); renderExchange();
-    toast(`엽전 ${cost.toLocaleString()}닢을 ${n}꾸러미로 꿰었습니다`);
-  }));
+    <div class="choices">
+      <button class="choice" disabled style="opacity:.55;cursor:default">10전 충전 — 10,000원</button>
+    </div>
+    <p class="note">충전은 아직 준비 중입니다. 서당에서 익히고 정원을 가꾸며 모아 보세요.</p>`;
 }
 
 /* ── 보따리 ─────────────────────────────── */
@@ -2794,7 +2758,6 @@ function animateNumber(el, to){
 /* ── 공용 ───────────────────────────────── */
 function syncHUD(){
   animateNumber(document.getElementById('coinTxt'), S.coin);
-  animateNumber(document.getElementById('gemTxt'), S.gem);
   animateNumber(document.getElementById('growTxt'), S.growWater||0);
   const rk = rankInfo(effCount());
   const gt = document.getElementById('gradeTxt');
