@@ -2739,7 +2739,7 @@ function renderBag(){
    그 마지막 하나가 닿는 순간에야 세어 올라간다(coinFlights/growFlights
    가 몇 개나 날아가고 있는지 세어, 그동안은 syncHUD가 숫자를 미리
    바꾸지 않게 막아 둔다). 엽전이 다 날아간 뒤에야 물방울 차례가 와서
-   둘이 겹치지 않는다. 전체는 1.5초를 넘기지 않는다.
+   둘이 겹치지 않는다. 눈으로 좇을 수 있게 조금 여유 있게 날아간다.
    움직임을 줄이는 설정에서는 particle 없이 글자만 옅게 보여주고
    숫자도 그 자리에서 곧장 바뀐다(움직임 요소만 뺀다). */
 const rewardQueue=[];
@@ -2796,9 +2796,9 @@ function flightPhase(kind, amount){
   return new Promise(resolve=>{
     const pop=document.getElementById('rewardPop');
     const n = kind==='coin' ? 4 : 3;
-    const dur = kind==='coin' ? 350 : 500;
-    const stagger = kind==='coin' ? 50 : 70;
-    const startDelay = kind==='coin' ? 150 : 100;
+    const dur = kind==='coin' ? 600 : 850;
+    const stagger = kind==='coin' ? 90 : 120;
+    const startDelay = kind==='coin' ? 250 : 200;
     const total = startDelay + (n-1)*stagger + dur;
 
     pop.innerHTML=`<span class="rw-item">${kind==='coin'?COIN_SVG:GROW_SVG}+${amount.toLocaleString()}${REWARD_UNIT[kind]}</span>`;
