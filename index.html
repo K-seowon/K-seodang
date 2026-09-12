@@ -36,6 +36,10 @@ body{font-family:'Gaegu',system-ui,sans-serif;color:var(--ink);-webkit-font-smoo
 .pip{width:22px;height:22px;flex:0 0 auto;display:block}
 .cost .pip{width:17px;height:17px}
 #gemPlate{pointer-events:auto;cursor:pointer}
+#bgmBtn,#helpBtn{display:none;pointer-events:auto;cursor:pointer;color:var(--ink)}
+#bgmBtn.on,#helpBtn.on{display:flex}
+#bgmBtn.muted{opacity:.5}
+#bgmBtn svg,#helpBtn svg{width:20px;height:20px}
 
 #stage{flex:1;position:relative;overflow:hidden}
 #scene{position:absolute;inset:0;width:100%;height:100%;display:block;touch-action:none}
@@ -115,7 +119,12 @@ body{font-family:'Gaegu',system-ui,sans-serif;color:var(--ink);-webkit-font-smoo
   background:var(--maehwa);font-family:inherit;font-size:22px;font-weight:700;cursor:pointer;box-shadow:0 3px 0 var(--ink)}
 .bigbtn:active{transform:translateY(2px);box-shadow:0 1px 0 var(--ink)}
 .subbtn{width:100%;margin-top:12px;padding:11px;border:2.5px solid var(--ink);border-radius:14px;
-  background:var(--hanji-2);font-family:inherit;font-size:18px;cursor:pointer}
+  background:var(--hanji-2);font-family:inherit;font-size:18px;cursor:pointer;
+  display:flex;align-items:center;justify-content:center;gap:6px}
+.subbtn svg{width:19px;height:19px;flex:0 0 auto}
+.subbtn.listening{background:#BFE3F5;color:#1B5E82}
+.subbtn.done{background:#DCEAC8;cursor:default}
+.subbtn:disabled{cursor:default}
 .note{font-size:17px;color:#7A6E5E;margin:10px 2px 0;line-height:1.5}
 .swap{display:flex;align-items:center;justify-content:center;gap:14px;font-size:20px}
 .swap span{display:flex;align-items:center;gap:5px}
@@ -160,6 +169,24 @@ body{font-family:'Gaegu',system-ui,sans-serif;color:var(--ink);-webkit-font-smoo
 .jokchars{font-size:22px;letter-spacing:.08em;color:#C4B8A2;word-break:break-all}
 .jokchars .met{color:var(--ink);font-weight:700}
 
+.gulist{display:flex;flex-direction:column;gap:8px;margin-bottom:4px}
+.gurow{display:flex;align-items:center;gap:10px;width:100%;text-align:left;
+  border:2.5px solid var(--ink);border-radius:14px;background:var(--hanji-2);
+  padding:9px 12px;font-family:inherit;cursor:pointer}
+.gurow .gunum{flex:0 0 auto;width:30px;height:30px;border-radius:50%;background:var(--hanji);
+  border:2px solid var(--ink);display:flex;align-items:center;justify-content:center;
+  font-size:14px;font-weight:700}
+.gurow .gutext{flex:1;font-size:16px;line-height:1.4;min-width:0}
+.gurow .gutext small{display:block;color:#7A6E5E;font-size:13px;font-weight:400;
+  overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.gurow.current{background:var(--maehwa)}
+.gurow.done{background:#DCEAC8}
+.gurow.locked{opacity:.55;cursor:default}
+.badge2{flex:0 0 auto;font-size:12px;font-weight:700;padding:3px 9px;border-radius:9px;
+  border:2px solid var(--ink);background:var(--hanji)}
+.badge2.now{background:#fff}
+.badge2.done{background:#8AB566;color:#fff}
+
 .packhead{border:3px solid var(--ink);border-radius:16px;overflow:hidden;margin-bottom:14px;position:relative}
 .packhead .strip{padding:10px 14px;background:var(--maehwa);border-bottom:3px solid var(--ink)}
 .packhead h2{margin:0;font-size:22px;font-weight:700}
@@ -172,12 +199,18 @@ body{font-family:'Gaegu',system-ui,sans-serif;color:var(--ink);-webkit-font-smoo
 .packhead.banner .sub{border-top:3px solid var(--ink)}
 .grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
 .cell{border:2.5px solid var(--ink);border-radius:14px;background:var(--hanji-2);padding:6px;
-  cursor:pointer;position:relative;font-family:inherit;text-align:center}
+  position:relative;font-family:inherit;text-align:center}
+button.cell{cursor:pointer}
 .cell .thumb{width:100%;aspect-ratio:1;display:block;background:#FBF0E6;border-radius:9px}
 .cell .cname{font-size:16px;margin-top:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .cell .cost{font-size:16px;font-weight:700;display:flex;align-items:center;justify-content:center;gap:4px}
+.paybar{display:flex;gap:4px;margin-top:4px}
+.paybtn{flex:1;min-width:0;border:2px solid var(--ink);border-radius:10px;background:var(--hanji);
+  font-family:inherit;font-size:14px;font-weight:700;padding:4px 2px;cursor:pointer;color:var(--ink);
+  display:flex;align-items:center;justify-content:center;gap:2px}
+.paybtn .pip{width:14px;height:14px}
 
-.cell.owned{opacity:.55}
+.cell.owned{opacity:.55;cursor:default}
 .cell.placed{background:#DCEAC8}
 .rar{position:absolute;top:3px;right:3px;min-width:22px;height:22px;border-radius:50%;
   border:2.5px solid var(--ink);color:#fff;font-size:14px;font-weight:700;
@@ -220,6 +253,18 @@ body{font-family:'Gaegu',system-ui,sans-serif;color:var(--ink);-webkit-font-smoo
     <div class="plate"><svg class="pip" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9.5" fill="#E8A33C" stroke="#3D3A36" stroke-width="2.4"/><rect x="8.6" y="8.6" width="6.8" height="6.8" rx="1.2" fill="#FBF3E4" stroke="#3D3A36" stroke-width="2"/></svg><span class="num" id="coinTxt">0</span></div>
     <div class="plate" id="gemPlate" role="button" aria-label="엽전 바꾸기"><svg class="pip" viewBox="0 0 24 24" aria-hidden="true"><circle cx="17.5" cy="15" r="6" fill="#B5731F" stroke="#3D3A36" stroke-width="1.8"/><circle cx="15" cy="15" r="6.2" fill="#C9832A" stroke="#3D3A36" stroke-width="1.8"/><circle cx="12.5" cy="15" r="6.4" fill="#D9922F" stroke="#3D3A36" stroke-width="1.8"/><path d="M9 11.5 C9 5, 17 5, 16.5 10" fill="none" stroke="#8A6A4E" stroke-width="2.2" stroke-linecap="round"/><circle cx="9" cy="15" r="7" fill="#E8A33C" stroke="#3D3A36" stroke-width="2.2"/><rect x="6.7" y="12.7" width="4.6" height="4.6" rx="1" fill="#FBF3E4" stroke="#3D3A36" stroke-width="1.8"/></svg><span class="num" id="gemTxt">0</span></div>
     <div class="plate" id="growPlate" aria-label="성장수"><svg class="pip" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3 C8 9 5 13 5 16.5 A7 7 0 0 0 19 16.5 C19 13 16 9 12 3 Z" fill="#7FC4EA" stroke="#3D3A36" stroke-width="2"/><ellipse cx="9.5" cy="14" rx="2" ry="3" fill="#BEE6F7"/></svg><span class="num" id="growTxt">0</span></div>
+    <button class="plate" id="bgmBtn" aria-label="배경음악 켜고 끄기">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" id="bgmIcon">
+        <path d="M4 9v6h4l5 5V4L8 9H4Z"/><path d="M16.5 8a5 5 0 0 1 0 8"/>
+      </svg>
+    </button>
+    <button class="plate" id="helpBtn" aria-label="글방 안내 다시 보기">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round">
+        <circle cx="12" cy="12" r="10"/>
+        <path d="M9.3 9.3a2.7 2.7 0 1 1 3.8 2.5c-.9.4-1.6 1.1-1.6 2.3"/>
+        <circle cx="12" cy="17.3" r="0.9" fill="currentColor" stroke="none"/>
+      </svg>
+    </button>
     <button class="plate" id="rankDemoBtn" aria-label="급수 시험(발표용)">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:18px;height:18px">
         <path d="M9 3h6M10 3v6l-5 9a2 2 0 0 0 2 3h10a2 2 0 0 0 2-3l-5-9V3"/><path d="M8.5 15h7"/>
@@ -280,6 +325,9 @@ body{font-family:'Gaegu',system-ui,sans-serif;color:var(--ink);-webkit-font-smoo
   </div>
 
   <div id="toast"></div>
+  <audio id="bgmAudio" loop preload="none">
+    <source src="sound/garden-bgm.mp3" type="audio/mpeg">
+  </audio>
 </div>
 
 <script>
@@ -757,6 +805,13 @@ const COIN_SVG = `<svg class="pip" viewBox="0 0 24 24" aria-hidden="true"><circl
 const BUNDLE_SVG = `<svg class="pip" viewBox="0 0 24 24" aria-hidden="true"><circle cx="17.5" cy="15" r="6" fill="#B5731F" stroke="#3D3A36" stroke-width="1.8"/><circle cx="15" cy="15" r="6.2" fill="#C9832A" stroke="#3D3A36" stroke-width="1.8"/><circle cx="12.5" cy="15" r="6.4" fill="#D9922F" stroke="#3D3A36" stroke-width="1.8"/><path d="M9 11.5 C9 5, 17 5, 16.5 10" fill="none" stroke="#8A6A4E" stroke-width="2.2" stroke-linecap="round"/><circle cx="9" cy="15" r="7" fill="#E8A33C" stroke="#3D3A36" stroke-width="2.2"/><rect x="6.7" y="12.7" width="4.6" height="4.6" rx="1" fill="#FBF3E4" stroke="#3D3A36" stroke-width="1.8"/></svg>`;
 const GROW_SVG = `<svg class="pip" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3 C8 9 5 13 5 16.5 A7 7 0 0 0 19 16.5 C19 13 16 9 12 3 Z" fill="#7FC4EA" stroke="#3D3A36" stroke-width="2"/><ellipse cx="9.5" cy="14" rx="2" ry="3" fill="#BEE6F7"/></svg>`;
 const PER_BUNDLE = 100;   // 엽전 백 닢을 실에 꿰면 한 꾸러미
+/* 무엇이든 엽전으로도 꾸러미로도 살 수 있게, 물건의 정가(cur/amt)를
+   다른 쪽 값으로 환산한다. 꾸러미→엽전은 그대로 백 곱, 엽전→꾸러미는
+   내림 없이 올림(모자라게 되지 않도록). */
+function priceOf(it, cur){
+  if(cur==='coin') return it.cur==='coin' ? it.amt : it.amt*PER_BUNDLE;
+  return it.cur==='gem' ? it.amt : Math.ceil(it.amt/PER_BUNDLE);
+}
 
 /* ── 계절 ───────────────────────────────
    all(사철) / spring / summer / autumn / winter
@@ -952,6 +1007,8 @@ if(!S.owned) S.owned={};
 if(!S.placed) S.placed=[];
 if(!S.seq) S.seq=0;
 if(S.growWater===undefined) S.growWater=0;
+if(S.bgmOn===undefined) S.bgmOn=true;
+if(S.seenSeodangIntro===undefined) S.seenSeodangIntro=false;
 if(!S.growth) S.growth={};
 if(!S.spot) S.spot={};
 if(!S.neighborWater) S.neighborWater={};
@@ -1538,7 +1595,7 @@ function drawMarket(){
   scene.innerHTML = `
     <image href="bg/bg-marketstreet.png" xlink:href="bg/bg-marketstreet.png" x="0" y="0" width="400" height="600" preserveAspectRatio="xMidYMid slice"/>
     ${marketZone([0,160,155,180],  'shop-clothes',75, 420,'의전으로',   '14벌',  true)}
-    ${marketZone([160,145,140,195],'shop-flower', 225,420,'화수전으로', '씨앗·묘목·성장수', true)}
+    ${marketZone([160,145,140,195],'shop-flower', 225,420,'화수전으로', '씨앗·묘목', true)}
     ${marketZone([300,160,100,180],'shop-stone',  350,420,'목석방으로', `${Object.keys(ITEMS).filter(id=>!ITEMS[id].grow).length}종`, true)}
     <g class="tapzone" data-act="go-garden" data-ax="344" data-ay="556" role="button" aria-label="나의 정원으로">
       <rect x="300" y="474" width="100" height="126" fill="transparent"/>
@@ -1574,7 +1631,39 @@ function drawScene(){
   const vb=document.getElementById('visitBar');
   vb.classList.toggle('on', !!visiting);
   if(visiting) document.getElementById('visitName').textContent = `${visiting.name}의 정원`;
+  document.getElementById('bgmBtn').classList.toggle('on', where==='garden');
+  document.getElementById('helpBtn').classList.toggle('on', where==='inside');
+  syncBgmBtn();
+  tryPlayBGM();
 }
+
+/* ── 배경음악 ─────────────────────────────
+   정원 화면에서만 튼다. 브라우저는 사용자가 화면을 한 번 조작하기
+   전에는 소리를 막으므로, 첫 조작이 있고 나서야 재생을 시도한다.
+   음원 파일은 sound/garden-bgm.mp3 자리에 넣으면 된다(없어도 조용히 무시). */
+const bgmAudio = document.getElementById('bgmAudio');
+let userInteracted = false;
+function markInteracted(){
+  if(userInteracted) return;
+  userInteracted = true;
+  tryPlayBGM();
+}
+document.addEventListener('pointerdown', markInteracted, {once:true});
+function tryPlayBGM(){
+  if(where==='garden' && S.bgmOn && userInteracted) bgmAudio.play().catch(()=>{});
+  else bgmAudio.pause();
+}
+function syncBgmBtn(){
+  const b=document.getElementById('bgmBtn');
+  b.classList.toggle('muted', !S.bgmOn);
+  document.getElementById('bgmIcon').innerHTML = S.bgmOn
+    ? '<path d="M4 9v6h4l5 5V4L8 9H4Z"/><path d="M16.5 8a5 5 0 0 1 0 8"/>'
+    : '<path d="M4 9v6h4l5 5V4L8 9H4Z"/><path d="M16 9l5 5M21 9l-5 5"/>';
+}
+document.getElementById('bgmBtn').addEventListener('click', ()=>{
+  S.bgmOn = !S.bgmOn; save(); markInteracted(); syncBgmBtn(); tryPlayBGM();
+  toast(S.bgmOn ? '배경음악을 켰습니다' : '배경음악을 껐습니다');
+});
 function goScene(name){
   visiting=null;
   where=name; placingId=null; watering=false;
@@ -1594,10 +1683,14 @@ function leaveNeighborGarden(){
 }
 function doAct(act){
   if(act==='go-seodang')    return goScene('seodang');
-  if(act==='enter-seodang') return goScene('inside');
+  if(act==='enter-seodang'){
+    goScene('inside');
+    if(!S.seenSeodangIntro) setTimeout(()=>openSeodangIntro(false), 300);
+    return;
+  }
   if(act==='go-market')     return goScene('market');
   if(act==='go-garden')     return goScene('garden');
-  if(act==='study-cheonja')   return openStudy();
+  if(act==='study-cheonja')   return openGujeolList();
   if(act==='study-jok')       return openJok();
   if(act==='study-myeongsim') return toast('명심보감은 곧 문을 엽니다');
   if(act==='shop-flower')  return openGrowShop();
@@ -1700,7 +1793,7 @@ document.getElementById('waterBtn').addEventListener('click', ()=>{
 const WATER_MS = 3200; // 물조리개가 기울었다 돌아오기까지 걸리는 시간
 const GROW_BONUS = { seed:200, sapling:400 }; // 씨앗이 꽃을 피우면/묘목이 열매를 맺으면 주는 엽전
 function waterPlant(iid, name){
-  if(!(S.growWater>0)) return toast('성장수가 없습니다. 화수전에서 사거나 익혀서 모으세요.');
+  if(!(S.growWater>0)) return toast('성장수가 없습니다. 서당에서 익혀서 모으세요.');
   S.growWater--;
   waterFX=iid; drawScene();
   toast(`${name}에 물을 주었습니다 · 성장수 ${S.growWater}방울 남음`);
@@ -1778,6 +1871,8 @@ const sheetTitle=document.getElementById('sheetTitle');
 const sheetBody=document.getElementById('sheetBody');
 function openSheetRaw(t){ sheetTitle.textContent=t; overlay.classList.add('on'); }
 function closeSheet(){
+  if(stopActiveMic) stopActiveMic(false);
+  studyMode='normal'; // 복습 중 그만두면 보상 없이 나간다
   overlay.classList.remove('on'); drawScene();
   if(pendingRankUp){
     const r=pendingRankUp; pendingRankUp=null;
@@ -1804,24 +1899,65 @@ document.querySelectorAll('#nav button').forEach(b=>{
    ---------------------------------------- */
 const shuffle = a => a.slice().sort(()=>Math.random()-.5);
 
-function openStudy(){ openSheetRaw('천자문'); renderStudy(); }
+/* ── 글방 안내(훈장이 말을 건다) ─────────────
+   글방(서당 안)에 처음 들어가면 다섯 단계와 배송 규칙을 짚어 준다.
+   "다시 보지 않기"를 고르지 않으면 들어갈 때마다 다시 뜨고,
+   물음표 버튼으로는 언제든 다시 볼 수 있다. */
+function openSeodangIntro(force){
+  if(!force && S.seenSeodangIntro) return;
+  openSheetRaw('훈장님 말씀');
+  sheetBody.innerHTML = `
+    <div class="hanja-card" style="text-align:left">
+      <p class="note" style="margin:0 0 12px;font-size:18px;color:var(--ink)">
+        "어서 오너라. 이 글방에서는 한 마디를 다섯 걸음으로 익힌다."</p>
+      <ol style="margin:0;padding-left:20px;font-size:16px;line-height:1.7">
+        ${STAGES.map(s=>`<li><b>${s.name}</b> — ${s.desc}</li>`).join('')}
+      </ol>
+      <p class="note" style="margin:12px 0 0;font-size:18px;color:var(--ink)">
+        "다섯째, <b>배송</b>을 통과해야 다음 마디로 나아갈 수 있다. 명심하거라."</p>
+    </div>
+    <label style="display:flex;align-items:center;gap:8px;margin:14px 4px;font-size:16px">
+      <input type="checkbox" id="introHide" style="width:18px;height:18px">다시 보지 않기
+    </label>
+    <button class="bigbtn" id="introOk">알겠습니다</button>`;
+  document.getElementById('introOk').addEventListener('click',()=>{
+    if(document.getElementById('introHide').checked){ S.seenSeodangIntro=true; save(); }
+    closeSheet();
+  });
+}
+document.getElementById('helpBtn').addEventListener('click', ()=>openSeodangIntro(true));
+
+/* ── 지금 익히는 중 / 복습 중 ─────────────────
+   복습은 이미 마친 마디를 다시 풀어 보는 것이라, 지금 진도(P)는
+   조금도 건드리지 않는다. RV가 복습 중의 임시 자리다(저장하지 않음).
+   틀린 글자의 되짚기 기록만은 진짜 자료(P.char)에 그대로 남긴다. */
+let studyMode = 'normal'; // 'normal' | 'review'
+let RV = { gu:0, stage:0, ci:0 };
+function curGu(){ return studyMode==='review' ? RV.gu : P.gu; }
+function curStage(){ return studyMode==='review' ? RV.stage : P.stage; }
+function curCi(){ return studyMode==='review' ? RV.ci : P.ci; }
+function setStage(v){ if(studyMode==='review') RV.stage=v; else P.stage=v; }
+function setCi(v){ if(studyMode==='review') RV.ci=v; else P.ci=v; }
 
 function stepBar(){
   const rk = rankInfo(effCount());
+  const modeBadge = studyMode==='review'
+    ? `<span class="grade" style="background:#8AB566">복습</span>`
+    : `<span class="grade" style="background:${rk.color}">${rk.name}</span>`;
   return `<div class="studyhead">
-      <span class="grade" style="background:${rk.color}">${rk.name}</span>
+      ${modeBadge}
       <span class="coin">${COIN_SVG}${S.coin.toLocaleString()}</span>
       <span class="coin">${GROW_SVG}${(S.growWater||0).toLocaleString()}</span>
     </div>
     <div class="steps">${STAGES.map((s,k)=>
-      `<span class="${k<P.stage?'past':k===P.stage?'now':''}" ${k<P.stage?`data-stage="${k}"`:''}>${s.name}</span>`).join('')}</div>`;
+      `<span class="${k<curStage()?'past':k===curStage()?'now':''}" ${k<curStage()?`data-stage="${k}"`:''}>${s.name}</span>`).join('')}</div>`;
 }
 /* 지나온 단계를 누르면 그 단계로 돌아간다(앞으로는 못 건너뜀) */
 function bindStepBar(){
   sheetBody.querySelectorAll('.steps span.past').forEach(el=>{
     el.addEventListener('click', ()=>{
-      P.stage = +el.dataset.stage;
-      P.ci = 0;
+      setStage(+el.dataset.stage);
+      setCi(0);
       save(); renderStudy();
     });
   });
@@ -1829,11 +1965,19 @@ function bindStepBar(){
 function guTitle(g){ return `<div class="gu">${g.gu1}   ${g.gu2}</div>`; }
 
 function renderStudy(){
+  if(studyMode==='review'){
+    const g=GUJEOL[RV.gu];
+    const fn=[stSeongdok, stGeulja, stSori, stTteut, stBaesong][RV.stage];
+    return fn(g);
+  }
   if(P.gu>=GUJEOL.length){
     sheetBody.innerHTML=`<div class="hanja-card"><div class="hanja">終</div>
       <div class="hunum">천자문 백스물다섯 마디를 다 마쳤습니다.</div></div>
-      <p class="note">익힌 글자는 글자 익힘책에서 계속 되짚을 수 있습니다.</p>
+      <p class="note">익힌 글자는 글자 익힘책에서 계속 되짚을 수 있습니다. 마디 목록에서
+      아무 마디나 다시 복습할 수도 있습니다.</p>
+      <button class="subbtn" id="toList">마디 목록으로</button>
       <button class="subbtn" id="resetStudy">처음 마디부터 다시</button>`;
+    document.getElementById('toList').addEventListener('click', openGujeolList);
     document.getElementById('resetStudy').addEventListener('click',()=>{
       P.gu=0; P.stage=0; P.ci=0; save(); syncHUD(); renderStudy();
     });
@@ -1844,7 +1988,19 @@ function renderStudy(){
   fn(g);
 }
 const GROW_PER_GUJEOL = 3; // 한 마디를 배송까지 마치면 받는 성장수
+const REVIEW_GROW = 2;     // 복습에서 배송까지 마치면 받는 성장수(엽전은 안 줌)
 function passStage(g, coin){
+  if(studyMode==='review'){
+    setStage(curStage()+1);
+    if(curStage()>=STAGES.length){
+      S.growWater=(S.growWater||0)+REVIEW_GROW;
+      save(); syncHUD();
+      toast(`복습을 마쳤습니다 · 성장수 ${REVIEW_GROW}방울`);
+      return renderReviewDone(g);
+    }
+    save(); syncHUD(); renderStudy();
+    return;
+  }
   const msg=[];
   if(coin){ S.coin+=coin; msg.push(`엽전 ${coin}냥`); }
   P.stage++;
@@ -1858,28 +2014,165 @@ function passStage(g, coin){
   save(); syncHUD(); renderStudy();
 }
 
+/* ── 마디 목록 ────────────────────────────
+   천자문 두루마리를 누르면 여기부터 보여준다. 마친 마디는 복습으로
+   다시 들어갈 수 있고, 지금 마디는 눈에 띄게 보이며, 아직 안 간
+   마디는 잠겨 있다. 열 마디씩 묶어 스크롤로 내려볼 수 있다. */
+function openGujeolList(){
+  studyMode='normal';
+  openSheetRaw('천자문');
+  renderGujeolList();
+}
+function gujeolStatus(g){
+  if(P.done.includes(g)) return 'done';
+  if(g===P.gu) return 'current';
+  return 'locked';
+}
+const LOCK_SVG='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:18px;height:18px;flex:0 0 auto;color:#9C917F"><rect x="4" y="11" width="16" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg>';
+function gujeolRowHTML(g){
+  const st=gujeolStatus(g.g);
+  const badge = st==='current' ? '<span class="badge2 now">지금</span>'
+    : st==='done' ? '<span class="badge2 done">복습</span>' : LOCK_SVG;
+  return `<button class="gurow ${st}" data-g="${g.g}" ${st==='locked'?'disabled':''}>
+    <span class="gunum">${g.g+1}</span>
+    <span class="gutext"><b>${g.gu1} ${g.gu2}</b><br><small>${g.mean}</small></span>
+    ${badge}</button>`;
+}
+function renderGujeolList(){
+  const finished = P.gu>=GUJEOL.length;
+  const groups=[];
+  for(let i=0;i<GUJEOL.length;i+=10) groups.push(GUJEOL.slice(i,i+10));
+  sheetBody.innerHTML = `
+    <p class="note" style="margin:0 2px 12px">${finished
+      ? '백스물다섯 마디를 다 마쳤습니다. 아무 마디나 다시 복습할 수 있습니다.'
+      : `${P.done.length}마디 마침 · 지금 ${P.gu+1}번째 마디를 익히는 중`}</p>
+    ${groups.map((grp,gi)=>{
+      const startNum=gi*10+1, endNum=Math.min((gi+1)*10, GUJEOL.length);
+      return `<p class="note" style="margin:14px 2px 8px;font-weight:700;color:#5C5346">${startNum}~${endNum}마디</p>
+        <div class="gulist">${grp.map(gujeolRowHTML).join('')}</div>`;
+    }).join('')}`;
+  sheetBody.querySelectorAll('.gurow:not([disabled])').forEach(el=>
+    el.addEventListener('click',()=>enterGujeol(+el.dataset.g)));
+}
+function enterGujeol(g){
+  const st=gujeolStatus(g);
+  if(st==='locked') return;
+  if(st==='current'){ studyMode='normal'; return renderStudy(); }
+  studyMode='review';
+  RV={gu:g, stage:0, ci:0};
+  renderStudy();
+}
+function renderReviewDone(g){
+  sheetBody.innerHTML=`
+    <div class="hanja-card">
+      <div class="hunum">복습을 마쳤습니다.</div>
+      ${guTitle(g)}
+      <div class="mean">${g.mean}</div>
+      <div class="hint">성장수 ${REVIEW_GROW}방울을 받았습니다</div>
+    </div>
+    <button class="bigbtn" id="again">이 마디 다시 복습</button>
+    <button class="subbtn" id="toList">마디 목록으로</button>`;
+  document.getElementById('again').addEventListener('click',()=>{
+    RV={gu:g.g, stage:0, ci:0}; renderStudy();
+  });
+  document.getElementById('toList').addEventListener('click', openGujeolList);
+}
+
+/* ── 들이기 화면의 소리 내어 읽기 ─────────────
+   발음의 정확함은 가리지 않는다. 마이크로 잠깐 들어서 소리를 냈는지만
+   확인하고, 냈으면 엽전을 조금 더 준다. 마이크가 없는 기기에서는
+   버튼 자체를 숨기고, 권한을 거부해도 학습은 그대로 이어진다. */
+const MIC_BONUS = 20;
+function micSupported(){
+  return !!(navigator.mediaDevices && navigator.mediaDevices.getUserMedia);
+}
+const MIC_ICON = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="2" width="6" height="12" rx="3"/><path d="M5 10v1a7 7 0 0 0 14 0v-1"/><path d="M12 18v4M8 22h8"/></svg>';
+function micRowHTML(){
+  if(!micSupported() || studyMode==='review') return ''; // 복습에서는 엽전을 주지 않는다
+  if(P.readAloudGu===P.gu)
+    return `<button class="subbtn done" disabled>${MIC_ICON}소리 내어 읽었습니다 · 엽전 ${MIC_BONUS}냥 받음</button>`;
+  return `<button class="subbtn" id="micBtn">${MIC_ICON}소리 내어 읽기</button>`;
+}
+let stopActiveMic=null;
+/* stream을 짧게 듣다가, 소리가 문턱을 넘으면 true, 조용히 시간이
+   다 차면 false, 마이크를 못 쓰거나 권한이 없으면 null을 준다. */
+function listenForVoice(onResult){
+  navigator.mediaDevices.getUserMedia({audio:true}).then(stream=>{
+    const AudioCtx = window.AudioContext || window.webkitAudioContext;
+    const ctx = new AudioCtx();
+    const src = ctx.createMediaStreamSource(stream);
+    const analyser = ctx.createAnalyser();
+    analyser.fftSize = 512;
+    src.connect(analyser);
+    const data = new Uint8Array(analyser.frequencyBinCount);
+    const start = Date.now(), DURATION=3000, THRESHOLD=14;
+    let done=false;
+    stopActiveMic = (heard)=>{
+      if(done) return; done=true;
+      stopActiveMic=null;
+      stream.getTracks().forEach(t=>t.stop());
+      ctx.close().catch(()=>{});
+      onResult(heard===undefined?false:heard);
+    };
+    (function tick(){
+      if(done) return;
+      analyser.getByteTimeDomainData(data);
+      let sum=0;
+      for(let i=0;i<data.length;i++) sum+=Math.abs(data[i]-128);
+      if(sum/data.length>THRESHOLD) return stopActiveMic(true);
+      if(Date.now()-start>DURATION) return stopActiveMic(false);
+      requestAnimationFrame(tick);
+    })();
+  }).catch(()=>onResult(null));
+}
+function bindMicBtn(){
+  const btn=document.getElementById('micBtn');
+  if(!btn) return;
+  btn.addEventListener('click', ()=>{
+    btn.disabled=true; btn.classList.add('listening');
+    btn.innerHTML = MIC_ICON+'듣는 중…';
+    listenForVoice(heard=>{
+      if(heard===true){
+        S.coin+=MIC_BONUS; P.readAloudGu=P.gu; save(); syncHUD();
+        toast(`소리 내어 읽었습니다 · 엽전 ${MIC_BONUS}냥`);
+        renderStudy();
+      } else {
+        toast(heard===null ? '마이크를 쓸 수 없습니다. 그냥 넘어가도 됩니다.'
+                            : '소리가 들리지 않았어요. 다시 눌러 보세요.');
+        btn.disabled=false; btn.classList.remove('listening');
+        btn.innerHTML = MIC_ICON+'소리 내어 읽기';
+      }
+    });
+  });
+}
+
 /* 1 들이기 — 소리 내어 읽고 뜻을 훑는다. 채점 없음 */
 function stSeongdok(g){
+  const hint = studyMode==='review'
+    ? `${g.g+1}번째 마디 되짚기`
+    : `${P.gu+1}번째 마디${P.gu>0?' · 지난번에 이어서':''}`;
   sheetBody.innerHTML=stepBar()+`
     <div class="hanja-card">
-      <div class="hint">${P.gu+1}번째 마디${P.gu>0?' · 지난번에 이어서':''}</div>
+      <div class="hint">${hint}</div>
       ${guTitle(g)}
       <div class="grid8">${g.chars.map(o=>
         `<div class="ja"><b>${o.c}</b><span>${o.hun} ${o.um}</span></div>`).join('')}</div>
       <div class="mean">${g.mean}</div>
     </div>
     <p class="note">소리 내어 두어 번 읽어 보세요. 여기서는 채점하지 않습니다.</p>
+    ${micRowHTML()}
     <button class="bigbtn" id="go">다 읽었습니다</button>`;
   bindStepBar();
+  bindMicBtn();
   document.getElementById('go').addEventListener('click',()=>passStage(g,0));
 }
 
 /* 2 글자 — 음을 직접 적는다. 못 적으면 그때 보기를 준다 */
 function stGeulja(g){
-  const o=g.chars[P.ci];
+  const o=g.chars[curCi()];
   sheetBody.innerHTML=stepBar()+`
     <div class="hanja-card">
-      <div class="hint">${P.ci+1} / 8</div>
+      <div class="hint">${curCi()+1} / 8</div>
       <div class="hanja">${o.c}</div>
       <div class="hunum">${o.hun} □</div>
     </div>
@@ -1923,15 +2216,15 @@ function stGeulja(g){
     }));
   }
   function next(){
-    P.ci++;
-    if(P.ci>=8){ P.ci=0; passStage(g, STAGES[1].coin); }
+    setCi(curCi()+1);
+    if(curCi()>=8){ setCi(0); passStage(g, STAGES[1].coin); }
     else { save(); renderStudy(); }
   }
 }
 
 /* 3 소리 — 넉 자 구에서 빠진 한 자를 채운다 */
 function stSori(g){
-  const half=P.ci<1?0:1;
+  const half=curCi()<1?0:1;
   const phrase=half?g.gu2:g.gu1;
   const base=half?4:0;
   const k=Math.floor(Math.random()*4);
@@ -1959,8 +2252,8 @@ function stSori(g){
       `<button class="bigbtn" id="nx">${ok?(half?'다음 단계로':'뒤 넉 자'):'다시'}</button>`;
     document.getElementById('nx').addEventListener('click',()=>{
       if(!ok) return renderStudy();
-      if(half){ P.ci=0; passStage(g, STAGES[2].coin); }
-      else { P.ci=1; save(); renderStudy(); }
+      if(half){ setCi(0); passStage(g, STAGES[2].coin); }
+      else { setCi(1); save(); renderStudy(); }
     });
   }));
 }
@@ -2142,6 +2435,18 @@ function packPreview(season){
       aria-label="${PACK_NAME[season]} 꾸민 모습">
     <rect x="0" y="258" width="400" height="40" fill="#C6D89C"/>${emptyLand()}${ground.map(placeAt).join('')}${body.map(placeAt).join('')}${airHtml}</svg>`;
 }
+/* 저잣거리·가게 화면 위쪽에 늘 붙는 재화 표시(엽전·꾸러미·성장수) */
+function resBarHTML(){
+  return `<div class="studyhead">
+    <span class="coin">${COIN_SVG}${S.coin.toLocaleString()}</span>
+    <span class="coin">${BUNDLE_SVG}${S.gem.toLocaleString()}</span>
+    <span class="coin">${GROW_SVG}${(S.growWater||0).toLocaleString()}</span>
+  </div>`;
+}
+function bindPayBtns(){
+  sheetBody.querySelectorAll('.paybtn').forEach(b=>
+    b.addEventListener('click',()=>buy(b.dataset.id,b.dataset.cur)));
+}
 let shopTab='spring';
 let activeShopRender=null; // buy()가 지금 열려 있는 상점 화면을 다시 그릴 수 있게
 function openShop(){
@@ -2155,7 +2460,7 @@ function placedCount(id){ return placedInstances(id).length; }
 function renderShop(){
   const ids=Object.keys(ITEMS).filter(id=>ITEMS[id].season===shopTab && !ITEMS[id].grow);
   const mine=ids.filter(id=>ownedCount(id)>0).length;
-  sheetBody.innerHTML=`
+  sheetBody.innerHTML= resBarHTML() + `
     <div class="tabs">${SEASON_TABS.map(([k,label])=>
       `<button data-tab="${k}" class="${k===shopTab?'on':''}">${label}</button>`).join('')}</div>
     <div class="packhead banner">
@@ -2166,9 +2471,9 @@ function renderShop(){
     <p class="note">산 물건은 정원보따리에 들어갑니다. 정원에 놓는 것은 보따리에서 고르세요.</p>`;
   sheetBody.querySelectorAll('.tabs button').forEach(b=>
     b.addEventListener('click',()=>{ shopTab=b.dataset.tab; renderShop(); sheetBody.scrollTop=0; }));
-  sheetBody.querySelectorAll('.cell').forEach(c=>c.addEventListener('click',()=>buy(c.dataset.id)));
+  bindPayBtns();
 }
-/* ── 화수전: 씨앗 · 묘목 · 성장수 (계절 상관없이 상시 판매) ─── */
+/* ── 화수전: 씨앗 · 묘목 (계절 상관없이 상시 판매) ─── */
 const SEED_IDS=['seed_pr','seed_bs','seed_np','seed_gu','seed_md','seed_mr'];
 const SAPLING_IDS=['sap_mh','sap_gam','sap_bam'];
 function openGrowShop(){
@@ -2177,66 +2482,46 @@ function openGrowShop(){
   renderGrowShop();
 }
 function renderGrowShop(){
-  sheetBody.innerHTML=`
+  sheetBody.innerHTML= resBarHTML() + `
     <div class="packhead">
       <div class="strip" style="background:#8AB566"><h2>화수전</h2></div>
-      <div class="sub">심어서 키우는 것과 물 · 계절과 상관없이 살 수 있습니다</div>
+      <div class="sub">심어서 키우는 것 · 계절과 상관없이 살 수 있습니다</div>
     </div>
     <p class="note" style="margin:14px 2px 8px;font-weight:700;color:#5C5346">씨앗</p>
     <div class="grid">${SEED_IDS.map(id=>cellHTML(id,'shop')).join('')}</div>
     <p class="note" style="margin:14px 2px 8px;font-weight:700;color:#5C5346">묘목</p>
     <div class="grid">${SAPLING_IDS.map(id=>cellHTML(id,'shop')).join('')}</div>
-    <p class="note" style="margin:14px 2px 8px;font-weight:700;color:#5C5346">성장수</p>
-    <div class="grid">${growWaterCellHTML()}</div>
-    <p class="note">산 것은 정원보따리에 들어갑니다. 정원에 심는 것은 보따리에서 고르세요.</p>`;
-  sheetBody.querySelectorAll('.cell[data-id]').forEach(c=>c.addEventListener('click',()=>buy(c.dataset.id)));
-  const gw=document.getElementById('buyGrowWater');
-  if(gw) gw.addEventListener('click', buyGrowWater);
-}
-function growWaterSVG(){
-  return `<g transform="translate(30,32)">
-    <path d="M-10 -16 h20 v5 l4 4 v19 a4 4 0 0 1 -4 4 h-20 a4 4 0 0 1 -4 -4 v-19 l4 -4 Z" fill="#7FC4EA" stroke="#2B2620" stroke-width="2.6" stroke-linejoin="round"/>
-    <rect x="-6" y="-20" width="12" height="6" rx="2" fill="#B08F6A" stroke="#2B2620" stroke-width="2"/>
-    <path d="M-10 -2 h28" stroke="#2B2620" stroke-width="1.6" opacity=".4"/>
-    <ellipse cx="0" cy="6" rx="9.5" ry="7.5" fill="#4FA8D8"/>
-    <ellipse cx="-2.5" cy="2" rx="2.6" ry="4.4" fill="#BEE6F7"/>
-  </g>`;
-}
-function growWaterCellHTML(){
-  return `<button class="cell" id="buyGrowWater">
-    <span class="rar" style="background:${RAR_COLOR.R}">R</span>
-    ${S.growWater?`<span class="tag">보유 ${S.growWater}</span>`:''}
-    <svg class="thumb" viewBox="0 0 60 60">${growWaterSVG()}</svg>
-    <div class="cname">성장수</div>
-    <div class="cost">${COIN_SVG}300</div></button>`;
-}
-function buyGrowWater(){
-  const price=300;
-  if(S.coin<price) return toast('엽전이 모자랍니다');
-  S.coin-=price; S.growWater=(S.growWater||0)+1; save(); syncHUD(); renderGrowShop();
-  toast(`성장수 — 보따리에 넣었습니다 (${S.growWater}개)`);
+    <p class="note">산 것은 정원보따리에 들어갑니다. 정원에 심는 것은 보따리에서 고르세요.</p>
+    <p class="note">성장수는 서당에서 글을 익혀야만 모입니다.</p>`;
+  bindPayBtns();
 }
 function cellHTML(id,mode){
   const it=ITEMS[id], cnt=ownedCount(id), onCnt=placedCount(id);
   const [w,h]=it.box, m=Math.max(w,h);
-  const foot = mode==='shop'
-    ? `${it.cur==='coin'?COIN_SVG:BUNDLE_SVG}${it.amt}`
-    : (onCnt<cnt?'정원에 놓기':'거두기');
   const tag = mode==='shop'
     ? (cnt?`<span class="tag">보유 ${cnt}</span>`:'')
     : (cnt?`<span class="tag">${onCnt}/${cnt}</span>`:'');
-  return `<button class="cell ${mode==='bag'&&onCnt?'placed':''}" data-id="${id}">
-    <span class="rar" style="background:${RAR_COLOR[it.rar]}">${it.rar}</span>
+  const body = `<span class="rar" style="background:${RAR_COLOR[it.rar]}">${it.rar}</span>
     ${tag}
     <svg class="thumb" viewBox="${(w-m)/2} ${(h-m)/2} ${m} ${m}">${itemMedia(it)}</svg>
-    <div class="cname">${it.name}</div>
-    <div class="cost">${foot}</div></button>`;
+    <div class="cname">${it.name}</div>`;
+  if(mode==='shop') return `<div class="cell">
+    ${body}
+    <div class="paybar">
+      <button class="paybtn" data-id="${id}" data-cur="coin">${COIN_SVG}${priceOf(it,'coin').toLocaleString()}</button>
+      <button class="paybtn" data-id="${id}" data-cur="gem">${BUNDLE_SVG}${priceOf(it,'gem').toLocaleString()}</button>
+    </div></div>`;
+  return `<button class="cell ${onCnt?'placed':''}" data-id="${id}">
+    ${body}
+    <div class="cost">${onCnt<cnt?'정원에 놓기':'거두기'}</div></button>`;
 }
-function buy(id){
+function buy(id, cur){
   const it=ITEMS[id];
-  const bag=it.cur==='coin'?S.coin:S.gem;
-  if(bag<it.amt) return toast(it.cur==='coin'?'엽전이 모자랍니다':'꾸러미가 모자랍니다');
-  if(it.cur==='coin') S.coin-=it.amt; else S.gem-=it.amt;
+  cur = cur==='gem' ? 'gem' : 'coin';
+  const price = priceOf(it, cur);
+  const bag = cur==='coin' ? S.coin : S.gem;
+  if(bag<price) return toast(cur==='coin'?'엽전이 모자랍니다':'꾸러미가 모자랍니다');
+  if(cur==='coin') S.coin-=price; else S.gem-=price;
   S.owned[id]=(S.owned[id]||0)+1; save(); syncHUD();
   if(activeShopRender) activeShopRender();
   toast(`${it.name} — 정원보따리에 넣었습니다 (${S.owned[id]}개)`);
@@ -2260,21 +2545,33 @@ function wearThumb(slot, g){
 }
 function wearCell(slot, id, mode){
   const g=WEAR[slot][id], has=S.closet.includes(id), on=S.wear[slot]===id;
-  const foot = mode==='shop'
-    ? (has?'보유 중':`${g.cur==='coin'?COIN_SVG:BUNDLE_SVG}${g.amt}`)
-    : (on?'입는 중':'입기');
-  return `<button class="cell ${mode==='shop'&&has?'owned':''} ${mode==='closet'&&on?'placed':''}" data-w="${id}">
+  if(mode==='shop'){
+    if(has) return `<div class="cell owned">
+      <span class="rar" style="background:${RAR_COLOR[g.rar]}">${g.rar}</span>
+      ${wearThumb(slot,g)}
+      <div class="cname">${g.name}</div>
+      <div class="cost">보유 중</div></div>`;
+    return `<div class="cell">
+      <span class="rar" style="background:${RAR_COLOR[g.rar]}">${g.rar}</span>
+      ${wearThumb(slot,g)}
+      <div class="cname">${g.name}</div>
+      <div class="paybar">
+        <button class="paybtn" data-w="${id}" data-cur="coin">${COIN_SVG}${priceOf(g,'coin').toLocaleString()}</button>
+        <button class="paybtn" data-w="${id}" data-cur="gem">${BUNDLE_SVG}${priceOf(g,'gem').toLocaleString()}</button>
+      </div></div>`;
+  }
+  return `<button class="cell ${on?'placed':''}" data-w="${id}">
     <span class="rar" style="background:${RAR_COLOR[g.rar]}">${g.rar}</span>
     ${wearThumb(slot,g)}
     <div class="cname">${g.name}</div>
-    <div class="cost">${foot}</div></button>`;
+    <div class="cost">${on?'입는 중':'입기'}</div></button>`;
 }
 
 /* ── 의전 ───────────────────────────────── */
 function openClothes(){
   openSheetRaw('운교장터 · 의전');
   const n=WEAR_SLOTS.reduce((a,[s])=>a+Object.keys(WEAR[s]).length,0);
-  sheetBody.innerHTML=`
+  sheetBody.innerHTML= resBarHTML() + `
     <div class="packhead">
       <div class="strip" style="background:#7FA9C9"><h2>의전</h2></div>
       <div class="sub">${n}벌 입고 · 옷장에 ${S.closet.length}벌</div>
@@ -2283,14 +2580,17 @@ function openClothes(){
       <p class="note" style="margin:14px 2px 8px;font-weight:700;color:#5C5346">${label}</p>
       <div class="grid">${Object.keys(WEAR[s]).map(id=>wearCell(s,id,'shop')).join('')}</div>`).join('')}
     <p class="note">산 옷은 학동보따리에 들어갑니다. 입는 것은 학동보따리에서 고르세요.</p>`;
-  sheetBody.querySelectorAll('.cell').forEach(c=>c.addEventListener('click',()=>buyWear(c.dataset.w)));
+  sheetBody.querySelectorAll('.paybtn').forEach(b=>
+    b.addEventListener('click',()=>buyWear(b.dataset.w,b.dataset.cur)));
 }
-function buyWear(id){
+function buyWear(id, cur){
   const g=findWear(id);
   if(S.closet.includes(id)) return toast('이미 옷장에 있습니다');
-  const bag=g.cur==='coin'?S.coin:S.gem;
-  if(bag<g.amt) return toast(g.cur==='coin'?'엽전이 모자랍니다':'꾸러미가 모자랍니다');
-  if(g.cur==='coin') S.coin-=g.amt; else S.gem-=g.amt;
+  cur = cur==='gem' ? 'gem' : 'coin';
+  const price = priceOf(g, cur);
+  const bag = cur==='coin' ? S.coin : S.gem;
+  if(bag<price) return toast(cur==='coin'?'엽전이 모자랍니다':'꾸러미가 모자랍니다');
+  if(cur==='coin') S.coin-=price; else S.gem-=price;
   S.closet.push(id); save(); syncHUD(); openClothes();
   toast(`${g.name} — 학동보따리에 넣었습니다`);
 }
