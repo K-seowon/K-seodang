@@ -1594,14 +1594,38 @@ function studyZone(hit, act, ax, ay, label, sub, ready, badge){
       fill="${ready?'#7A6E5E':'#A99E8B'}" ${halo}>${sub}</text>
   </g>`;
 }
+/* 새로 들어온 학습 두 가지(글자 익힘책·박흥보전)는 그림에 맞는 서안이
+   없어서, 기존 책상과 같은 느낌으로 작게 하나씩 그려 준다. 학습 하나당
+   책상 하나이며, 상판 위에 제목을 바로 얹어 그 자리를 누르게 한다.
+   cx는 가로 가운데, y는 상판이 시작하는 자리다. */
+function deskStudyZone(cx, y, act, ax, ay, label, sub, ready, badge){
+  const w=170, h=64, x0=cx-w/2;
+  const halo='style="paint-order:stroke;stroke:#FBF3E4;stroke-width:4px;stroke-linejoin:round"';
+  return `<g class="tapzone" data-act="${act}" data-ax="${ax}" data-ay="${ay}" role="button" aria-label="${label}">
+    <g transform="translate(${x0},${y})">
+      <rect x="0" y="0" width="${w}" height="${h}" fill="transparent"/>
+      <ellipse cx="85" cy="58" rx="82" ry="9" fill="rgba(43,36,28,.16)"/>
+      <path d="M4 6 H166 L150 22 H20 Z" fill="#B08F6A" stroke="#5C4130" stroke-width="2.4" stroke-linejoin="round"/>
+      <rect x="20" y="22" width="130" height="9" fill="#7A5F45"/>
+      <rect x="27" y="31" width="11" height="26" fill="#7A5F45"/>
+      <rect x="132" y="31" width="11" height="26" fill="#7A5F45"/>
+      <rect x="79.5" y="31" width="11" height="26" fill="#7A5F45"/>
+      ${badge&&ready?'<circle cx="150" cy="10" r="9" fill="#D9463F" stroke="#3D3A36" stroke-width="2.5"/>':''}
+      <text x="85" y="17" text-anchor="middle" font-family="Gaegu, sans-serif" font-size="13" font-weight="700"
+        fill="${ready?'#3D3A36':'#9C917F'}" ${halo}>${label}</text>
+    </g>
+    <text x="${cx}" y="${y+h+18}" text-anchor="middle" font-family="Gaegu, sans-serif" font-size="12"
+      fill="${ready?'#7A6E5E':'#A99E8B'}" ${halo}>${sub}</text>
+  </g>`;
+}
 function drawInside(){
   const p = S.pos.inside;
   scene.innerHTML = `
     <image href="bg/bg-seodanginside.png" xlink:href="bg/bg-seodanginside.png" x="0" y="0" width="400" height="600" preserveAspectRatio="xMidYMid slice"/>
     ${studyZone([140,185,185,120],'study-cheonja',200,380,'천자문',`${P.gu} / 125마디`,true,true)}
-    ${studyZone([90,200,90,105],'study-jok',110,380,'글자 익힘책',`${metCount()}자 익힘`,true,true)}
     ${studyZone([270,125,95,180],'study-myeongsim',310,380,'명심보감','곧 문 엽니다',false,false)}
-    ${studyZone([100,310,180,70],'study-bakheungbo',190,375,'박흥보전',`${P.hb.done.length} / 10대목`,true,false)}
+    ${deskStudyZone(105,362,'study-jok',105,470,'글자 익힘책',`${metCount()}자 익힘`,true,true)}
+    ${deskStudyZone(285,362,'study-bakheungbo',285,470,'박흥보전',`${P.hb.done.length} / 10대목`,true,false)}
     <g class="tapzone" data-act="go-seodang" data-ax="340" data-ay="556" role="button" aria-label="마당으로 나가기">
       <rect x="288" y="470" width="112" height="130" fill="transparent"/>
       <rect x="316" y="500" width="72" height="86" rx="3" fill="#6F6258"/>
