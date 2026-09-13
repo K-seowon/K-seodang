@@ -2261,7 +2261,8 @@ function renderBhSection(n){
     leaveBhReading(); openBakheungbo();
   });
   document.getElementById('bhQuizBtn').addEventListener('click', ()=>{
-    toast('퀴즈는 다음 단계에서 이어집니다'); // 3단계에서 실제 퀴즈로 바꾼다
+    leaveBhReading();
+    startBhQuiz(n);
   });
   sheetBody.onscroll = ()=>{
     rp.scroll = sheetBody.scrollTop;
@@ -2272,6 +2273,111 @@ function renderBhSection(n){
     }
   };
   sheetBody.scrollTop = rp.scroll; // 읽던 자리로 곧장 돌아간다
+}
+
+/* ── [3단계] 어휘 퀴즈와 보상 ─────────────────
+   낱말의 뜻을 익히는 것이 목적이라 관문으로 막지 않는다. 문제 순서는
+   섞어서 낸다. 맞히면 0.5초 보여준 뒤 곧장 다음 문제로, 틀리면 정답과
+   풀이를 보여주고 "다음" 버튼으로 넘어간다. */
+const BH8_QUIZ = [
+  { q:'밑줄 친 낱말의 뜻으로 알맞은 것은?\n「흥보 부부가 큰 톱으로 박을 탔습니다.」',
+    opts:['불에 굽다','둘로 갈라 쪼개다','위에 올라앉다','물에 담그다'],
+    answer:'둘로 갈라 쪼개다',
+    note:`'타다'는 여러 뜻이 있지만, 박이나 수박처럼 둥근 것을 둘로 쪼갤 때도 씁니다.` },
+  { q:`'미음'은 무엇입니까?`,
+    opts:['쌀을 오래 끓여 만든 묽은 죽','고기를 넣은 국','차가운 물','달콤한 과자'],
+    answer:'쌀을 오래 끓여 만든 묽은 죽',
+    note:'아프거나 기운이 없는 사람에게 주는 부드러운 음식입니다.' },
+  { q:'빈칸에 알맞은 낱말은?\n「상자를 열어 보니 쌀이 ___ 있었습니다.」',
+    opts:['비어','가득 차','떨어져','흩어져'],
+    answer:'가득 차',
+    note:`'가득하다'는 빈 곳 없이 꽉 차 있다는 뜻입니다.` },
+  { q:`'여드레'는 며칠입니까?`,
+    opts:['사 일','육 일','팔 일','십 일'],
+    answer:'팔 일',
+    note:'하루, 이틀, 사흘, 나흘, 닷새, 엿새, 이레, 여드레 순으로 셉니다.' },
+  { q:`'목수'는 어떤 일을 하는 사람입니까?`,
+    opts:['나무로 집이나 물건을 만든다','옷을 만든다','병을 고친다','글을 가르친다'],
+    answer:'나무로 집이나 물건을 만든다',
+    note:`'목(木)'은 나무를 뜻합니다.` },
+  { q:`'눈 깜짝할 사이'는 무슨 뜻입니까?`,
+    opts:['아주 짧은 시간','아주 긴 시간','어두운 밤','잠자는 동안'],
+    answer:'아주 짧은 시간',
+    note:'눈을 한 번 감았다 뜨는 정도로 짧다는 뜻입니다.' },
+  { q:'밑줄 친 말과 뜻이 가장 가까운 것은?\n「나는 그날 죽어도 한이 없겠네.」',
+    opts:['아쉬운 것이 없다','화가 나지 않는다','배가 부르다','잠이 오지 않는다'],
+    answer:'아쉬운 것이 없다',
+    note:`'한'은 마음에 남는 아쉬움이나 억울함을 뜻합니다.` },
+  { q:`'섬'과 '냥'은 무엇을 세는 단위입니까?`,
+    opts:['섬은 곡식, 냥은 돈','섬은 땅, 냥은 사람','섬은 시간, 냥은 거리','섬은 옷, 냥은 그릇'],
+    answer:'섬은 곡식, 냥은 돈',
+    note:'옛날에 쌀은 섬으로, 돈은 냥으로 셌습니다.' },
+  { q:'빈칸에 알맞은 낱말은?\n「박이 쩍 ___ 상자 두 개가 나왔습니다.」',
+    opts:['갈라지자','사라지자','굳어지자','무거워지자'],
+    answer:'갈라지자',
+    note:`'갈라지다'는 하나가 둘로 나뉜다는 뜻입니다.` },
+  { q:`'소문이 퍼지다'는 무슨 뜻입니까?`,
+    opts:['이야기가 여러 사람에게 알려지다','비밀을 지키다','거짓말을 하다','편지를 보내다'],
+    answer:'이야기가 여러 사람에게 알려지다',
+    note:'흥보가 착하다는 이야기가 온 나라 사람들에게 알려졌다는 뜻입니다.' }
+];
+const BH_PRIZE_IDS = ['hb_gourdvine','hb_swallownest'];
+function startBhQuiz(n){
+  const order = shuffle(BH8_QUIZ.map((q,i)=>i));
+  let qi=0, got=0;
+  const draw=()=>{
+    if(qi>=order.length) return finish();
+    const q=BH8_QUIZ[order[qi]];
+    sheetBody.innerHTML = `
+      <div class="hanja-card">
+        <div class="hint">${qi+1} / ${order.length}</div>
+        <p style="margin:8px 0;font-size:18px;line-height:1.6;white-space:pre-line">${q.q}</p>
+      </div>
+      <div class="choices">${q.opts.map(o=>`<button class="choice" data-o="${o}">${o}</button>`).join('')}</div>
+      <div id="after"></div>`;
+    sheetBody.querySelectorAll('.choice').forEach(b=>b.addEventListener('click',()=>{
+      const ok=b.dataset.o===q.answer;
+      sheetBody.querySelectorAll('.choice').forEach(x=>{
+        x.disabled=true; if(x.dataset.o===q.answer) x.classList.add('right');
+      });
+      if(ok){
+        got++;
+        setTimeout(()=>{ qi++; draw(); }, 500);
+        return;
+      }
+      b.classList.add('wrong');
+      document.getElementById('after').innerHTML = `
+        <div class="verdict wrong">아닙니다 — 정답은 "${q.answer}"</div>
+        <p class="note">${q.note}</p>
+        <button class="bigbtn" id="nx">다음</button>`;
+      document.getElementById('nx').addEventListener('click',()=>{ qi++; draw(); });
+    }));
+  };
+  const finish=()=>{
+    const bonus = got>=8 ? 1 : 0;
+    const coin = GUJEOL_COIN + bonus;
+    const firstTime = !P.hb.done.includes(n);
+    S.coin += coin; S.growWater=(S.growWater||0)+GROW_PER_GUJEOL;
+    let prizeMsg = '';
+    if(firstTime){
+      P.hb.done.push(n);
+      BH_PRIZE_IDS.forEach(id=>{ S.owned[id]=(S.owned[id]||0)+1; });
+      prizeMsg = `<div class="hint">「박 넝쿨」과 「제비집」을 정원보따리에서 심을 수 있습니다.</div>`;
+    }
+    save(); syncHUD();
+    queueReward({coin, grow:GROW_PER_GUJEOL});
+    sheetBody.innerHTML = `
+      <div class="hanja-card">
+        <div class="hunum">${order.length}문제 중 ${got}개를 맞혔습니다.</div>
+        <div class="hint">${coin}전${bonus?' (여덟 개 이상 맞혀 1전 더)':''} · 성장수 ${GROW_PER_GUJEOL}방울</div>
+        ${prizeMsg}
+      </div>
+      <button class="bigbtn" id="again">다시 풀기</button>
+      <button class="subbtn" id="bhBack2">대목 목록으로</button>`;
+    document.getElementById('again').addEventListener('click', ()=>startBhQuiz(n));
+    document.getElementById('bhBack2').addEventListener('click', openBakheungbo);
+  };
+  draw();
 }
 
 /* ── 들이기 화면의 소리 내어 읽기 ─────────────
