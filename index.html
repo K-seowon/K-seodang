@@ -207,6 +207,8 @@ body{font-family:'Gaegu',system-ui,sans-serif;color:var(--ink);-webkit-font-smoo
   border:2px solid var(--ink);background:var(--hanji)}
 .badge2.now{background:#fff}
 .badge2.done{background:#8AB566;color:#fff}
+.bhword{text-decoration:underline;text-decoration-style:dotted;text-underline-offset:3px;
+  text-decoration-color:var(--maehwa-d);cursor:pointer;color:var(--maehwa-d);font-weight:700}
 
 .packhead{border:3px solid var(--ink);border-radius:16px;overflow:hidden;margin-bottom:14px;position:relative}
 .packhead .strip{padding:10px 14px;background:var(--maehwa);border-bottom:3px solid var(--ink)}
@@ -1056,6 +1058,8 @@ if(!S.wear) S.wear={ top:'jg_dahong', bottom:'ch_namsaek', outer:null, shoes:'sh
 if(!S.prog) S.prog={ gu:0, stage:0, ci:0, done:[], char:{} };
 if(S.prog.ci===undefined) S.prog.ci=0;
 if(!S.prog.hb) S.prog.hb={ done:[], read:{} };
+if(!S.prog.hb.done) S.prog.hb.done=[];
+if(!S.prog.hb.read) S.prog.hb.read={};
 const P = S.prog;
 const metCount = ()=>Object.keys(P.char).length;
 
@@ -1906,6 +1910,7 @@ function openSheetRaw(t){ sheetTitle.textContent=t; overlay.classList.add('on');
 function closeSheet(){
   if(stopActiveMic) stopActiveMic(false);
   studyMode='normal'; // 복습 중 그만두면 보상 없이 나간다
+  leaveBhReading(); // 읽던 자리를 저장해 둔다
   overlay.classList.remove('on'); drawScene();
   if(pendingRankUp){
     const r=pendingRankUp; pendingRankUp=null;
@@ -2175,13 +2180,98 @@ function renderBhList(){
 function enterBhSection(n){
   const s=BH_SECTIONS.find(x=>x.n===n);
   if(!s.unlocked) return toast('곧 열립니다');
-  // 본문 읽기·퀴즈 화면은 다음 단계에서 잇는다
+  renderBhSection(n);
+}
+
+/* ── [2단계] 8대목 본문 — 장 나눔 없이 줄글로 이어 읽는다 ─────
+   "— 로 시작하는" 장면 구분은 문서를 나누어 적기 위한 것일 뿐 화면에는
+   내지 않는다. 어려운 낱말은 처음 나오는 자리에만 밑줄을 긋고, 누르면
+   뜻을 토스트로 보여준다. 맨 아래까지 스크롤해야 퀴즈 버튼이 뜬다. */
+const BH8_TEXT = [
+  '옛날에 놀보와 흥보라는 형제가 살았습니다. 형 놀보는 욕심이 많고 마음이 나빴습니다. 동생 흥보는 착했지만 아주 가난했습니다.',
+  '어느 날 흥보는 다리가 부러진 제비를 보았습니다. 흥보는 제비의 다리를 정성껏 고쳐 주었습니다. 이듬해 봄, 제비가 돌아와 박씨 하나를 물어다 주었습니다. 흥보는 그 씨를 심었습니다. 가을이 되자 큰 박 세 통이 열렸습니다.',
+  '흥보 부부가 큰 톱으로 박을 타기 시작했습니다.',
+  '"시르렁 시르렁 톱질이야, 어여라 톱질이야."',
+  '흥보 아내가 노래를 부르며 말했습니다.',
+  '"이 박에서 밥 한 섬만 나오면 좋겠네. 우리 아이들 배부르게 먹이고 나면, 나는 그날 죽어도 한이 없겠네."',
+  '그런데 갑자기 아내가 말했습니다.',
+  '"아이고, 배고파라."',
+  '그러고는 톱을 잡은 손을 스르르 놓더니 그대로 쓰러졌습니다. 흥보가 울고 있을 때, 이웃집 부인이 미음 한 그릇을 보내 주었습니다. 흥보가 그것을 아내의 입에 조금씩 흘려 넣었습니다. 얼마 뒤 아내가 다시 깨어났습니다.',
+  '"얼씨구, 잘되었네. 여보, 전보다 더 예뻐졌구나."',
+  '두 사람은 다시 박을 탔습니다. 박이 쩍 갈라지자 상자 두 개가 나왔습니다. 하나를 열어 보니 쌀이 가득했습니다. 또 하나를 열어 보니 돈이 가득했습니다.',
+  '그런데 상자를 비우고 다시 열어 보니 쌀도 돈도 또 가득 차 있었습니다. 부어 내고 또 부어 냈습니다. 세어 보니 쌀이 일만 팔천 섬, 돈이 일만 팔천 냥이었습니다.',
+  '흥보 부부가 둘째 박을 탔습니다. 박이 갈라지자 온갖 비단이 쏟아졌습니다. 그 뒤로 금과 은, 진주와 산호도 여드레 동안 계속 나왔습니다.',
+  '아내가 붉은 비단으로 옷을 지어 입고 물었습니다.',
+  '"자, 어때요?"',
+  '흥보가 웃으며 말했습니다.',
+  '"꼭 고추잠자리 같구나."',
+  '두 사람이 셋째 박을 탔습니다. 박이 갈라지자 목수들이 줄지어 나왔습니다. 목수들이 터를 다듬고 기둥을 세우더니, 눈 깜짝할 사이에 예순 칸이나 되는 큰 집을 지었습니다.',
+  '흥보는 새집에 세간을 들여놓았습니다. 그리고 옷이 없는 사람에게는 옷을 주고, 굶는 사람에게는 밥을 주었습니다. 흥보가 착하다는 소문이 온 나라에 퍼졌습니다.'
+];
+const BH8_GLOSSARY = [
+  {match:'타기', label:'타다', mean:'박이나 수박처럼 둥근 것을 둘로 쪼개다'},
+  {match:'미음', label:'미음', mean:'쌀을 오래 끓여 만든 묽은 죽'},
+  {match:'한이 없겠네', label:'한이 없다', mean:'마음에 남는 아쉬움이나 억울함이 없다'},
+  {match:'가득했습니다', label:'가득하다', mean:'빈 곳 없이 꽉 차 있다'},
+  {match:'섬만', label:'섬', mean:'곡식을 세던 옛 단위'},
+  {match:'갈라지자', label:'갈라지다', mean:'하나가 둘로 나뉘다'},
+  {match:'냥이었습니다', label:'냥', mean:'돈을 세던 옛 단위'},
+  {match:'여드레', label:'여드레', mean:'여덟 날. 팔 일'},
+  {match:'목수들이', label:'목수', mean:'나무로 집이나 물건을 만드는 사람'},
+  {match:'눈 깜짝할 사이', label:'눈 깜짝할 사이', mean:'아주 짧은 시간'},
+  {match:'소문이', label:'소문', mean:'이야기가 여러 사람에게 알려짐'}
+];
+/* 낱말마다 본문에서 맨 처음 나오는 자리 하나에만 밑줄을 건다 */
+function bhAnnotate(paragraphs, glossary){
+  const used = new Set();
+  return paragraphs.map(p=>{
+    let html = p;
+    glossary.forEach((g, gi)=>{
+      if(used.has(gi)) return;
+      const idx = html.indexOf(g.match);
+      if(idx<0) return;
+      used.add(gi);
+      html = html.slice(0,idx) + `<span class="bhword" data-gi="${gi}">${g.match}</span>` + html.slice(idx+g.match.length);
+    });
+    return html;
+  });
+}
+let bhReading = null; // 지금 줄글을 읽고 있는 대목 번호(안 읽는 중이면 null)
+function leaveBhReading(){
+  if(bhReading==null) return;
+  sheetBody.onscroll = null;
+  save();
+  bhReading = null;
+}
+function renderBhSection(n){
+  const s=BH_SECTIONS.find(x=>x.n===n);
   openSheetRaw(`박흥보전 · ${s.title}`);
-  sheetBody.innerHTML = `<div class="hanja-card">
-      <div class="hunum">${s.title}</div>
-      <div class="hint">본문은 다음 단계에서 넣습니다.</div></div>
+  bhReading = n;
+  const rp = P.hb.read[n] || (P.hb.read[n] = {scroll:0, reachedEnd:false});
+  const body = bhAnnotate(BH8_TEXT, BH8_GLOSSARY).map(p=>`<p style="margin:0 0 16px;font-size:18px;line-height:1.8">${p}</p>`).join('');
+  sheetBody.innerHTML = `
+    ${body}
+    <button class="bigbtn" id="bhQuizBtn" ${rp.reachedEnd?'':'hidden'}>퀴즈 풀기</button>
     <button class="subbtn" id="bhBack">대목 목록으로</button>`;
-  document.getElementById('bhBack').addEventListener('click', openBakheungbo);
+  sheetBody.querySelectorAll('.bhword').forEach(el=>el.addEventListener('click',()=>{
+    const g=BH8_GLOSSARY[+el.dataset.gi];
+    toast(`${g.label} — ${g.mean}`);
+  }));
+  document.getElementById('bhBack').addEventListener('click', ()=>{
+    leaveBhReading(); openBakheungbo();
+  });
+  document.getElementById('bhQuizBtn').addEventListener('click', ()=>{
+    toast('퀴즈는 다음 단계에서 이어집니다'); // 3단계에서 실제 퀴즈로 바꾼다
+  });
+  sheetBody.onscroll = ()=>{
+    rp.scroll = sheetBody.scrollTop;
+    if(!rp.reachedEnd && sheetBody.scrollTop + sheetBody.clientHeight >= sheetBody.scrollHeight - 24){
+      rp.reachedEnd = true;
+      document.getElementById('bhQuizBtn').hidden = false;
+      save();
+    }
+  };
+  sheetBody.scrollTop = rp.scroll; // 읽던 자리로 곧장 돌아간다
 }
 
 /* ── 들이기 화면의 소리 내어 읽기 ─────────────
