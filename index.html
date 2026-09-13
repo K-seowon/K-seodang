@@ -939,6 +939,16 @@ Object.assign(ITEMS, {
     svg:`<ellipse cx="20" cy="50" rx="12.8" ry="2.3" fill="rgba(43,36,28,.28)"/><path d="M20 50 L20 24" stroke="#2B2620" stroke-width="5.6" stroke-linecap="round"/><path d="M20 50 L20 24" stroke="#8B6A4E" stroke-width="3" stroke-linecap="round"/><path d="M20 30 l-7 -6" stroke="#2B2620" stroke-width="4.6" stroke-linecap="round"/><path d="M20 30 l-7 -6" stroke="#8B6A4E" stroke-width="2" stroke-linecap="round"/><path d="M20 28 l7 -5" stroke="#2B2620" stroke-width="4.6" stroke-linecap="round"/><path d="M20 28 l7 -5" stroke="#8B6A4E" stroke-width="2" stroke-linecap="round"/><circle cx="11" cy="20" r="7" fill="#5E8A3C" stroke="#2B2620" stroke-width="2.6"/><circle cx="13.9" cy="22.1" r="3.9" fill="#3F5F27"/><circle cx="22" cy="15" r="7.5" fill="#5E8A3C" stroke="#2B2620" stroke-width="2.6"/><circle cx="24.1" cy="17.3" r="4.1" fill="#3F5F27"/><circle cx="28" cy="23" r="6.5" fill="#5E8A3C" stroke="#2B2620" stroke-width="2.6"/><circle cx="29.8" cy="24.9" r="3.6" fill="#3F5F27"/>`}
 });
 
+/* ── 흥부전을 다 마쳐야만 얻는 것 ─────────────
+   장터에서 팔지 않는다(quest:true). 이야기를 끝까지 읽으면
+   정원보따리에 곧장 들어간다. ------------------------------- */
+Object.assign(ITEMS, {
+  hb_gourdvine:{name:'박 넝쿨',slot:'mid',rar:'SR',quest:true,box:[100,170],at:[200,470],anchor:'bc',season:'all',
+    svg:`<ellipse cx="50" cy="164" rx="30" ry="6" fill="rgba(43,36,28,.18)"/><path d="M50 160 C 40 120, 58 95, 46 55 C 36 22, 54 10, 48 2" stroke="#4A7D3E" stroke-width="5" fill="none" stroke-linecap="round"/><path d="M48 130 q-18 -4 -24 -20" stroke="#4A7D3E" stroke-width="3" fill="none"/><path d="M50 90 q20 -2 28 -16" stroke="#4A7D3E" stroke-width="3" fill="none"/><path d="M46 50 q-16 -2 -20 -16" stroke="#4A7D3E" stroke-width="3" fill="none"/><ellipse cx="26" cy="104" rx="15" ry="10" fill="#5CAC55" transform="rotate(-24 26 104)"/><ellipse cx="76" cy="72" rx="15" ry="10" fill="#5CAC55" transform="rotate(22 76 72)"/><ellipse cx="24" cy="32" rx="13" ry="9" fill="#5CAC55" transform="rotate(-18 24 32)"/><ellipse cx="30" cy="146" rx="17" ry="22" fill="#F2E7C9" stroke="#8B6A4E" stroke-width="2.4"/><ellipse cx="26" cy="140" rx="6" ry="8" fill="#FBF3E4" opacity=".5"/><ellipse cx="66" cy="86" rx="14" ry="18" fill="#F2E7C9" stroke="#8B6A4E" stroke-width="2.4"/><ellipse cx="62" cy="80" rx="5" ry="7" fill="#FBF3E4" opacity=".5"/>`},
+  hb_swallownest:{name:'제비집',slot:'front',rar:'SR',quest:true,box:[80,60],at:[140,560],anchor:'bc',season:'all',
+    svg:`<ellipse cx="40" cy="52" rx="34" ry="7" fill="rgba(43,36,28,.18)"/><path d="M8 44 Q10 20 40 18 Q70 20 72 44 Q60 34 40 34 Q20 34 8 44 Z" fill="#B08F6A" stroke="#6F5A3E" stroke-width="2.4"/><path d="M14 40 Q40 26 66 40" stroke="#8B6A4E" stroke-width="2" fill="none"/><ellipse cx="30" cy="26" rx="7" ry="6" fill="#6B5040"/><ellipse cx="50" cy="24" rx="7" ry="6" fill="#7A5F45"/><circle cx="27" cy="24" r="1.6" fill="#2B2620"/><circle cx="47" cy="22" r="1.6" fill="#2B2620"/><path d="M23 27 l-5 2 l5 1 Z" fill="#E0A03C"/><path d="M53 25 l5 2 l-5 1 Z" fill="#E0A03C"/>`}
+});
+
 /* ── 아이템 그림 ─────────────────────────
    media 항목이 없거나 'svg'면 지금처럼 it.svg 코드를 그대로 그린다.
    media가 'img'면 it.src 그림 파일을 it.box 크기에 맞춰 불러온다.
@@ -1045,6 +1055,7 @@ if(!S.closet) S.closet=START_WEAR.slice();
 if(!S.wear) S.wear={ top:'jg_dahong', bottom:'ch_namsaek', outer:null, shoes:'sh_gomu' };
 if(!S.prog) S.prog={ gu:0, stage:0, ci:0, done:[], char:{} };
 if(S.prog.ci===undefined) S.prog.ci=0;
+if(!S.prog.hb) S.prog.hb={ done:[], read:{} };
 const P = S.prog;
 const metCount = ()=>Object.keys(P.char).length;
 
@@ -1586,6 +1597,7 @@ function drawInside(){
     ${studyZone([140,185,185,120],'study-cheonja',200,380,'천자문',`${P.gu} / 125마디`,true,true)}
     ${studyZone([90,200,90,105],'study-jok',110,380,'글자 익힘책',`${metCount()}자 익힘`,true,true)}
     ${studyZone([270,125,95,180],'study-myeongsim',310,380,'명심보감','곧 문 엽니다',false,false)}
+    ${studyZone([100,310,180,70],'study-bakheungbo',190,375,'박흥보전',`${P.hb.done.length} / 10대목`,true,false)}
     <g class="tapzone" data-act="go-seodang" data-ax="340" data-ay="556" role="button" aria-label="마당으로 나가기">
       <rect x="288" y="470" width="112" height="130" fill="transparent"/>
       <rect x="316" y="500" width="72" height="86" rx="3" fill="#6F6258"/>
@@ -1614,7 +1626,7 @@ function drawMarket(){
     <image href="bg/bg-marketstreet.png" xlink:href="bg/bg-marketstreet.png" x="0" y="0" width="400" height="600" preserveAspectRatio="xMidYMid slice"/>
     ${marketZone([0,160,155,180],  'shop-clothes',75, 420,'의전으로',   '14벌',  true)}
     ${marketZone([160,145,140,195],'shop-flower', 225,420,'화수전으로', '씨앗·묘목', true)}
-    ${marketZone([300,160,100,180],'shop-stone',  350,420,'목석방으로', `${Object.keys(ITEMS).filter(id=>!ITEMS[id].grow).length}종`, true)}
+    ${marketZone([300,160,100,180],'shop-stone',  350,420,'목석방으로', `${Object.keys(ITEMS).filter(id=>!ITEMS[id].grow && !ITEMS[id].quest).length}종`, true)}
     <g class="tapzone" data-act="go-garden" data-ax="344" data-ay="556" role="button" aria-label="나의 정원으로">
       <rect x="300" y="474" width="100" height="126" fill="transparent"/>
       <path d="M400 600 L356 512 L332 512 L380 600 Z" fill="#E4D6B4"/>
@@ -1711,6 +1723,7 @@ function doAct(act){
   if(act==='study-cheonja')   return openGujeolList();
   if(act==='study-jok')       return openJok();
   if(act==='study-myeongsim') return toast('명심보감은 곧 문을 엽니다');
+  if(act==='study-bakheungbo') return openBakheungbo();
   if(act==='shop-flower')  return openGrowShop();
   if(act==='shop-clothes') return openClothes();
   if(act==='shop-stone')   return openShop();
@@ -2124,6 +2137,53 @@ function renderReviewDone(g){
   document.getElementById('toList').addEventListener('click', openGujeolList);
 }
 
+/* ── 박흥보전 ───────────────────────────────
+   두루마리 → 대목 목록 → 본문 읽기 → 어휘 퀴즈 → 보상.
+   천자문과 달리 순서로 막지 않고, 다시 풀어도 늘 보상을 준다.
+   [1단계] 지금은 목록 화면만 만든다. 8대목만 열려 있고 나머지는
+   "곧 열립니다"만 보여준다. 본문·퀴즈는 다음 단계에서 잇는다. */
+const BH_SECTIONS = [
+  {n:1,  title:'놀보의 심술',        blurb:'마음 고약한 형이 동생을 집에서 내쫓다'},
+  {n:2,  title:'흥보네 살림',        blurb:'움막을 짓고 굶주리며 사는 흥보네'},
+  {n:3,  title:'형에게 갔다가',      blurb:'쌀을 얻으러 갔다가 매만 맞고 돌아오다'},
+  {n:4,  title:'매품을 팔러',        blurb:'남 대신 매를 맞으러 갔다가 허탕을 치다'},
+  {n:5,  title:'스님이 잡아 준 집터', blurb:'지나던 스님이 좋은 집터를 일러 주다'},
+  {n:6,  title:'제비 다리를 고치다', blurb:'다리가 부러진 제비를 정성껏 치료하다'},
+  {n:7,  title:'제비가 물어 온 박씨', blurb:'이듬해 봄, 제비가 은혜를 갚으러 오다'},
+  {n:8,  title:'박을 타다',          blurb:'박 세 통에서 쌀과 비단과 새집이 나오다', unlocked:true},
+  {n:9,  title:'놀보의 욕심',        blurb:'화초장을 빼앗고 제비 다리를 부러뜨리다'},
+  {n:10, title:'놀보의 박',          blurb:'놀보의 박에서 재앙이 쏟아지고 형제가 화해하다'}
+];
+function openBakheungbo(){
+  openSheetRaw('박흥보전');
+  renderBhList();
+}
+function bhRowHTML(s){
+  const badge = s.unlocked ? '<span class="badge2 done">읽기</span>' : LOCK_SVG;
+  return `<button class="gurow ${s.unlocked?'done':'locked'}" data-n="${s.n}">
+    <span class="gunum">${s.n}</span>
+    <span class="gutext"><b>${s.title}</b><br><small>${s.blurb}</small></span>
+    ${badge}</button>`;
+}
+function renderBhList(){
+  sheetBody.innerHTML = `
+    <p class="note" style="margin:0 2px 12px">두루마리를 펼쳐 대목을 골라 읽습니다. 다시 읽어도 됩니다.</p>
+    <div class="gulist">${BH_SECTIONS.map(bhRowHTML).join('')}</div>`;
+  sheetBody.querySelectorAll('.gurow[data-n]').forEach(el=>
+    el.addEventListener('click', ()=>enterBhSection(+el.dataset.n)));
+}
+function enterBhSection(n){
+  const s=BH_SECTIONS.find(x=>x.n===n);
+  if(!s.unlocked) return toast('곧 열립니다');
+  // 본문 읽기·퀴즈 화면은 다음 단계에서 잇는다
+  openSheetRaw(`박흥보전 · ${s.title}`);
+  sheetBody.innerHTML = `<div class="hanja-card">
+      <div class="hunum">${s.title}</div>
+      <div class="hint">본문은 다음 단계에서 넣습니다.</div></div>
+    <button class="subbtn" id="bhBack">대목 목록으로</button>`;
+  document.getElementById('bhBack').addEventListener('click', openBakheungbo);
+}
+
 /* ── 들이기 화면의 소리 내어 읽기 ─────────────
    발음의 정확함은 가리지 않는다. 마이크로 잠깐 들어서 소리를 냈는지만
    확인하고, 냈으면 전을 조금 더 준다. 마이크가 없는 기기에서는
@@ -2526,7 +2586,7 @@ function ownedCount(id){ return (S.owned && S.owned[id]) || 0; }
 function placedInstances(id){ return S.placed.filter(iid=>typeOf(iid)===id); }
 function placedCount(id){ return placedInstances(id).length; }
 function renderShop(){
-  const ids=Object.keys(ITEMS).filter(id=>ITEMS[id].season===shopTab && !ITEMS[id].grow);
+  const ids=Object.keys(ITEMS).filter(id=>ITEMS[id].season===shopTab && !ITEMS[id].grow && !ITEMS[id].quest);
   const mine=ids.filter(id=>ownedCount(id)>0).length;
   sheetBody.innerHTML= resBarHTML() + `
     <div class="tabs">${SEASON_TABS.map(([k,label])=>
