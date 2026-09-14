@@ -1578,11 +1578,16 @@ function waterCanSVG(cx,cy){
 }
 function waterFxSVG(w,h){
   // 물뿌리개 주둥이(물이 실제로 떨어지는 자리)를 식물 너비의 한가운데(w/2)에
-  // 맞춘다. 몸통(waterCanSVG의 translate 기준점)은 그 그림 그대로 주둥이보다
-  // 오른쪽 위로 32,20만큼 물러나 있으므로, 몸통 자리를 주둥이 자리 + (32,20)로
-  // 잡아주면 주둥이가 언제나 식물 크기와 상관없이 한가운데로 온다.
-  const sx=(w/2).toFixed(1), sy='0';
-  const cx=w/2+32, cy=-20;
+  // 맞춘다. 식물 그림의 위쪽 끝(y=0)에 딱 붙이면 꽃송이가 이미 그 자리
+  // 가까이에 그려진 종(예: 다 핀 국화)에서는 물조리개가 꽃에 닿아 있는
+  // 것처럼 낮아 보이므로, 머리 위로 확실한 틈(clearance)을 두어 물이
+  // 떨어지는 모습이 보이게 한다. 몸통(waterCanSVG의 translate 기준점)은
+  // 그 그림 그대로 주둥이보다 오른쪽 위로 32,20만큼 물러나 있으므로,
+  // 몸통 자리를 주둥이 자리 + (32,20)로 잡아주면 주둥이가 언제나 식물
+  // 크기와 상관없이 한가운데·머리 위로 온다.
+  const clearance = Math.max(14, h*0.32);
+  const sx=(w/2).toFixed(1), sy=(-clearance).toFixed(1);
+  const cx=w/2+32, cy=-clearance-20;
   // 거의 수직으로 떨어지되, 안쪽/바깥쪽으로 살짝씩 퍼지도록 물방울마다
   // 다른 각도(fx: -1 안쪽 ~ 1 바깥쪽)를 준다
   const baseDdy=h*0.58, spread=w*0.16;
@@ -1864,10 +1869,13 @@ function fadeTo(vol, duration){
 }
 /* 공간을 옮기면 그 공간의 곡으로 바뀌되, 뚝 끊기지 않게 잠깐(0.5초)
    줄였다가 새 곡으로 바꾸고 다시(0.5초) 키운다. 같은 곡으로 이어지는
-   경우(예: 서당 마당 ↔ 서당 안)에는 아무것도 다시 하지 않는다. */
+   경우(예: 서당 마당 ↔ 서당 안)에는 아무것도 다시 하지 않는다.
+   남의 정원(정원 마실)은 화면만 정원 것을 빌려 쓸 뿐 사랑방에서 이어진
+   곳이라, visiting 중에는 정원 음악 대신 사랑방 음악을 그대로 둔다. */
 let bgmToken = 0;
 async function tryPlayBGM(){
-  const track = BGM_TRACKS[where];
+  const trackKey = (where==='garden' && visiting) ? 'sarangbang' : where;
+  const track = BGM_TRACKS[trackKey];
   if(!track || !S.bgmOn || !userInteracted){ bgmAudio.pause(); return; }
   if(curBgmTrack === track){
     if(bgmAudio.paused){ bgmAudio.volume = BGM_VOLUME; bgmAudio.play().catch(()=>{}); }
