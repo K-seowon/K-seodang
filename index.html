@@ -1667,36 +1667,32 @@ function openScrolls(){
    그은 면). x,y는 책의 왼쪽 위 자리다. */
 function deskBookSVG(x,y){
   return `<g transform="translate(${x},${y})">
-    <ellipse cx="45" cy="34" rx="58" ry="12" fill="#FFE9A8" opacity=".3">
+    <ellipse cx="45" cy="14" rx="58" ry="10" fill="#FFE9A8" opacity=".3">
       <animate attributeName="opacity" values=".18;.42;.18" dur="2.6s" repeatCount="indefinite"/>
     </ellipse>
-    <path d="M2 6 L46 2 L46 26 L2 30 Z" fill="#F5EAD3" stroke="#3D3A36" stroke-width="2.6" stroke-linejoin="round"/>
-    <path d="M50 2 L94 6 L94 30 L50 26 Z" fill="#F8EFDB" stroke="#3D3A36" stroke-width="2.6" stroke-linejoin="round"/>
-    <path d="M48 2 V26" stroke="#3D3A36" stroke-width="2.2"/>
+    <path d="M2 7 L46 4 L46 20 L2 23 Z" fill="#F5EAD3" stroke="#3D3A36" stroke-width="2.4" stroke-linejoin="round"/>
+    <path d="M50 4 L94 7 L94 23 L50 20 Z" fill="#F8EFDB" stroke="#3D3A36" stroke-width="2.4" stroke-linejoin="round"/>
+    <path d="M48 4 V20" stroke="#3D3A36" stroke-width="2"/>
     <g stroke="#8B6A4E" stroke-width="1.1">
-      <path d="M8 10 L42 8"/><path d="M8 15 L42 13.5"/><path d="M8 20 L42 19"/><path d="M8 25 L42 24"/>
-      <path d="M54 8 L90 10"/><path d="M54 13.5 L90 15"/><path d="M54 19 L90 20"/><path d="M54 24 L90 25"/>
+      <path d="M8 11 L42 9"/><path d="M8 16 L42 14.5"/><path d="M8 20.5 L42 19.5"/>
+      <path d="M54 9 L90 11"/><path d="M54 14.5 L90 16"/><path d="M54 19.5 L90 20.5"/>
     </g>
-    <g class="badge-bob"><circle cx="90" cy="-4" r="7" fill="#D9463F" stroke="#3D3A36" stroke-width="2.2"/></g>
+    <g class="badge-bob"><circle cx="90" cy="-3" r="7" fill="#D9463F" stroke="#3D3A36" stroke-width="2.2"/></g>
   </g>`;
 }
-/* 빈 방 가운데, 훈장님 책상 앞쪽에 놓인 서안. 배경 그림 속 훈장님
-   책상과 같은 생김새(굽은 등받이·서랍칸 앞판·짧은 다리)로 그리되,
-   학동 것이라 그보다 작게 그린다. cx는 가로 가운데, y는 등받이가
-   시작하는 자리다. */
+/* 빈 방 가운데, 훈장님 책상 앞쪽에 놓인 서안. 학동 것이라 훈장님
+   책상보다 작게 그린다. cx는 가로 가운데, y는 상판이 시작하는 자리다. */
 function seoanSVG(cx, y){
   const w=130, x=cx-w/2;
   return `<g transform="translate(${x},${y})">
-    <ellipse cx="${w/2}" cy="60" rx="${w/2-2}" ry="8" fill="rgba(43,36,28,.18)"/>
-    <path d="M${w*0.28} 20 C${w*0.28} 3 ${w*0.42} -3 ${w/2} 6 C${w*0.58} -3 ${w*0.72} 3 ${w*0.72} 20 Z"
-      fill="#8B6A4E" stroke="#3D3A36" stroke-width="2.6" stroke-linejoin="round"/>
-    <rect x="4" y="18" width="${w-8}" height="9" fill="#C9A06B" stroke="#3D3A36" stroke-width="2.6"/>
-    <rect x="10" y="27" width="${w-20}" height="12" fill="#8B6A4E" stroke="#3D3A36" stroke-width="2.4"/>
-    <rect x="${w*0.22}" y="32" width="${w*0.56}" height="8" rx="4" fill="#3E6FA8" stroke="#3D3A36" stroke-width="2"/>
-    <rect x="14" y="39" width="9" height="14" fill="#7A5F45" stroke="#3D3A36" stroke-width="2.2"/>
-    <rect x="11" y="53" width="15" height="5" rx="1.5" fill="#7A5F45" stroke="#3D3A36" stroke-width="2.2"/>
-    <rect x="${w-23}" y="39" width="9" height="14" fill="#7A5F45" stroke="#3D3A36" stroke-width="2.2"/>
-    <rect x="${w-26}" y="53" width="15" height="5" rx="1.5" fill="#7A5F45" stroke="#3D3A36" stroke-width="2.2"/>
+    <ellipse cx="${w/2}" cy="42" rx="${w/2-2}" ry="8" fill="rgba(43,36,28,.18)"/>
+    <rect x="4" y="0" width="${w-8}" height="9" fill="#C9A06B" stroke="#3D3A36" stroke-width="2.6"/>
+    <rect x="10" y="9" width="${w-20}" height="12" fill="#8B6A4E" stroke="#3D3A36" stroke-width="2.4"/>
+    <rect x="${w*0.22}" y="14" width="${w*0.56}" height="8" rx="4" fill="#3E6FA8" stroke="#3D3A36" stroke-width="2"/>
+    <rect x="14" y="21" width="9" height="14" fill="#7A5F45" stroke="#3D3A36" stroke-width="2.2"/>
+    <rect x="11" y="35" width="15" height="5" rx="1.5" fill="#7A5F45" stroke="#3D3A36" stroke-width="2.2"/>
+    <rect x="${w-23}" y="21" width="9" height="14" fill="#7A5F45" stroke="#3D3A36" stroke-width="2.2"/>
+    <rect x="${w-26}" y="35" width="15" height="5" rx="1.5" fill="#7A5F45" stroke="#3D3A36" stroke-width="2.2"/>
   </g>`;
 }
 function drawInside(){
@@ -1705,8 +1701,8 @@ function drawInside(){
     <image href="bg/bg-seodanginside.png" xlink:href="bg/bg-seodanginside.png" x="0" y="0" width="400" height="600" preserveAspectRatio="xMidYMid slice"/>
     <g class="tapzone" data-act="open-scrolls" data-ax="200" data-ay="405" role="button" aria-label="서안의 책 펼치기">
       <rect x="130" y="305" width="140" height="95" fill="transparent"/>
-      ${seoanSVG(200,330)}
-      ${deskBookSVG(153,322)}
+      ${seoanSVG(200,348)}
+      ${deskBookSVG(153,342)}
     </g>
     <g class="tapzone" data-act="go-seodang" data-ax="340" data-ay="556" role="button" aria-label="마당으로 나가기">
       <rect x="288" y="470" width="112" height="130" fill="transparent"/>
