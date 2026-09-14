@@ -28,11 +28,8 @@ body{font-family:'Gaegu',system-ui,sans-serif;color:var(--ink);-webkit-font-smoo
 #who{flex-direction:column;align-items:flex-start;gap:1px;padding:5px 12px}
 #who .nameRow{display:flex;align-items:center;gap:6px}
 #who .name{font-weight:700;font-size:18px}
-#who .rank{font-size:15px;color:#7A6E5E}
 .grade{font-size:11px;font-weight:700;padding:1px 8px;border-radius:9px;border:2px solid var(--ink);color:#fff}
 #rankDemoBtn{pointer-events:auto;cursor:pointer;margin-left:auto;color:var(--ink)}
-.bar{width:86px;height:8px;background:var(--hanji-2);border:2px solid var(--ink);border-radius:6px;overflow:hidden;margin-top:2px}
-.bar>i{display:block;height:100%;background:var(--maehwa);width:0%}
 .pip{width:22px;height:22px;flex:0 0 auto;display:block}
 .cost .pip{width:17px;height:17px}
 #topupBtn{pointer-events:auto;cursor:pointer;color:var(--ink)}
@@ -210,6 +207,18 @@ body{font-family:'Gaegu',system-ui,sans-serif;color:var(--ink);-webkit-font-smoo
 .bhword{text-decoration:underline;text-decoration-style:dotted;text-underline-offset:3px;
   text-decoration-color:var(--maehwa-d);cursor:pointer;color:var(--maehwa-d);font-weight:700}
 
+/* 낱말 뜻 풍선 — 누른 낱말 바로 옆(위/아래)에 뜬다. 위치는 JS가 매번
+   계산해 top/left/--tail-x로 넣어 준다. 저절로 사라지지 않고, 다른
+   곳을 누르거나 같은 낱말을 다시 누르면 사라진다. */
+.word-bubble{position:absolute;z-index:45;max-width:min(280px,78%);background:var(--ink);color:var(--hanji);
+  padding:8px 13px;border-radius:12px;font-size:15px;line-height:1.5;box-shadow:0 4px 12px rgba(0,0,0,.28);
+  opacity:0;transform:translateY(4px);transition:opacity .12s ease,transform .12s ease;pointer-events:none}
+.word-bubble.on{opacity:1;transform:translateY(0);pointer-events:auto}
+.word-bubble::after{content:'';position:absolute;left:var(--tail-x,20px);width:12px;height:12px;
+  background:var(--ink);transform:rotate(45deg)}
+.word-bubble.below::after{top:-5px}
+.word-bubble.above::after{bottom:-5px}
+
 .packhead{border:3px solid var(--ink);border-radius:16px;overflow:hidden;margin-bottom:14px;position:relative}
 .packhead .strip{padding:10px 14px;background:var(--maehwa);border-bottom:3px solid var(--ink)}
 .packhead h2{margin:0;font-size:22px;font-weight:700}
@@ -265,8 +274,6 @@ button.cell{cursor:pointer}
   <div id="hud">
     <div class="plate" id="who">
       <span class="nameRow"><span class="name">푸믹</span><span class="grade" id="gradeTxt"></span></span>
-      <span class="rank" id="rankTxt"></span>
-      <span class="bar"><i id="progBar"></i></span>
     </div>
     <div class="plate" id="coinPlate"><svg class="pip" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9.5" fill="#E8A33C" stroke="#3D3A36" stroke-width="2.4"/><rect x="8.6" y="8.6" width="6.8" height="6.8" rx="1.2" fill="#FBF3E4" stroke="#3D3A36" stroke-width="2"/></svg><span class="num" id="coinTxt">0</span></div>
     <button class="plate" id="topupBtn" aria-label="전 충전">
@@ -316,6 +323,10 @@ button.cell{cursor:pointer}
   </div>
 
   <nav id="nav">
+    <button data-go="garden">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21c5-3 7-6 7-10a7 7 0 1 0-14 0c0 4 2 7 7 10Z"/><circle cx="12" cy="10" r="3"/></svg>
+      나의 정원
+    </button>
     <button data-go="seodang">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 8 12 3l10 5"/><path d="M4 8v12h16V8"/><path d="M9 20v-6h6v6"/></svg>
       운교서당<span class="dot" id="navDot"></span>
@@ -324,17 +335,13 @@ button.cell{cursor:pointer}
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9h18l-2-5H5Z"/><path d="M5 9v11h14V9"/><path d="M9 20v-6h6v6"/></svg>
       운교장터
     </button>
-    <button data-go="garden">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21c5-3 7-6 7-10a7 7 0 1 0-14 0c0 4 2 7 7 10Z"/><circle cx="12" cy="10" r="3"/></svg>
-      나의 정원
-    </button>
     <button data-go="bag">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 8h14l1 12H4Z"/><path d="M8 8V6a4 4 0 0 1 8 0v2"/></svg>
       보따리
     </button>
-    <button data-go="neighbors">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="8" r="3"/><path d="M3 20c0-3 3-5 6-5s6 2 6 5"/><circle cx="17" cy="9" r="2.5"/><path d="M16 15c3 0 5 2 5 5"/></svg>
-      이웃
+    <button data-go="sarangbang">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 10 12 3l9 7"/><path d="M5 10v10h14V10"/><path d="M9 20v-5h6v5"/><path d="M12 10v5M9 12.5h6"/></svg>
+      운교사랑방
     </button>
   </nav>
 
@@ -344,6 +351,7 @@ button.cell{cursor:pointer}
       <h1 id="sheetTitle"></h1>
     </div>
     <div class="sheet-body" id="sheetBody"></div>
+    <div id="wordBubble" class="word-bubble"></div>
   </div>
 
   <div id="toast"></div>
@@ -733,16 +741,16 @@ const EMPTY_PROGRESS = {
   char: {}      // 글자별 되짚기 기록 { '天': {n, ok, streak, due} }
 };
 
-/* 글자 하나를 채점한 뒤 기록을 고쳐 준다 */
+/* 글자 하나를 채점한 뒤 기록을 고쳐 준다. 급수는 이제 글자 하나가
+   아니라 콘텐츠 완주로만 오르므로(checkRankUp 참고), 여기서는 급수를
+   건드리지 않는다. */
 function markChar(prog, ch, correct, now) {
-  const isNew = !(ch in prog.char);
   const r = prog.char[ch] || { n: 0, ok: 0, streak: 0, due: 0 };
   r.n++;
   if (correct) { r.ok++; r.streak++; }
   else { r.streak = 0; }
   r.due = correct ? nextDue(r.streak, now) : (now || Date.now()) + 864e5;
   prog.char[ch] = r;
-  if (isNew) checkRankUp();
   return r;
 }
 
@@ -1038,7 +1046,7 @@ const S = load() || {
   locked: false,
   closet: START_WEAR.slice(),
   wear: { top:'jg_dahong', bottom:'ch_namsaek', outer:null, shoes:'sh_gomu' },
-  pos: { garden:{x:200,y:470}, seodang:{x:200,y:500}, inside:{x:200,y:520}, market:{x:200,y:500} }
+  pos: { garden:{x:200,y:470}, seodang:{x:200,y:500}, inside:{x:200,y:520}, market:{x:200,y:500}, sarangbang:{x:200,y:500} }
 };
 // 예전 저장 자료( owned가 배열 )를 개수 표(맵)로 바꿔준다
 if(Array.isArray(S.owned)){
@@ -1071,6 +1079,7 @@ if(!S.sampleGukAdded){
   S.sampleGukAdded = true;
 }
 if(!S.pos.inside) S.pos.inside={x:200,y:520};
+if(!S.pos.sarangbang) S.pos.sarangbang={x:200,y:500};
 if(!S.closet) S.closet=START_WEAR.slice();
 if(!S.wear) S.wear={ top:'jg_dahong', bottom:'ch_namsaek', outer:null, shoes:'sh_gomu' };
 if(!S.prog) S.prog={ gu:0, stage:0, ci:0, done:[], char:{} };
@@ -1082,31 +1091,44 @@ const P = S.prog;
 const metCount = ()=>Object.keys(P.char).length;
 
 /* ── 학동의 급 ───────────────────────────
-   정원이 자라는 모습에 빗댄 이름. 익힌 글자 수(화면에 보이는 수 =
-   실제 + 발표용 보정)로 매긴다. 급이 오르면 축하와 함께 전을 준다.
+   정원이 자라는 모습에 빗댄 이름. 마디·대목 하나가 아니라 콘텐츠를
+   통째로 마쳐야 배움 점수를 받고, 그 점수로 급이 오른다(익힌 글자
+   수는 더 이상 급수에 쓰지 않는다). 급이 오르면 축하와 함께 전을 준다.
    ------------------------------------- */
 const RANKS = [
-  {name:'씨앗', min:0,   color:'#8B6A4E', bonus:0},
-  {name:'새싹', min:50,  color:'#6FAE55', bonus:5},
-  {name:'떡잎', min:150, color:'#3F9142', bonus:10},
-  {name:'연두', min:350, color:'#9CB93C', bonus:20},
-  {name:'초록', min:600, color:'#2A6B33', bonus:30},
-  {name:'열매', min:850, color:'#C0392B', bonus:50}
+  {name:'씨앗', min:0,  color:'#8B6A4E', bonus:0},
+  {name:'새싹', min:7,  color:'#6FAE55', bonus:5},
+  {name:'떡잎', min:15, color:'#3F9142', bonus:10},
+  {name:'연두', min:25, color:'#9CB93C', bonus:20},
+  {name:'초록', min:40, color:'#2A6B33', bonus:30},
+  {name:'열매', min:60, color:'#C0392B', bonus:50}
 ];
-function effCount(){ return metCount() + (S.demoBoost||0); }
+/* 배움 점수: 콘텐츠 하나를 끝까지 마쳐야만 오른다.
+   명심보감은 아직 열리지 않았으니 지금은 0점만 더한다(열리면 15점). */
+function learnScore(){
+  let s = 0;
+  if(P.gu>=GUJEOL.length) s += 10;      // 천자문 125마디 완주
+  if(P.hb.done.length>=10) s += 7;      // 박흥보전 10대목 완주
+  return s;
+}
+function effScore(){ return learnScore() + (S.demoBoost||0); }
 function rankOf(n){ let idx=0; for(let i=0;i<RANKS.length;i++) if(n>=RANKS[i].min) idx=i; return idx; }
-function rankInfo(n){
-  const idx=rankOf(n), cur=RANKS[idx], next=RANKS[idx+1];
-  return { idx, name:cur.name, color:cur.color, next: next?next.name:null, toNext: next?next.min-n:0 };
+/* 이미 쌓인 진도가 있으면(옛 글자 수 기준 급수였던 P.rankSeen) 급수가
+   초기화되지 않도록, 화면에 보이는 급은 실제 점수와 P.rankSeen 중 더
+   높은 쪽을 쓴다. */
+function curRankIdx(){ return Math.max(rankOf(effScore()), P.rankSeen||0); }
+function rankInfo(idx){
+  const cur=RANKS[idx], next=RANKS[idx+1];
+  return { idx, name:cur.name, color:cur.color, next: next?next.name:null };
 }
 if(S.demoBoost===undefined) S.demoBoost=0;
-if(P.rankSeen===undefined) P.rankSeen=rankOf(metCount());
+if(P.rankSeen===undefined) P.rankSeen=rankOf(learnScore());
 let pendingRankUp=null;
 function checkRankUp(){
-  const idx=rankOf(metCount());
-  if(idx>P.rankSeen){
+  const idx=rankOf(learnScore());
+  if(idx>(P.rankSeen||0)){
     let bonus=0;
-    for(let i=P.rankSeen+1;i<=idx;i++) bonus+=RANKS[i].bonus;
+    for(let i=(P.rankSeen||0)+1;i<=idx;i++) bonus+=RANKS[i].bonus;
     P.rankSeen=idx;
     if(bonus) S.coin+=bonus;
     save(); syncHUD();
@@ -1125,20 +1147,20 @@ function showRankUp(rank, bonus){
     </div>`;
   if(bonus) queueReward({coin:bonus});
 }
-/* 발표용: 실제 익힌 글자 수는 그대로 두고 화면에 보이는 급만 잠깐 올린다 */
+/* 발표용: 실제 배움 점수는 그대로 두고 화면에 보이는 급만 잠깐 올린다 */
 function openRankDemo(){ openSheetRaw('급수 시험 (발표용)'); renderRankDemo(); }
 function renderRankDemo(){
   sheetBody.innerHTML = `
-    <p class="note">실제로 익힌 글자 수는 바뀌지 않습니다. 화면에 보이는 급만 잠깐 올려서 확인합니다.</p>
-    <p class="note" style="font-weight:700">지금 표시되는 글자 수: ${effCount()}자 (실제 ${metCount()}자 + 시험 ${S.demoBoost}자)</p>
+    <p class="note">실제로 쌓인 배움 점수는 바뀌지 않습니다. 화면에 보이는 급만 잠깐 올려서 확인합니다.</p>
+    <p class="note" style="font-weight:700">지금 표시되는 배움 점수: ${effScore()}점 (실제 ${learnScore()}점 + 시험 ${S.demoBoost}점)</p>
     <div class="choices">
-      ${RANKS.map((r,i)=>`<button class="choice" data-rank="${i}">${r.name}급으로 (${r.min}자)</button>`).join('')}
+      ${RANKS.map((r,i)=>`<button class="choice" data-rank="${i}">${r.name}급으로 (${r.min}점)</button>`).join('')}
       <button class="choice" data-rank="-1">시험 끄기(실제 값으로)</button>
     </div>`;
   sheetBody.querySelectorAll('.choice').forEach(b=>b.addEventListener('click',()=>{
     const i=+b.dataset.rank;
     if(i<0){ S.demoBoost=0; save(); syncHUD(); renderRankDemo(); return; }
-    S.demoBoost=Math.max(0, RANKS[i].min-metCount());
+    S.demoBoost=Math.max(0, RANKS[i].min-learnScore());
     save(); syncHUD();
     showRankUp(RANKS[i], RANKS[i].bonus);
     if(RANKS[i].bonus){ S.coin+=RANKS[i].bonus; save(); syncHUD(); }
@@ -1456,7 +1478,7 @@ const GUK_STAGES = [
    나중에 이웃이 왔을 때 이 팻말로 급을 알아볼 수 있게 된다. */
 function nameplateSVG(name, rk){
   name = name || '푸믹';
-  rk = rk || rankInfo(effCount());
+  rk = rk || rankInfo(curRankIdx());
   const w=78;
   return `
     <rect x="${w/2-13}" y="40" width="5" height="18" rx="1" fill="#8A6A4E" stroke="${LINE}" stroke-width="1.6"/>
@@ -1599,38 +1621,100 @@ function drawSeodang(){
 }
 
 /* ── 장면 3 · 서당 안 ───────────────────── */
-const SHOW_JOK_DESK = false; // 글자 익힘책 두루마리는 지금 잠시 감춰 둔다
-/* 학동들이 앉는 작은 책상을 학습 하나당 하나씩 그린다. 상판 위에 제목을
-   바로 얹어 그 자리를 누르게 한다. cx는 가로 가운데, y는 상판이 시작
-   하는 자리다. */
-function deskStudyZone(cx, y, act, ax, ay, label, sub, ready, badge){
-  const w=124, h=46, x0=cx-w/2;
-  const halo='style="paint-order:stroke;stroke:#FBF3E4;stroke-width:4px;stroke-linejoin:round"';
-  return `<g class="tapzone" data-act="${act}" data-ax="${ax}" data-ay="${ay}" role="button" aria-label="${label}">
-    <g transform="translate(${x0},${y})">
-      <rect x="0" y="0" width="${w}" height="${h}" fill="transparent"/>
-      <ellipse cx="62" cy="42" rx="59" ry="7" fill="rgba(43,36,28,.16)"/>
-      <path d="M3 4 H121 L109 16 H15 Z" fill="#B08F6A" stroke="#5C4130" stroke-width="2" stroke-linejoin="round"/>
-      <rect x="15" y="16" width="95" height="7" fill="#7A5F45"/>
-      <rect x="20" y="23" width="8" height="19" fill="#7A5F45"/>
-      <rect x="96" y="23" width="8" height="19" fill="#7A5F45"/>
-      <rect x="58" y="23" width="8" height="19" fill="#7A5F45"/>
-      ${badge&&ready?'<circle cx="109" cy="7" r="7" fill="#D9463F" stroke="#3D3A36" stroke-width="2"/>':''}
-      <text x="62" y="13" text-anchor="middle" font-family="Gaegu, sans-serif" font-size="11" font-weight="700"
-        fill="${ready?'#3D3A36':'#9C917F'}" ${halo}>${label}</text>
+/* 두루마리를 갈래로 묶어 자료로 관리한다. 두루마리가 늘어나도 방 안에
+   책상을 새로 그려 넣지 않고, 이 목록에 한 줄만 더하면 된다.
+   「글자 익힘책」은 천자문 진도가 쌓이면 다시 열 것이라 목록에서만
+   빼 두었다. 관련 코드(openJok 등)는 그대로 남아 있다. */
+const SCROLL_CATALOG = [
+  { cat:'한문 고전', items:[
+    { act:'study-cheonja',   title:'천자문',   ready:true,  sub:()=>`${P.gu} / 125마디`, current:()=>P.gu<GUJEOL.length },
+    { act:'study-myeongsim', title:'명심보감', ready:false, sub:()=>'곧 문을 엽니다' }
+  ]},
+  { cat:'옛이야기', items:[
+    { act:'study-bakheungbo', title:'박흥보전', ready:true, sub:()=>`${P.hb.done.length} / 10대목` }
+  ]}
+];
+function scrollRowHTML(it){
+  const badge = !it.ready ? LOCK_SVG
+    : (it.current && it.current()) ? '<span class="badge2 now">지금</span>'
+    : '<span class="badge2 done">읽기</span>';
+  return `<button class="gurow ${it.ready?'done':'locked'}" data-act="${it.act}">
+    <span class="gutext"><b>${it.title}</b><br><small>${it.sub()}</small></span>
+    ${badge}</button>`;
+}
+function renderScrollList(){
+  sheetBody.innerHTML = SCROLL_CATALOG.map(g=>`
+    <div class="gugroup">
+      <div class="grouptitle" style="margin:4px 2px 8px;font-size:15px;font-weight:700;color:#7A6E5E">${g.cat}</div>
+      <div class="gulist">${g.items.map(scrollRowHTML).join('')}</div>
+    </div>`).join('');
+  sheetBody.querySelectorAll('.gurow[data-act]').forEach(el=>
+    el.addEventListener('click', ()=>{
+      const it = SCROLL_CATALOG.flatMap(g=>g.items).find(x=>x.act===el.dataset.act);
+      if(!it.ready) return toast('곧 열립니다');
+      doAct(it.act);
+    }));
+}
+function openScrolls(){
+  openSheetRaw('두루마리');
+  renderScrollList();
+}
+/* 서가에 놓인 두루마리들. cx는 가로 가운데, y는 받침대 윗면 자리다. */
+function scrollRackSVG(cx, y){
+  return `<g transform="translate(${cx-90},${y})">
+    <ellipse cx="90" cy="70" rx="86" ry="9" fill="rgba(43,36,28,.16)"/>
+    <rect x="6" y="40" width="168" height="12" fill="#7A5F45" stroke="#5C4130" stroke-width="2"/>
+    <rect x="16" y="52" width="10" height="18" fill="#7A5F45"/>
+    <rect x="154" y="52" width="10" height="18" fill="#7A5F45"/>
+    <g><rect x="26" y="0" width="26" height="42" rx="13" fill="#F2E7C9" stroke="#8B6A4E" stroke-width="2.4"/><rect x="26" y="6" width="26" height="6" fill="#C8384A"/></g>
+    <g><rect x="70" y="-10" width="30" height="52" rx="15" fill="#F2E7C9" stroke="#8B6A4E" stroke-width="2.4"/><rect x="70" y="-2" width="30" height="7" fill="#4A7D3E"/></g>
+    <g><rect x="118" y="2" width="26" height="40" rx="13" fill="#F2E7C9" stroke="#8B6A4E" stroke-width="2.4"/><rect x="118" y="10" width="26" height="6" fill="#E0A03C"/></g>
+  </g>`;
+}
+/* 서안 위에 펼쳐 놓은 책 — 두루마리 목록을 여는 자리다. 양쪽 면이
+   보이게 펼치고, 세로 줄을 그어 옛 책처럼 보이게 한다. x,y는 책의
+   왼쪽 위 자리다. */
+function deskBookSVG(x,y){
+  return `<g transform="translate(${x},${y})">
+    <ellipse cx="55" cy="46" rx="72" ry="14" fill="#FFE9A8" opacity=".3">
+      <animate attributeName="opacity" values=".18;.42;.18" dur="2.6s" repeatCount="indefinite"/>
+    </ellipse>
+    <path d="M2 7 L53 2 L53 38 L2 45 Z" fill="#F2E7C9" stroke="#3D3A36" stroke-width="2.8" stroke-linejoin="round"/>
+    <path d="M57 2 L108 7 L108 45 L57 38 Z" fill="#F5EAD3" stroke="#3D3A36" stroke-width="2.8" stroke-linejoin="round"/>
+    <path d="M55 2 V38" stroke="#3D3A36" stroke-width="2.4"/>
+    <g stroke="#8B6A4E" stroke-width="1.4">
+      <path d="M11 9 L10 41"/><path d="M20 8.3 L19.5 40"/><path d="M29 7.6 L29 39"/><path d="M38 7 L38.5 38"/><path d="M47 6.3 L48 37"/>
     </g>
-    <text x="${cx}" y="${y+h+15}" text-anchor="middle" font-family="Gaegu, sans-serif" font-size="10"
-      fill="${ready?'#7A6E5E':'#A99E8B'}" ${halo}>${sub}</text>
+    <g stroke="#8B6A4E" stroke-width="1.4">
+      <path d="M63 6.3 L62 38"/><path d="M72 7 L71.5 39"/><path d="M81 7.6 L81 39.6"/><path d="M90 8.3 L90.5 40.3"/><path d="M99 9 L100 41"/>
+    </g>
+    <g class="badge-bob"><circle cx="102" cy="-4" r="7" fill="#D9463F" stroke="#3D3A36" stroke-width="2.2"/></g>
+  </g>`;
+}
+/* 서안 앞에 놓인 두툼한 방석. cx는 가로 가운데, y는 방석 앞면이 시작하는 자리다. */
+function cushionSVG(cx, y, color){
+  const w=74, h=22, depth=11, x=cx-w/2;
+  return `<g transform="translate(${x},${y})">
+    <ellipse cx="${w/2}" cy="${h+depth+5}" rx="${w/2+7}" ry="7" fill="rgba(43,36,28,.2)"/>
+    <path d="M8 0 H${w-8} L${w} ${depth} H0 Z" fill="${color}" stroke="#3D3A36" stroke-width="2.6" stroke-linejoin="round"/>
+    <rect x="0" y="${depth}" width="${w}" height="${h}" rx="4" fill="${color}" stroke="#3D3A36" stroke-width="2.6"/>
+    <path d="M2 ${depth+3} H${w-2}" stroke="rgba(0,0,0,.18)" stroke-width="1.6"/>
   </g>`;
 }
 function drawInside(){
   const p = S.pos.inside;
   scene.innerHTML = `
     <image href="bg/bg-seodanginside.png" xlink:href="bg/bg-seodanginside.png" x="0" y="0" width="400" height="600" preserveAspectRatio="xMidYMid slice"/>
-    ${deskStudyZone(66,350,'study-cheonja',66,426,'천자문',`${P.gu} / 125마디`,true,P.gu<GUJEOL.length)}
-    ${deskStudyZone(200,350,'study-myeongsim',200,426,'명심보감','곧 문 엽니다',false,false)}
-    ${SHOW_JOK_DESK?deskStudyZone(105,400,'study-jok',105,476,'글자 익힘책',`${metCount()}자 익힘`,true,true):''}
-    ${deskStudyZone(334,350,'study-bakheungbo',334,426,'박흥보전',`${P.hb.done.length} / 10대목`,true,false)}
+    ${cushionSVG(195,296,'#C8384A')}
+    <g class="tapzone" data-act="open-scrolls" data-ax="195" data-ay="316" role="button" aria-label="서안의 책 펼치기">
+      <rect x="128" y="188" width="124" height="66" fill="transparent"/>
+      ${deskBookSVG(140,196)}
+    </g>
+    <g class="tapzone" data-act="open-scrolls" data-ax="200" data-ay="470" role="button" aria-label="두루마리">
+      <rect x="90" y="330" width="220" height="100" fill="transparent"/>
+      ${scrollRackSVG(200,340)}
+      ${signboard(158,440,84,'두루마리')}
+    </g>
     <g class="tapzone" data-act="go-seodang" data-ax="340" data-ay="556" role="button" aria-label="마당으로 나가기">
       <rect x="288" y="470" width="112" height="130" fill="transparent"/>
       <rect x="316" y="500" width="72" height="86" rx="3" fill="#6F6258"/>
@@ -1653,6 +1737,53 @@ function marketZone(hit, act, ax, ay, label, sub, ready){
       fill="${ready?'#3D3A36':'#9C917F'}" ${halo}>${sub}</text>
   </g>`;
 }
+/* ── 장면 5 · 운교사랑방 ────────────────────
+   서버가 아직 없어 방 세 개를 그림으로만 보여준다. 방마다 실제 자료는
+   나중에 함수 하나(fetchNeighbors류)로 갈아 끼울 수 있게 따로 뗀다.
+   지금 이 화면에는 배경 그림 파일이 없어 다른 방과 같은 화풍(굵은
+   먹선·납작한 색면)으로 직접 그린다. */
+function sarangDoorSVG(x, y, w, h){
+  return `<rect x="${x}" y="${y}" width="${w}" height="${h}" rx="4" fill="#F2E7C9" stroke="#3D3A36" stroke-width="3.2"/>
+    <g stroke="#8B6A4E" stroke-width="2.4">
+      <path d="M${x+w/2} ${y+3} V${y+h-3}"/>
+      <path d="M${x+3} ${y+h*0.34} H${x+w-3}"/>
+      <path d="M${x+3} ${y+h*0.67} H${x+w-3}"/>
+    </g>
+    <circle cx="${x+w/2}" cy="${y+h*0.56}" r="4.5" fill="#5C4130" stroke="#3D3A36" stroke-width="1.6"/>`;
+}
+function sarangRoomZone(x, label, act){
+  const w=110, y=110, h=170;
+  const cx = x+w/2;
+  return `<g class="tapzone" data-act="${act}" data-ax="${cx}" data-ay="400" role="button" aria-label="${label}">
+    <rect x="${x-4}" y="${y-4}" width="${w+8}" height="${h+52}" fill="transparent"/>
+    ${sarangDoorSVG(x,y,w,h)}
+    ${signboard(x+3,y+h+16,w-6,label)}
+  </g>`;
+}
+function drawSarangbang(){
+  const p = S.pos.sarangbang;
+  scene.innerHTML = `
+    <rect x="0" y="0" width="400" height="600" fill="#FBF3E4"/>
+    <rect x="0" y="0" width="400" height="356" fill="#F2E4CB"/>
+    <rect x="0" y="330" width="400" height="26" fill="#7A5F45"/>
+    <rect x="0" y="356" width="400" height="244" fill="#B08F6A"/>
+    <g stroke="rgba(43,36,28,.14)" stroke-width="2">
+      <path d="M0 410 H400"/><path d="M0 470 H400"/><path d="M0 530 H400"/>
+    </g>
+    ${sarangRoomZone(16, '오늘의 글귀', 'sr-quotes')}
+    ${sarangRoomZone(145,'훈장님 말씀', 'sr-notices')}
+    ${sarangRoomZone(274,'정원 마실',   'sr-visit')}
+    <g transform="translate(150,470)">
+      <ellipse cx="50" cy="94" rx="66" ry="10" fill="rgba(43,36,28,.16)"/>
+      <rect x="6" y="18" width="88" height="10" fill="#5C4130"/>
+      <rect x="14" y="28" width="10" height="24" fill="#5C4130"/>
+      <rect x="76" y="28" width="10" height="24" fill="#5C4130"/>
+      <path d="M0 12 H100 L88 24 H12 Z" fill="#B08F6A" stroke="#3D3A36" stroke-width="2.6" stroke-linejoin="round"/>
+      <rect x="20" y="58" width="64" height="34" rx="6" fill="#8B4B3A" stroke="#3D3A36" stroke-width="2.6"/>
+      <rect x="28" y="64" width="48" height="6" fill="#B0684F"/>
+    </g>
+    ${avatarSVG(p.x,p.y)}`;
+}
 function drawMarket(){
   const p = S.pos.market;
   scene.innerHTML = `
@@ -1671,9 +1802,9 @@ function drawMarket(){
 
 /* ── 장면 관리 ──────────────────────────── */
 const scene = document.getElementById('scene');
-const DRAW = { garden:drawGarden, seodang:drawSeodang, inside:drawInside, market:drawMarket };
-const FLOOR = { garden:[200,560,50,350], seodang:[330,580,40,360], inside:[320,580,40,360], market:[370,580,50,350] };
-const NAVKEY = { garden:'garden', seodang:'seodang', inside:'seodang', market:'market' };
+const DRAW = { garden:drawGarden, seodang:drawSeodang, inside:drawInside, market:drawMarket, sarangbang:drawSarangbang };
+const FLOOR = { garden:[200,560,50,350], seodang:[330,580,40,360], inside:[320,580,40,360], market:[370,580,50,350], sarangbang:[330,580,40,360] };
+const NAVKEY = { garden:'garden', seodang:'seodang', inside:'seodang', market:'market', sarangbang:'sarangbang' };
 let where='garden', walking=false, placingId=null;
 let visiting=null, visitPos={x:200,y:470}; // 이웃의 정원을 구경하는 중이면 그 이웃 자료, 아니면 null
 
@@ -1753,6 +1884,7 @@ function doAct(act){
   }
   if(act==='go-market')     return goScene('market');
   if(act==='go-garden')     return goScene('garden');
+  if(act==='open-scrolls')    return openScrolls();
   if(act==='study-cheonja')   return openGujeolList();
   if(act==='study-jok')       return openJok();
   if(act==='study-myeongsim') return toast('명심보감은 곧 문을 엽니다');
@@ -1760,6 +1892,9 @@ function doAct(act){
   if(act==='shop-flower')  return openGrowShop();
   if(act==='shop-clothes') return openClothes();
   if(act==='shop-stone')   return openShop();
+  if(act==='sr-quotes')  return toast('곧 열립니다');
+  if(act==='sr-notices') return toast('곧 열립니다');
+  if(act==='sr-visit')   return openNeighborList();
 }
 
 /* ── 손가락 처리: 걷기 · 끌기 · 놓기 · 물주기 ───── */
@@ -1940,6 +2075,7 @@ function closeSheet(){
   if(stopActiveMic) stopActiveMic(false);
   studyMode='normal'; // 복습 중 그만두면 보상 없이 나간다
   leaveBhReading(); // 읽던 자리를 저장해 둔다
+  hideWordBubble();
   overlay.classList.remove('on'); drawScene();
   if(pendingRankUp){
     const r=pendingRankUp; pendingRankUp=null;
@@ -1950,11 +2086,52 @@ document.getElementById('closeSheet').addEventListener('click', closeSheet);
 document.getElementById('topupBtn').addEventListener('click', openTopUp);
 document.getElementById('rankDemoBtn').addEventListener('click', openRankDemo);
 
+/* ── 낱말 뜻 풍선 ───────────────────────────
+   누른 낱말 바로 아래(모자라면 위)에 뜬다. 화면 좌우로는 넘치지 않게
+   자리를 맞추고, 꼬리는 늘 그 낱말을 가리키게 --tail-x로 옮긴다.
+   다른 곳을 누르거나 같은 낱말을 다시 누르면 사라진다(저절로는 안 사라짐). */
+const wordBubble = document.getElementById('wordBubble');
+let activeWordEl = null;
+function hideWordBubble(){
+  wordBubble.classList.remove('on');
+  activeWordEl = null;
+}
+function showWordBubble(el, text){
+  wordBubble.textContent = text;
+  wordBubble.classList.add('on');
+  const oRect = overlay.getBoundingClientRect();
+  const wRect = el.getBoundingClientRect();
+  const margin = 8;
+  const bw = wordBubble.offsetWidth, bh = wordBubble.offsetHeight;
+  let left = (wRect.left - oRect.left) + wRect.width/2 - bw/2;
+  left = Math.max(margin, Math.min(left, oRect.width - bw - margin));
+  const spaceBelow = oRect.bottom - wRect.bottom;
+  const spaceAbove = wRect.top - oRect.top;
+  const below = spaceBelow >= bh + 14 || spaceBelow >= spaceAbove;
+  const top = below
+    ? (wRect.bottom - oRect.top) + 8
+    : (wRect.top - oRect.top) - bh - 8;
+  wordBubble.style.left = `${left}px`;
+  wordBubble.style.top = `${top}px`;
+  wordBubble.classList.toggle('below', below);
+  wordBubble.classList.toggle('above', !below);
+  const tailX = (wRect.left - oRect.left) + wRect.width/2 - left - 6;
+  wordBubble.style.setProperty('--tail-x', `${Math.max(10, Math.min(bw-22, tailX))}px`);
+  activeWordEl = el;
+}
+/* 낱말이 아닌 다른 곳을 누르면 닫는다. 낱말 자체를 누른 클릭은 각
+   낱말의 click 핸들러가 열고 닫는 것을 직접 맡으므로 여기서는 건드리지 않는다. */
+document.addEventListener('click', e=>{
+  if(!wordBubble.classList.contains('on')) return;
+  if(e.target.closest('.bhword')) return;
+  hideWordBubble();
+});
+sheetBody.addEventListener('scroll', ()=>{ if(wordBubble.classList.contains('on')) hideWordBubble(); });
+
 document.querySelectorAll('#nav button').forEach(b=>{
   b.addEventListener('click',()=>{
     const g=b.dataset.go;
     if(g==='bag'){ visiting=null; return openBag(); }
-    if(g==='neighbors') return openNeighborList();
     goScene(g);
   });
 });
@@ -1976,12 +2153,16 @@ function openSeodangIntro(force){
   sheetBody.innerHTML = `
     <div class="hanja-card" style="text-align:left">
       <p class="note" style="margin:0 0 12px;font-size:18px;color:var(--ink)">
-        "어서 오너라. 이 글방에서는 한 마디를 다섯 걸음으로 익힌다."</p>
-      <ol style="margin:0;padding-left:20px;font-size:16px;line-height:1.7">
-        ${STAGES.map(s=>`<li><b>${s.name}</b> — ${s.desc}</li>`).join('')}
-      </ol>
+        "어서 오너라. 여기가 운교서당의 글방이다. 두루마리를 골라 그날 공부할 것을 정하거라."</p>
+      <ul style="margin:0;padding-left:20px;font-size:16px;line-height:1.7">
+        <li><b>한문 고전</b>은 한 마디씩 다섯 걸음을 밟아 익히고, <b>배송</b>을 통과해야 다음 마디로 간다</li>
+        <li><b>옛이야기</b>는 대목을 읽고 어휘 퀴즈를 풀어 낱말을 익힌다</li>
+        <li>어느 쪽이든 공부를 마치면 전과 성장수를 받는다</li>
+        <li>성장수로는 정원의 화초와 나무를 키운다</li>
+        <li>두루마리 한 권을 끝까지 마치면 배움이 쌓여 급이 오른다</li>
+      </ul>
       <p class="note" style="margin:12px 0 0;font-size:18px;color:var(--ink)">
-        "다섯째, <b>배송</b>을 통과해야 다음 마디로 나아갈 수 있다. 명심하거라."</p>
+        "서두르지 말거라. 하루에 조금씩이면 충분하니라."</p>
     </div>
     <label style="display:flex;align-items:center;gap:8px;margin:14px 4px;font-size:16px">
       <input type="checkbox" id="introHide" style="width:18px;height:18px">다시 보지 않기
@@ -2007,7 +2188,7 @@ function setStage(v){ if(studyMode==='review') RV.stage=v; else P.stage=v; }
 function setCi(v){ if(studyMode==='review') RV.ci=v; else P.ci=v; }
 
 function stepBar(){
-  const rk = rankInfo(effCount());
+  const rk = rankInfo(curRankIdx());
   const modeBadge = studyMode==='review'
     ? `<span class="grade" style="background:#8AB566">복습</span>`
     : `<span class="grade" style="background:${rk.color}">${rk.name}</span>`;
@@ -2081,6 +2262,7 @@ function passStage(g, coin){
     msg.push(`${GUJEOL_COIN}전 · 성장수 ${GROW_PER_GUJEOL}방울`);
     reward.coin=(reward.coin||0)+GUJEOL_COIN;
     reward.grow=GROW_PER_GUJEOL;
+    checkRankUp(); // 125마디를 다 마쳤으면 여기서 급수가 오른다
   }
   if(msg.length) toast(msg.join(' · '));
   queueReward(reward);
@@ -2480,9 +2662,11 @@ function renderBhSection(n){
     ${body}
     <button class="bigbtn" id="bhQuizBtn" ${rp.reachedEnd?'':'hidden'}>퀴즈 풀기</button>
     <button class="subbtn" id="bhBack">대목 목록으로</button>`;
-  sheetBody.querySelectorAll('.bhword').forEach(el=>el.addEventListener('click',()=>{
+  sheetBody.querySelectorAll('.bhword').forEach(el=>el.addEventListener('click',e=>{
+    e.stopPropagation();
+    if(activeWordEl===el){ hideWordBubble(); return; }
     const g=BH_GLOSSARY[n][+el.dataset.gi];
-    toast(`${g.label} — ${g.mean}`);
+    showWordBubble(el, `${g.label} — ${g.mean}`);
   }));
   document.getElementById('bhBack').addEventListener('click', ()=>{
     leaveBhReading(); openBakheungbo();
@@ -2772,6 +2956,7 @@ function startBhQuiz(n){
       prizeIds.forEach(id=>{ S.owned[id]=(S.owned[id]||0)+1; });
       const names = prizeIds.map(id=>`「${ITEMS[id].name}」`).join('과 ');
       if(names) prizeMsg = `<div class="hint">${names}을 정원보따리에서 쓸 수 있습니다.</div>`;
+      checkRankUp(); // 10대목을 다 마쳤으면 여기서 급수가 오른다
     }
     save(); syncHUD();
     queueReward({coin, grow:GROW_PER_GUJEOL});
@@ -3560,12 +3745,9 @@ function syncHUD(){
   // 엽전·물방울이 화면을 날아가는 중이면, 닿을 때까지는 위쪽 숫자를 미리 바꾸지 않는다
   if(coinFlights<=0) animateNumber(document.getElementById('coinTxt'), S.coin);
   if(growFlights<=0) animateNumber(document.getElementById('growTxt'), S.growWater||0);
-  const rk = rankInfo(effCount());
+  const rk = rankInfo(curRankIdx());
   const gt = document.getElementById('gradeTxt');
   gt.textContent = rk.name; gt.style.background = rk.color;
-  const nextTxt = rk.next ? `${rk.next}까지 ${rk.toNext}자` : '가장 높은 급';
-  document.getElementById('rankTxt').textContent=`${P.gu}마디 · ${metCount()}자 익힘 · ${nextTxt}`;
-  document.getElementById('progBar').style.width=Math.min(100,(P.gu/GUJEOL.length)*100)+'%';
   document.getElementById('navDot').style.display=(P.gu<GUJEOL.length||dueChars(P).length)?'block':'none';
 }
 let toastTimer;
