@@ -54,16 +54,19 @@ body{font-family:'Gaegu',system-ui,sans-serif;color:var(--ink);-webkit-font-smoo
 /* 위쪽 줄에는 호를 넣지 않는다. 호는 8자까지라 좁은 화면에서 줄이 넘치므로,
    급수와 계정 동그라미만 두고 호는 정원의 이름 팻말과 계정 창에서 보인다. */
 #who .name{display:none}
-/* 로그인한 뒤 호를 급수·계정 동그라미 바로 아래 작은 글씨로 보여준다.
-   같은 판 안에 두되 판의 너비는 늘리지 않는다(width:0 + min-width:100% —
-   윗줄 너비만큼만 쓰고 넘치면 「…」). 위쪽 줄은 좁은 화면에서 남는 자리가
-   없어, 동그라미 옆(가로)에 두면 긴 호가 줄을 넘친다. */
-#who .nameRow{display:grid;grid-template-areas:"g b" "k k";column-gap:5px;row-gap:1px;align-items:center}
-#who .grade{grid-area:g}
-#acctBtn{grid-area:b}
-#who .nick{grid-area:k;font-size:12px;font-weight:700;line-height:1.1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
-  width:0;min-width:100%;text-align:center}
+/* 계정 판(#who)은 위쪽 줄 오른쪽 끝에 둔다. 판 안에서는 호가 위, 급수가 아래,
+   계정 동그라미는 두 줄에 걸쳐 오른쪽. 로그인 전(호 없음)에는 [급수 ◯] 한 줄.
+   호는 급수보다 큰 글씨로 먼저 눈에 띄게 한다. 위쪽 줄은 좁은 화면에서 남는
+   자리가 없어 호 칸은 한글 세 자가 들어가는 폭(46px, 좁은 화면 44px)만 쓰고,
+   그보다 긴 호는 「…」로 줄인다(width:0 + min-width:100% — 칸 너비만큼만 쓴다). */
+#who .nameRow{display:grid;grid-template-columns:minmax(46px,auto) auto;grid-template-areas:"k b" "g b";
+  column-gap:5px;row-gap:1px;align-items:center}
+#who .nameRow:has(.nick:empty){grid-template-columns:auto auto;grid-template-areas:"g b"}
+#who .nick{grid-area:k;font-size:15px;font-weight:700;line-height:1.1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+  width:0;min-width:100%}
 #who .nick:empty{display:none}
+#who .grade{grid-area:g;justify-self:start}
+#acctBtn{grid-area:b}
 /* 좁은 화면(앱 너비 460px 이하)에서는 위 줄의 여백을 줄여 한 줄에 다 들어가게 한다
    (앱 틀 #app의 실제 너비를 기준으로 한다) */
 #app{container:app / inline-size}
@@ -71,12 +74,19 @@ body{font-family:'Gaegu',system-ui,sans-serif;color:var(--ink);-webkit-font-smoo
   #hud{gap:3px;padding-left:6px;padding-right:6px}
   #who{padding:3px 6px}
   #who .grade{font-size:10px;padding:1px 5px}
-  #who .nameRow{column-gap:4px}
+  #who .nameRow{column-gap:4px;grid-template-columns:minmax(44px,auto) auto}
   #acctBtn{margin-left:0}
-  #who .nick{font-size:11px}
+  #who .nick{font-size:14px}
   .plate .num{font-size:17px}
   #topupBtn,#bgmBtn,#helpBtn,#rankDemoBtn{padding:3px 4px}
   #bgmBtn svg,#helpBtn svg{width:18px;height:18px}
+}
+/* 아주 좁은 화면(380px 이하)에서는 틈과 단추 여백을 몇 px씩 더 줄인다 */
+@container app (max-width:380px){
+  #hud{gap:2px;padding-left:4px;padding-right:4px}
+  #who{padding:3px 4px}
+  .plate{padding:3px 5px}
+  #topupBtn,#bgmBtn,#helpBtn,#rankDemoBtn{padding:3px 3px}
 }
 
 #stage{flex:1;position:relative;overflow:hidden}
@@ -300,7 +310,6 @@ button.cell{cursor:pointer}
 #visitBar.on{display:flex}
 #visitBar #visitName{flex:1;font-size:17px;font-weight:700}
 #visitBar #visitWater{font-size:15px;color:#3F7FB0;font-weight:700;white-space:nowrap}
-.like-tag{pointer-events:none}
 #visitBar button{border:2.5px solid var(--ink);border-radius:10px;background:var(--hanji-2);
   font-family:inherit;font-size:15px;padding:6px 12px;cursor:pointer}
 
@@ -315,9 +324,6 @@ button.cell{cursor:pointer}
 <body>
 <div id="app">
   <div id="hud">
-    <div class="plate" id="who">
-      <span class="nameRow"><span class="name">푸믹</span><span class="grade" id="gradeTxt"></span><button id="acctBtn" aria-label="들어가기"></button><span class="nick" id="nickTxt"></span></span>
-    </div>
     <div class="plate" id="coinPlate"><svg class="pip" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9.5" fill="#E8A33C" stroke="#3D3A36" stroke-width="2.4"/><rect x="8.6" y="8.6" width="6.8" height="6.8" rx="1.2" fill="#FBF3E4" stroke="#3D3A36" stroke-width="2"/></svg><span class="num" id="coinTxt" data-num="coin">0</span></div>
     <button class="plate" id="topupBtn" aria-label="전 충전">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" style="width:16px;height:16px">
@@ -345,6 +351,9 @@ button.cell{cursor:pointer}
         <path d="M9 3h6M10 3v6l-5 9a2 2 0 0 0 2 3h10a2 2 0 0 0 2-3l-5-9V3"/><path d="M8.5 15h7"/>
       </svg>
     </button>
+    <div class="plate" id="who">
+      <span class="nameRow"><span class="name">푸믹</span><span class="nick" id="nickTxt"></span><button id="acctBtn" aria-label="들어가기"></button><span class="grade" id="gradeTxt"></span></span>
+    </div>
   </div>
 
   <div id="stage">
@@ -935,7 +944,8 @@ aut_06:{name:'낙엽 바닥',slot:'ground',rar:'N',cur:'coin',amt:4,box:[400,300
 aut_01:{name:'단풍나무',slot:'mid',rar:'SR',cur:'coin',amt:25,box:[156,168],at:[104,472],anchor:'bc',plant:true,
   svg:`<path d="M82 166 q7 -56 -2 -84 q-8 -22 -28 -36" stroke="#7A5540" stroke-width="12" fill="none" stroke-linecap="round"/><path d="M78 96 q26 -14 42 -40 M76 124 q-22 -8 -34 -24" stroke="#7A5540" stroke-width="8" fill="none" stroke-linecap="round"/><g fill="#D9541F"><circle cx="40" cy="52" r="24"/><circle cx="82" cy="30" r="26"/><circle cx="122" cy="52" r="22"/><circle cx="58" cy="80" r="22"/><circle cx="108" cy="88" r="21"/><circle cx="30" cy="88" r="16"/></g><g fill="#F0873A"><circle cx="82" cy="26" r="12"/><circle cx="42" cy="48" r="10"/><circle cx="108" cy="84" r="10"/><circle cx="58" cy="76" r="9"/><circle cx="122" cy="48" r="8"/></g><g fill="#F7BE4C"><circle cx="82" cy="22" r="5"/><circle cx="42" cy="44" r="4.5"/><circle cx="108" cy="80" r="4.5"/></g>`},
 
-aut_02:{name:'감나무',slot:'mid',rar:'R',cur:'coin',amt:13,box:[130,142],at:[312,448],anchor:'bc',plant:true,
+aut_02:{name:'감나무',slot:'mid',rar:'R',cur:'coin',amt:13,box:[150,176],at:[312,448],anchor:'bc',plant:true,
+  media:'img',src:'items/Firefly_persimmon-friut.png',imgSize:[843,1264],crop:[24,180,800,940],
   svg:`<path d="M66 140 q-5 -42 2 -62 q5 -18 20 -28" stroke="#6F5A3E" stroke-width="8" fill="none" stroke-linecap="round"/><path d="M68 88 q20 -8 32 -22 M66 102 q-18 -6 -28 -20" stroke="#6F5A3E" stroke-width="6" fill="none" stroke-linecap="round"/><g fill="#5E8A3C"><circle cx="34" cy="52" r="20"/><circle cx="66" cy="34" r="22"/><circle cx="98" cy="52" r="19"/><circle cx="46" cy="76" r="19"/><circle cx="88" cy="76" r="19"/></g><g fill="#6F9E45"><circle cx="66" cy="30" r="11"/><circle cx="38" cy="70" r="9"/><circle cx="94" cy="70" r="9"/></g><g fill="#EE8C22"><circle cx="38" cy="58" r="9"/><circle cx="80" cy="44" r="9.5"/><circle cx="62" cy="80" r="9"/><circle cx="104" cy="60" r="8"/></g><g fill="#F5A93F"><circle cx="36" cy="56" r="3.6"/><circle cx="78" cy="42" r="3.8"/><circle cx="60" cy="78" r="3.6"/></g><g fill="#4A7030"><rect x="34" y="50" width="8" height="2.6" rx="1.3"/><rect x="76" y="36" width="8" height="2.6" rx="1.3"/><rect x="58" y="72" width="8" height="2.6" rx="1.3"/></g>`},
 
 aut_03:{name:'억새',slot:'mid',rar:'N',cur:'coin',amt:3,box:[110,96],at:[58,524],anchor:'bc',plant:true,
@@ -961,7 +971,7 @@ win_02:{name:'동백나무',slot:'mid',rar:'R',cur:'coin',amt:13,box:[116,126],a
   svg:`<path d="M58 124 q-4 -34 0 -50 M58 96 q16 -8 24 -18 M58 108 q-14 -8 -22 -16" stroke="#6B5040" stroke-width="6" fill="none" stroke-linecap="round"/><g fill="#2F5B45"><ellipse cx="30" cy="66" rx="22" ry="14"/><ellipse cx="80" cy="58" rx="24" ry="15"/><ellipse cx="56" cy="42" rx="24" ry="14"/><ellipse cx="54" cy="84" rx="24" ry="13"/></g><g fill="#3E7357"><ellipse cx="30" cy="64" rx="22" ry="13"/><ellipse cx="80" cy="56" rx="24" ry="14"/><ellipse cx="56" cy="40" rx="24" ry="13"/><ellipse cx="54" cy="82" rx="24" ry="12"/></g><g fill="#C8384A"><circle cx="34" cy="52" r="8"/><circle cx="76" cy="42" r="8.5"/><circle cx="68" cy="76" r="8"/><circle cx="28" cy="82" r="7"/><circle cx="92" cy="70" r="6.5"/></g><g fill="#E8626F"><circle cx="34" cy="52" r="3.6"/><circle cx="76" cy="42" r="3.8"/><circle cx="68" cy="76" r="3.6"/></g><g fill="#F5D356"><circle cx="34" cy="52" r="1.7"/><circle cx="76" cy="42" r="1.8"/><circle cx="68" cy="76" r="1.7"/></g><g fill="#FFFFFF"><ellipse cx="56" cy="32" rx="20" ry="6"/><ellipse cx="84" cy="48" rx="16" ry="5"/></g>`},
 
 win_03:{name:'석등',slot:'front',rar:'R',cur:'coin',amt:11,box:[76,116],at:[334,548],anchor:'bc',
-  media:'img',src:'items/lantern.png',
+  media:'img',src:'items/Firefly_lantern.png',imgSize:[1024,1024],crop:[236,84,552,856],
   svg:`<ellipse cx="38" cy="112" rx="28" ry="8" fill="#C6CEDA"/><rect x="26" y="80" width="24" height="30" rx="2" fill="#9AA3B0"/><rect x="18" y="70" width="40" height="12" rx="3" fill="#AEB7C3"/><rect x="20" y="40" width="36" height="30" rx="3" fill="#AEB7C3"/><rect x="26" y="46" width="24" height="20" rx="2" fill="#F5D356"/><path d="M12 40 q26 -16 52 0 Z" fill="#7C8492"/><path d="M10 38 q28 -20 56 0 q-15 5 -28 5 q-13 0 -28 -5 Z" fill="#FFFFFF"/><rect x="31" y="26" width="14" height="7" rx="2" fill="#9AA3B0"/><ellipse cx="38" cy="25" rx="10" ry="4" fill="#FFFFFF"/>`},
 
 win_04:{name:'눈사람',slot:'front',rar:'N',cur:'coin',amt:3,box:[74,84],at:[246,584],anchor:'bc',
@@ -1057,11 +1067,18 @@ Object.assign(ITEMS, {
    media가 'img'면 it.src 그림 파일을 it.box 크기에 맞춰 불러온다.
    그림 파일을 못 찾으면(아직 items 폴더에 넣지 않은 경우 등) 빈 칸 대신
    점선 칸과 "그림 없음" 글자를 보여준다. ------------------------------- */
+/* 그림 파일 둘레에 빈 여백이 많으면 crop:[x,y,너비,높이](원본 픽셀)와
+   imgSize:[원본 너비,원본 높이]를 적는다. 그러면 그 부분만 box에 꽉 차게,
+   아래쪽 가운데를 맞춰(바닥에 서도록) 그린다. */
 function itemMedia(it){
   if(it.media!=='img') return it.svg;
   const [w,h]=it.box;
-  return `<image href="${it.src}" xlink:href="${it.src}" x="0" y="0" width="${w}" height="${h}" preserveAspectRatio="xMidYMid meet"
-      onerror="this.style.display='none';this.nextElementSibling.style.display=''"></image>
+  const fail = `onerror="const s=this.closest('svg.crop')||this;s.style.display='none';s.nextElementSibling.style.display=''"`;
+  const img = it.crop
+    ? `<svg class="crop" x="0" y="0" width="${w}" height="${h}" viewBox="${it.crop.join(' ')}" preserveAspectRatio="xMidYMax meet">
+        <image href="${it.src}" xlink:href="${it.src}" x="0" y="0" width="${it.imgSize[0]}" height="${it.imgSize[1]}" ${fail}></image></svg>`
+    : `<image href="${it.src}" xlink:href="${it.src}" x="0" y="0" width="${w}" height="${h}" preserveAspectRatio="xMidYMid meet" ${fail}></image>`;
+  return `${img}
     <g style="display:none">
       <rect x="0" y="0" width="${w}" height="${h}" rx="8" fill="#F3D9C4" stroke="#D9463F" stroke-width="2" stroke-dasharray="6 4"/>
       <text x="${w/2}" y="${h/2}" text-anchor="middle" dominant-baseline="middle" font-family="Gaegu, sans-serif" font-size="13" fill="#D9463F">그림 없음</text>
@@ -1143,7 +1160,7 @@ if(!S.growth) S.growth={};
 if(!S.spot) S.spot={};
 // 예전의 「이웃 화초마다 하루 한 번 · 답례 1전」 기록은 하루 세 번 규칙으로 바뀌며 쓰지 않는다
 delete S.neighborWater;
-if(!S.likes) S.likes={};         // 내 화초에 남은 「좋구나」 {iid:[{from,date}]}
+delete S.likes;                  // 「좋구나」 표시는 없앴다(예전 저장 자료에 남은 것 정리)
 if(!S.visitLog) S.visitLog=[];   // 내 정원에 다녀간 이웃 기록
 // 국화를 debug용 미리보기 대신 정원 제자리에 심어 두는 것으로 바꾼 뒤,
 // 이미 저장돼 있던 자료에도 한 번만 자연스럽게 얹어준다.
@@ -1437,13 +1454,12 @@ function sanitizeGarden(d){
   const pick=(m, f)=>{ const out={}; placed.forEach(iid=>{ const v=f(m && m[iid]); if(v!=null) out[iid]=v; }); return out; };
   const spot = pick(d.spot, v=>Array.isArray(v)&&v.length===2&&v.every(Number.isFinite) ? [int(v[0],0,400),int(v[1],0,600)] : null);
   const growth = pick(d.growth, v=>Number.isFinite(v) ? int(v,0,1000) : null);
-  const likes = pick(d.likes, v=>Number.isFinite(v)&&v>0 ? int(v,0,99) : null);
   const wear = {};
   WEAR_SLOTS.forEach(([slot])=>{ const id=d.wear && d.wear[slot]; wear[slot] = (typeof id==='string' && WEAR[slot] && WEAR[slot][id]) ? id : null; });
   const nick = typeof d.nick==='string' ? d.nick.trim().slice(0,8) : '';
   if(!nick) return null;
   return { id:d.id, name:nick, rankIdx:int(d.rankIdx,0,RANKS.length-1), chars:int(d.chars,0,1000),
-           placed, spot, growth, likes, wear, updatedAtMs:int(d.updatedAtMs,0,1e15), real:true };
+           placed, spot, growth, wear, updatedAtMs:int(d.updatedAtMs,0,1e15), real:true };
 }
 
 async function openNeighborList(){
@@ -1717,35 +1733,9 @@ function drawGarden(){
     + ground.map(place).join('')
     + pool.map(o=>o.html).join('')
     + air.map(o=> o.it.fall ? fallSVG(o.it.fall) : place(o)).join('')
-    + mid.map(o=>likeTagSVG(o)).join('')
     + (visiting
         ? nameplateScene(visiting.name, {color:RANKS[visiting.rankIdx].color, name:RANKS[visiting.rankIdx].name})
         : nameplateScene());
-}
-/* 물을 받은 화초·나무 머리 위에 남는 「좋구나」 팻말. 여러 번 받았으면 수를 붙인다. */
-function likeTagSVG(o){
-  const likes = (visiting ? visiting.likes : S.likes) || {};
-  const n = (likes[o.iid]||[]).length;
-  if(!n) return '';
-  const [sx,sy]=spotOf(o.iid);
-  const h = (o.it.grow ? growVisual(o.iid, o.it.grow).box : o.it.box)[1];
-  const label = n>1 ? `좋구나 ×${n}` : '좋구나';
-  const w = n>1 ? 62 : 44;
-  let cx = sx, top = sy - h*SIZE_SCALE - 22;
-  if(o.iid===waterFX){
-    // 물을 주는 동안에는 떨어지는 물을 가리지 않게 물조리개 위로 올린다.
-    // 물조리개 몸통은 식물 가운데에서 오른쪽으로 32, 손잡이 꼭대기는 식물
-    // 머리 위 (clearance+42) 자리에 있다(waterFxSVG·waterCanSVG 그림 기준).
-    // 물을 부을 때 물조리개가 기울며 손잡이가 조금 더 올라가므로 넉넉히 띄운다.
-    cx = sx + 32*SIZE_SCALE;
-    top = sy - (h + waterClearance(h) + 54)*SIZE_SCALE - 22 - 4;
-  }
-  return `<g class="like-tag" transform="translate(${cx-w/2},${top})">
-    <rect x="0" y="0" width="${w}" height="17" rx="8.5" fill="#FBF3E4" stroke="${LINE}" stroke-width="1.6"/>
-    <path d="M${w/2-4} 17 l4 5 l4 -5" fill="#FBF3E4" stroke="${LINE}" stroke-width="1.6" stroke-linejoin="round"/>
-    <rect x="${w/2-5}" y="15" width="10" height="3" fill="#FBF3E4"/>
-    <text x="${w/2}" y="12.5" text-anchor="middle" font-family="Gaegu, sans-serif" font-size="12" font-weight="700" fill="#C0392B">${label}</text>
-  </g>`;
 }
 function spotOf(iid){
   const store = visiting ? (visiting.spot||{}) : S.spot;
@@ -1802,7 +1792,7 @@ function waterCanSVG(cx,cy){
     </g>
   </g></g>`;
 }
-/* 식물 머리 위로 물조리개를 띄우는 높이. 「좋구나」 팻말도 이 값으로 물조리개 위에 선다. */
+/* 식물 머리 위로 물조리개를 띄우는 높이 */
 function waterClearance(h){ return Math.max(14, h*0.32); }
 function waterFxSVG(w,h){
   // 물뿌리개 주둥이(물이 실제로 떨어지는 자리)를 식물 너비의 한가운데(w/2)에
@@ -2151,9 +2141,9 @@ function goScene(name){
   }
 }
 function enterNeighborGarden(nb){
-  // 이웃 자료에 그 정원의 성장·「좋구나」 기록을 붙여서 구경한다
+  // 이웃 자료에 그 정원의 성장 기록을 붙여서 구경한다
   const st=nbGardenState(nb);
-  visiting={...nb, growth:st.growth, likes:st.likes}; visitPos={x:200,y:470};
+  visiting={...nb, growth:st.growth}; visitPos={x:200,y:470};
   where='garden'; placingId=null; watering=false;
   document.getElementById('placeBar').classList.remove('on');
   overlay.classList.remove('on');
@@ -2321,10 +2311,8 @@ function waterPlant(iid, name){
    - 내 성장수는 줄지 않고, 전이나 다른 보상도 없다
    - 하루에 모두 합쳐 NEIGHBOR_WATER_PER_DAY번. 한 정원에 몰아서 줘도 되고
      여러 정원에 나눠 줘도 된다 (날짜는 이 기기 시각 기준, 자정에 새로 채워짐)
-   - 물을 받은 화초·나무는 한 단계 자라고, 「좋구나」 표시가 남는다
-     (장식용 화초·나무는 단계가 없어 표시만 남는다) */
+   - 물을 받은 화초·나무는 한 단계 자란다(장식용 화초·나무는 단계가 없어 그대로) */
 const NEIGHBOR_WATER_PER_DAY = 3;
-const LIKES_KEEP = 10;       // 화초 하나에 남겨 두는 「좋구나」 수
 function dateKey(t){
   const d=new Date(t);
   return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
@@ -2336,23 +2324,16 @@ function neighborWaterLeft(){
   return Math.max(0, NEIGHBOR_WATER_PER_DAY-used);
 }
 function myName(){ return S.nick || '푸믹'; }
-/* 물 한 번이 정원에 남기는 것: 한 단계 성장 + 「좋구나」. 내 정원이 이웃의
-   물을 받을 때와 이웃 정원에 내가 물을 줄 때 모두 이 함수를 쓴다.
+/* 물 한 번이 정원에 남기는 것: 한 단계 성장. 내 정원이 이웃의 물을 받을 때와
+   이웃 정원에 내가 물을 줄 때 모두 이 함수를 쓴다.
    자란 단계 이름을 돌려준다(자라지 않았으면 null). */
-function applyWater(growth, likes, iid, from, date){
+function applyWater(growth, iid){
   const it=ITEMS[typeOf(iid)];
-  let grewTo=null;
-  if(it && it.grow){
-    const before=growth[iid]||0, after=growDropsForNextStage(it.grow, before);
-    if(after>before){
-      growth[iid]=after;
-      grewTo=GROW_TYPES[it.grow].stages[growStageOf(it.grow, after)].name;
-    }
-  }
-  const list = likes[iid] || (likes[iid]=[]);
-  list.push({from, date});
-  if(list.length>LIKES_KEEP) list.splice(0, list.length-LIKES_KEEP);
-  return grewTo;
+  if(!it || !it.grow) return null;
+  const before=growth[iid]||0, after=growDropsForNextStage(it.grow, before);
+  if(after<=before) return null;
+  growth[iid]=after;
+  return GROW_TYPES[it.grow].stages[growStageOf(it.grow, after)].name;
 }
 /* 이웃 정원에 남긴 물을 그 이웃에게 보내는 자리. 지금 이웃은 기기 안의
    본보기 이웃이라 이 기기에 적어 두기만 한다(S.nbGardens). 서버가 붙으면
@@ -2360,18 +2341,13 @@ function applyWater(growth, likes, iid, from, date){
    앱을 켤 때 receiveVisits()로 받는다. */
 /* 실제 이웃(nb.real)은 서버의 정원이 기준이다. 주인이 내 물을 받아 정원을
    새로 올렸으면(updatedAtMs가 더 새로우면) 서버 것으로 다시 맞추고, 그 전까지는
-   내가 준 물이 이 기기에서 보이도록 남겨 둔다. 서버의 「좋구나」는 수(n)로
-   오므로, 화면에서 쓰는 목록 모양으로 바꿔 둔다. */
+   내가 준 물이 이 기기에서 보이도록 남겨 둔다. */
 function nbGardenState(nb){
   if(!S.nbGardens) S.nbGardens={};
   let st = S.nbGardens[nb.id];
   const base = nb.updatedAtMs || 0;
   if(!st || (nb.real && base > (st.base||0))){
-    const likes={};
-    Object.entries(nb.likes||{}).forEach(([iid,n])=>{
-      likes[iid] = Array.from({length:Math.min(n,LIKES_KEEP)}, ()=>({from:'', date:''}));
-    });
-    st = S.nbGardens[nb.id] = { growth:{...(nb.growth||{})}, likes, base };
+    st = S.nbGardens[nb.id] = { growth:{...(nb.growth||{})}, base };
   }
   return st;
 }
@@ -2380,14 +2356,14 @@ function waterNeighborPlant(nb, iid, name){
   const today=todayKey();
   if(!S.neighborWaterDay || S.neighborWaterDay.date!==today) S.neighborWaterDay={date:today, used:0};
   S.neighborWaterDay.used++;
-  const grewTo = applyWater(visiting.growth, visiting.likes, iid, myName(), today);
+  const grewTo = applyWater(visiting.growth, iid);
   // 실제 이웃이면 그 정원에 「다녀감」을 남긴다. 주인이 앱을 켤 때 receiveVisits()로 받는다.
   if(nb.real) window.cloud.sendVisit(nb.id, { from:myName(), iid })
     .catch(e=>console.warn('물 준 것을 이웃에게 보내지 못함', e));
   save();
   waterFX=iid; drawScene();
   const left=neighborWaterLeft();
-  toast(`${name}에 물을 주었습니다 · 좋구나 · 오늘 ${left}번 남음`);
+  toast(`${name}에 물을 주었습니다 · 오늘 ${left}번 남음`);
   setTimeout(()=>{
     if(waterFX===iid){ waterFX=null; drawScene(); }
     if(grewTo) toast(`${name} — ${grewTo} 단계가 되었습니다`);
@@ -2395,9 +2371,8 @@ function waterNeighborPlant(nb, iid, name){
 }
 
 /* ── 내 정원에 다녀간 이웃 ───────────────────
-   이웃이 내 화초에 준 물은 receiveVisits()로 들어온다(서버가 붙으면
-   앱을 켤 때 받아 온다). 받으면 곧장 내 정원에 반영하고(한 단계 성장 +
-   「좋구나」), 기록을 S.visitLog에 쌓아 두었다가 내 정원에 돌아왔을 때
+   이웃이 내 화초에 준 물은 receiveVisits()로 들어온다(checkVisits가 서버에서
+   받아 온다). 받으면 곧장 내 정원에 반영하고(한 단계 성장), 기록을 S.visitLog에 쌓아 두었다가 내 정원에 돌아왔을 때
    아직 안 본 것 가운데 최근 것 몇 개만 알림으로 보여준다.
    visits: [{from:'달래', iid:'seed_gu', at:밀리초}] */
 const VISIT_LOG_KEEP = 20;
@@ -2405,10 +2380,9 @@ const VISIT_NOTICE_MAX = 3;
 function receiveVisits(visits){
   if(!visits || !visits.length) return;
   if(!S.visitLog) S.visitLog=[];
-  if(!S.likes) S.likes={};
   visits.forEach(v=>{
     if(!S.placed.includes(v.iid) || !ITEMS[typeOf(v.iid)]) return; // 이미 치운 화초
-    const grewTo = applyWater(S.growth, S.likes, v.iid, v.from, dateKey(v.at||Date.now()));
+    const grewTo = applyWater(S.growth, v.iid);
     const it=ITEMS[typeOf(v.iid)];
     if(grewTo && it.grow && growStageOf(it.grow, S.growth[v.iid])===growLastStage(it.grow)) payGrowBonus(v.iid);
     S.visitLog.push({from:v.from, iid:v.iid, name:it.name, grewTo, at:v.at||Date.now(), seen:false});
@@ -2432,7 +2406,7 @@ function showVisitNotice(){
     <div class="gulist">${recent.map(v=>`
       <div class="gurow done" style="cursor:default">
         <span class="gutext"><b>${escHTML(v.from)}${josa(v.from,'이','가')} ${escHTML(v.name)}에 물을 주었습니다</b><br>
-        <small>${agoText(v.at)} · 좋구나${v.grewTo?` · ${escHTML(v.grewTo)} 단계가 되었습니다`:''}</small></span>
+        <small>${agoText(v.at)}${v.grewTo?` · ${escHTML(v.grewTo)} 단계가 되었습니다`:''}</small></span>
       </div>`).join('')}</div>
     ${unseen.length>recent.length?`<p class="note" style="margin:4px 2px 12px">그 밖에 ${unseen.length-recent.length}번 더 다녀갔습니다.</p>`:''}
     <button class="bigbtn" id="visitOk">고맙구나</button>`;
@@ -4776,14 +4750,15 @@ async function cloudPushNow(){
    가운데 하나라도 바뀌었을 때만 올린다(학습만 했을 때는 올리지 않는다). */
 function gardenSnapshot(){
   const placed = S.placed.filter(iid=>IID_RE.test(iid)).slice(0,200);
-  const spot={}, growth={}, likes={};
+  const spot={}, growth={};
   placed.forEach(iid=>{
     if(Array.isArray(S.spot[iid])) spot[iid]=S.spot[iid];
     if(S.growth[iid]) growth[iid]=S.growth[iid];
-    const n=(S.likes[iid]||[]).length; if(n) likes[iid]=n;
   });
   const wear={}; WEAR_SLOTS.forEach(([slot])=>{ wear[slot]=S.wear[slot]||null; });
-  return { nick:S.nick, rankIdx:curRankIdx(), chars:metCount(), placed, spot, growth, likes, wear };
+  // likes는 없앤 「좋구나」 칸이다. 지금 게시된 보안 규칙이 이 칸을 요구해서 빈 칸으로 보낸다
+  // (규칙에서 likes를 빼고 다시 게시할 때 여기서도 뺀다).
+  return { nick:S.nick, rankIdx:curRankIdx(), chars:metCount(), placed, spot, growth, likes:{}, wear };
 }
 async function publishGardenIfChanged(){
   if(!S.nick) return;
