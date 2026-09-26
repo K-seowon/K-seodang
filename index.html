@@ -37,6 +37,35 @@ body{font-family:'Gaegu',system-ui,sans-serif;color:var(--ink);-webkit-font-smoo
 #bgmBtn.on,#helpBtn.on{display:flex}
 #bgmBtn.muted{opacity:.5}
 #bgmBtn svg,#helpBtn svg{width:20px;height:20px}
+/* 계정 단추 — 급수 표시 오른쪽 끝의 작은 동그라미. 로그인 전에는 사람 모양,
+   로그인한 뒤에는 계정 사진(없으면 이름 첫 글자). 누르는 자리는 보이는
+   것보다 넓게(::after) 잡아 손가락으로도 누르기 쉽게 한다. */
+#acctBtn{position:relative;pointer-events:auto;cursor:pointer;flex:0 0 auto;width:24px;height:24px;
+  margin-left:2px;padding:0;border:2px solid var(--ink);border-radius:50%;background:var(--hanji-2);
+  display:flex;align-items:center;justify-content:center;font-family:inherit;font-size:13px;font-weight:700;color:var(--ink)}
+#acctBtn::after{content:'';position:absolute;inset:-9px -7px}
+#acctBtn .face{width:100%;height:100%;border-radius:50%;overflow:hidden;display:flex;align-items:center;justify-content:center}
+#acctBtn img{width:100%;height:100%;object-fit:cover;display:block}
+#acctBtn svg{width:15px;height:15px}
+#acctBtn.in{background:#8AB566;color:#fff}
+/* 위 줄의 표시는 줄어들며 글자가 꺾이지 않게 한다 */
+#hud > *{flex-shrink:0}
+#who .name,.grade{white-space:nowrap}
+/* 좁은 화면에서는 위 줄의 여백을 줄여 한 줄에 다 들어가게 한다
+   (앱 틀 #app의 실제 너비를 기준으로 한다) */
+#app{container:app / inline-size}
+@container app (max-width:420px){
+  #hud{gap:3px;padding-left:6px;padding-right:6px}
+  #who{padding:3px 6px}
+  /* 이름 위, 급수 아래로 쌓고 계정 동그라미는 그 오른쪽에 */
+  #who .nameRow{display:grid;grid-template-areas:"n b" "g b";column-gap:5px;row-gap:1px;align-items:center}
+  #who .name{grid-area:n;font-size:14px;line-height:1}
+  #who .grade{grid-area:g;font-size:10px;padding:0 5px}
+  #acctBtn{grid-area:b;margin-left:0}
+  .plate .num{font-size:17px}
+  #topupBtn,#bgmBtn,#helpBtn,#rankDemoBtn{padding:3px 4px}
+  #bgmBtn svg,#helpBtn svg{width:18px;height:18px}
+}
 
 #stage{flex:1;position:relative;overflow:hidden}
 #scene{position:absolute;inset:0;width:100%;height:100%;display:block;touch-action:none}
@@ -258,6 +287,8 @@ button.cell{cursor:pointer}
   border-radius:14px;padding:6px 8px 6px 14px;box-shadow:0 2px 0 rgba(61,58,54,.25)}
 #visitBar.on{display:flex}
 #visitBar #visitName{flex:1;font-size:17px;font-weight:700}
+#visitBar #visitWater{font-size:15px;color:#3F7FB0;font-weight:700;white-space:nowrap}
+.like-tag{pointer-events:none}
 #visitBar button{border:2.5px solid var(--ink);border-radius:10px;background:var(--hanji-2);
   font-family:inherit;font-size:15px;padding:6px 12px;cursor:pointer}
 
@@ -273,7 +304,7 @@ button.cell{cursor:pointer}
 <div id="app">
   <div id="hud">
     <div class="plate" id="who">
-      <span class="nameRow"><span class="name">푸믹</span><span class="grade" id="gradeTxt"></span></span>
+      <span class="nameRow"><span class="name">푸믹</span><span class="grade" id="gradeTxt"></span><button id="acctBtn" aria-label="들어가기"></button></span>
     </div>
     <div class="plate" id="coinPlate"><svg class="pip" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9.5" fill="#E8A33C" stroke="#3D3A36" stroke-width="2.4"/><rect x="8.6" y="8.6" width="6.8" height="6.8" rx="1.2" fill="#FBF3E4" stroke="#3D3A36" stroke-width="2"/></svg><span class="num" id="coinTxt">0</span></div>
     <button class="plate" id="topupBtn" aria-label="전 충전">
@@ -322,7 +353,7 @@ button.cell{cursor:pointer}
       <span id="waterTxt">물주기</span>
     </button>
     <div id="placeBar"><span id="placeMsg"></span><button id="placeCancel">그만두기</button></div>
-    <div id="visitBar"><span id="visitName"></span><button id="visitBackBtn">내 정원으로</button></div>
+    <div id="visitBar"><span id="visitName"></span><span id="visitWater"></span><button id="visitBackBtn">내 정원으로</button></div>
   </div>
 
   <nav id="nav">
@@ -1092,7 +1123,10 @@ if(S.dueTally===undefined) S.dueTally=0;
 if(S.gem!==undefined){ S.coin=(S.coin||0)+S.gem; delete S.gem; }
 if(!S.growth) S.growth={};
 if(!S.spot) S.spot={};
-if(!S.neighborWater) S.neighborWater={};
+// 예전의 「이웃 화초마다 하루 한 번 · 답례 1전」 기록은 하루 세 번 규칙으로 바뀌며 쓰지 않는다
+delete S.neighborWater;
+if(!S.likes) S.likes={};         // 내 화초에 남은 「좋구나」 {iid:[{from,date}]}
+if(!S.visitLog) S.visitLog=[];   // 내 정원에 다녀간 이웃 기록
 // 국화를 debug용 미리보기 대신 정원 제자리에 심어 두는 것으로 바꾼 뒤,
 // 이미 저장돼 있던 자료에도 한 번만 자연스럽게 얹어준다.
 if(!S.sampleGukAdded){
@@ -1337,16 +1371,20 @@ function signboard(x,y,w,label){
 const NEIGHBORS = [
   { id:'dallae',  name:'달래', rankIdx:1, chars:82,  season:'spring',
     wear:{ top:'jg_baek',   bottom:'ch_bunhong', outer:null,      shoes:'sh_jip'   },
-    placed:['mhs_07','mhs_09','mhs_10','mhs_11','spr_08'] },
+    placed:['mhs_07','mhs_09','mhs_10','mhs_11','spr_08','seed_gu'],
+    spot:{ seed_gu:[255,585] }, growth:{ seed_gu:3 } },
   { id:'doryeon', name:'도련', rankIdx:2, chars:210, season:'summer',
     wear:{ top:'jg_yeondu', bottom:'ba_jaet',    outer:null,      shoes:'sh_namak' },
-    placed:['sum_06','sum_01','sum_02','sum_04','sum_07'] },
+    placed:['sum_06','sum_01','sum_02','sum_04','sum_07','sap_mh'],
+    spot:{ sap_mh:[110,575] }, growth:{ sap_mh:3 } },
   { id:'dume',    name:'두메', rankIdx:3, chars:420, season:'autumn',
     wear:{ top:'jg_dahong', bottom:'ba_huin',    outer:'du_huin', shoes:'sh_gomu'  },
-    placed:['aut_06','aut_01','aut_02','aut_03','aut_04','aut_05','aut_07'] },
+    placed:['aut_06','aut_01','aut_02','aut_03','aut_04','aut_05','aut_07','seed_md'],
+    spot:{ seed_md:[255,585] }, growth:{ seed_md:6 } },
   { id:'haneui',  name:'하늬', rankIdx:4, chars:680, season:'winter',
     wear:{ top:'jg_jaju',   bottom:'ch_namsaek', outer:'du_ok',   shoes:'sh_jang'  },
-    placed:['win_06','win_01','win_02','win_03','win_04','win_05','win_07','mhs_22','mhs_23','mhs_12','mhs_20'] }
+    placed:['win_06','win_01','win_02','win_03','win_04','win_05','win_07','mhs_22','mhs_23','mhs_12','mhs_20','sap_gam'],
+    spot:{ sap_gam:[110,578] }, growth:{ sap_gam:9 } }
 ];
 function fetchNeighbors(){ return NEIGHBORS; }
 
@@ -1536,9 +1574,41 @@ const GUK_STAGES = [
   {name:'새싹', w:34,h:28, draw:gukSprout},
   {name:'떡잎', w:44,h:42, draw:gukCotyledon},
   {name:'봉오리',w:52,h:60, draw:gukBud},
-  {name:'꽃',   w:60,h:72, draw:gukFlower},
-  {name:'시든 모습',w:60,h:72, draw:gukWither}
+  {name:'꽃',   w:60,h:72, draw:gukFlower}
 ];
+const GUK_WITHER = {name:'시든 모습',w:60,h:72, draw:gukWither}; // 자라는 단계가 아니라 따로 둔다
+
+/* ── 자라는 것의 단계 ───────────────────────
+   화초(seed)와 나무(sapling)가 몇 단계로 자라는지는 이 표 하나로 정한다.
+     stages         단계 그림 목록. 첫 줄이 심은 모습, 끝 줄이 다 자란 모습.
+                    단계 수를 바꾸려면 여기 목록에 그림을 더하거나 빼기만 하면
+                    된다(화초 7단계, 나무 15단계로 늘릴 예정)
+     dropsPerStage  내 성장수 몇 방울마다 한 단계 자라는지
+     bonus          마지막 단계에 이르면 한 번 주는 전
+   단계 계산은 모두 아래 함수들을 거친다. 숫자 4나 5를 코드에 직접 쓰지 않는다. */
+const GROW_TYPES = {
+  seed:    { kind:'화초', stages:GUK_STAGES,  dropsPerStage:3, bonus:3 },
+  sapling: { kind:'나무', stages:PLUM_STAGES, dropsPerStage:3, bonus:5 }
+};
+function growLastStage(type){ return GROW_TYPES[type].stages.length-1; }
+function growStageOf(type, drops){
+  return Math.min(growLastStage(type), Math.floor((drops||0)/GROW_TYPES[type].dropsPerStage));
+}
+/* 한 단계 올려 주는 데 필요한 물방울 수(이웃이 준 물은 한 번에 한 단계).
+   이미 다 자랐으면 그대로. */
+function growDropsForNextStage(type, drops){
+  const st = growStageOf(type, drops);
+  if(st>=growLastStage(type)) return drops||0;
+  return (st+1)*GROW_TYPES[type].dropsPerStage;
+}
+// 이 표가 생기기 전에 이미 다 자라 전을 받은 것들을 한 번만 적어 둔다
+if(!S.grownPaid){
+  S.grownPaid={};
+  Object.entries(S.growth).forEach(([iid,d])=>{
+    const it=ITEMS[typeOf(iid)];
+    if(it && it.grow && growStageOf(it.grow, d)===growLastStage(it.grow)) S.grownPaid[iid]=true;
+  });
+}
 
 /* 이름 팻말 — 돈으로 살 수 없고 학습으로만(급이 오르면) 바뀐다.
    나중에 이웃이 왔을 때 이 팻말로 급을 알아볼 수 있게 된다. */
@@ -1583,9 +1653,26 @@ function drawGarden(){
     + ground.map(place).join('')
     + pool.map(o=>o.html).join('')
     + air.map(o=> o.it.fall ? fallSVG(o.it.fall) : place(o)).join('')
+    + mid.map(o=>likeTagSVG(o)).join('')
     + (visiting
         ? nameplateScene(visiting.name, {color:RANKS[visiting.rankIdx].color, name:RANKS[visiting.rankIdx].name})
         : nameplateScene());
+}
+/* 물을 받은 화초·나무 머리 위에 남는 「좋구나」 팻말. 여러 번 받았으면 수를 붙인다. */
+function likeTagSVG(o){
+  const likes = (visiting ? visiting.likes : S.likes) || {};
+  const n = (likes[o.iid]||[]).length;
+  if(!n) return '';
+  const [sx,sy]=spotOf(o.iid);
+  const h = (o.it.grow ? growVisual(o.iid, o.it.grow).box : o.it.box)[1];
+  const label = n>1 ? `좋구나 ×${n}` : '좋구나';
+  const w = n>1 ? 62 : 44, top = sy - h*SIZE_SCALE - 22;
+  return `<g class="like-tag" transform="translate(${sx-w/2},${top})">
+    <rect x="0" y="0" width="${w}" height="17" rx="8.5" fill="#FBF3E4" stroke="${LINE}" stroke-width="1.6"/>
+    <path d="M${w/2-4} 17 l4 5 l4 -5" fill="#FBF3E4" stroke="${LINE}" stroke-width="1.6" stroke-linejoin="round"/>
+    <rect x="${w/2-5}" y="15" width="10" height="3" fill="#FBF3E4"/>
+    <text x="${w/2}" y="12.5" text-anchor="middle" font-family="Gaegu, sans-serif" font-size="12" font-weight="700" fill="#C0392B">${label}</text>
+  </g>`;
 }
 function spotOf(iid){
   const store = visiting ? (visiting.spot||{}) : S.spot;
@@ -1599,10 +1686,11 @@ function posFor(w){ return (visiting && w==='garden') ? visitPos : S.pos[w]; }
    (씨앗 대표)와 매화나무(묘목 대표)만 제 그림이 있어서, 나머지
    다섯 씨앗은 국화 단계를, 나머지 밤/감나무 묘목은 매화나무 단계를
    임시로 함께 쓴다(나중에 각자 그림이 생기면 이 표만 바꾸면 됨). */
-function growStageIdx(iid){ return Math.min(4, Math.floor((S.growth[iid]||0)/3)); }
+/* 지금 보고 있는 정원(내 정원이거나 구경 중인 이웃 정원)의 성장 기록 */
+function gardenGrowth(){ return visiting ? visiting.growth : S.growth; }
+function growStageIdx(iid){ return growStageOf(ITEMS[typeOf(iid)].grow, gardenGrowth()[iid]); }
 function growVisual(iid, growType){
-  const table = growType==='seed' ? GUK_STAGES : PLUM_STAGES;
-  const s = table[growStageIdx(iid)];
+  const s = GROW_TYPES[growType].stages[growStageIdx(iid)];
   return { box:[s.w,s.h], svg:s.draw(), name:s.name };
 }
 function placedTransform(iid){
@@ -1881,7 +1969,10 @@ function drawScene(){
   document.getElementById('waterTxt').textContent = watering ? '물 주는 중' : '물주기';
   const vb=document.getElementById('visitBar');
   vb.classList.toggle('on', !!visiting);
-  if(visiting) document.getElementById('visitName').textContent = `${visiting.name}의 정원`;
+  if(visiting){
+    document.getElementById('visitName').textContent = `${visiting.name}의 정원`;
+    document.getElementById('visitWater').textContent = `오늘 물 ${neighborWaterLeft()}/${NEIGHBOR_WATER_PER_DAY}`;
+  }
   document.getElementById('bgmBtn').classList.toggle('on', !!BGM_TRACKS[where]);
   document.getElementById('helpBtn').classList.toggle('on', where==='inside');
   syncBgmBtn();
@@ -1979,9 +2070,12 @@ function goScene(name){
   document.getElementById('placeBar').classList.remove('on');
   overlay.classList.remove('on');
   drawScene();
+  if(name==='garden') setTimeout(showVisitNotice, 300); // 내 정원에 돌아오면 다녀간 이웃 알림
 }
 function enterNeighborGarden(nb){
-  visiting=nb; visitPos={x:200,y:470};
+  // 이웃 자료에 그 정원의 성장·「좋구나」 기록을 붙여서 구경한다
+  const st=nbGardenState(nb);
+  visiting={...nb, growth:st.growth, likes:st.likes}; visitPos={x:200,y:470};
   where='garden'; placingId=null; watering=false;
   document.getElementById('placeBar').classList.remove('on');
   overlay.classList.remove('on');
@@ -2105,7 +2199,16 @@ document.getElementById('waterBtn').addEventListener('click', ()=>{
   toast(watering ? '화초나 나무를 눌러 물을 주세요' : '물뿌리개를 거두었습니다');
 });
 const WATER_MS = 3200; // 물조리개가 기울었다 돌아오기까지 걸리는 시간
-const GROW_BONUS = { seed:3, sapling:5 }; // 씨앗이 꽃을 피우면(3전)/묘목이 열매를 맺으면(5전) 주는 전
+/* 다 자라서 전을 받은 것은 적어 둔다. 나중에 단계 수가 늘어 같은 것이
+   다시 마지막 단계에 이르러도 전을 두 번 주지 않게. */
+function payGrowBonus(iid){
+  if(!S.grownPaid) S.grownPaid={};
+  if(S.grownPaid[iid]) return 0;
+  S.grownPaid[iid]=true;
+  const bonus=GROW_TYPES[ITEMS[typeOf(iid)].grow].bonus;
+  S.coin+=bonus;
+  return bonus;
+}
 function waterPlant(iid, name){
   if(!(S.growWater>0)) return toast('성장수가 없습니다. 서당에서 익혀서 모으세요.');
   S.growWater--;
@@ -2117,13 +2220,12 @@ function waterPlant(iid, name){
   const it=ITEMS[typeOf(iid)];
   let laterMsg='', laterBonus=0;
   if(it.grow){
-    const oldStage=Math.min(4,Math.floor(oldCnt/3)), newStage=Math.min(4,Math.floor(newCnt/3));
+    const oldStage=growStageOf(it.grow, oldCnt), newStage=growStageOf(it.grow, newCnt);
     if(newStage>oldStage){
-      const table = it.grow==='seed' ? GUK_STAGES : PLUM_STAGES;
-      laterMsg = `${name} — ${table[newStage].name} 단계가 되었습니다`;
-      if(newStage===4){
-        laterBonus=GROW_BONUS[it.grow];
-        S.coin+=laterBonus; laterMsg += ` · ${laterBonus}전`;
+      laterMsg = `${name} — ${GROW_TYPES[it.grow].stages[newStage].name} 단계가 되었습니다`;
+      if(newStage===growLastStage(it.grow)){
+        laterBonus=payGrowBonus(iid);
+        if(laterBonus) laterMsg += ` · ${laterBonus}전`;
       }
     }
   } else if(newCnt%3===0){
@@ -2136,21 +2238,115 @@ function waterPlant(iid, name){
     if(laterBonus) queueReward({coin:laterBonus});
   }, WATER_MS);
 }
-/* 이웃의 화초·나무는 자라지 않지만, 하루 한 번 물을 주면 답례로
-   전을 받는다. 자리표(iid)별로 오늘 날짜를 적어 두어, 이웃마다
-   화초마다 하루 한 번만 답례를 받게 한다. */
+/* ── 정원 마실: 이웃의 화초·나무에 물 주기 ─────────
+   - 내 성장수는 줄지 않고, 전이나 다른 보상도 없다
+   - 하루에 모두 합쳐 NEIGHBOR_WATER_PER_DAY번. 한 정원에 몰아서 줘도 되고
+     여러 정원에 나눠 줘도 된다 (날짜는 이 기기 시각 기준, 자정에 새로 채워짐)
+   - 물을 받은 화초·나무는 한 단계 자라고, 「좋구나」 표시가 남는다
+     (장식용 화초·나무는 단계가 없어 표시만 남는다) */
+const NEIGHBOR_WATER_PER_DAY = 3;
+const LIKES_KEEP = 10;       // 화초 하나에 남겨 두는 「좋구나」 수
+function dateKey(t){
+  const d=new Date(t);
+  return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+}
+function todayKey(){ return dateKey(Date.now()); }
+function neighborWaterLeft(){
+  const d=S.neighborWaterDay;
+  const used = (d && d.date===todayKey()) ? d.used : 0;
+  return Math.max(0, NEIGHBOR_WATER_PER_DAY-used);
+}
+function myName(){ return S.nick || '푸믹'; }
+/* 물 한 번이 정원에 남기는 것: 한 단계 성장 + 「좋구나」. 내 정원이 이웃의
+   물을 받을 때와 이웃 정원에 내가 물을 줄 때 모두 이 함수를 쓴다.
+   자란 단계 이름을 돌려준다(자라지 않았으면 null). */
+function applyWater(growth, likes, iid, from, date){
+  const it=ITEMS[typeOf(iid)];
+  let grewTo=null;
+  if(it && it.grow){
+    const before=growth[iid]||0, after=growDropsForNextStage(it.grow, before);
+    if(after>before){
+      growth[iid]=after;
+      grewTo=GROW_TYPES[it.grow].stages[growStageOf(it.grow, after)].name;
+    }
+  }
+  const list = likes[iid] || (likes[iid]=[]);
+  list.push({from, date});
+  if(list.length>LIKES_KEEP) list.splice(0, list.length-LIKES_KEEP);
+  return grewTo;
+}
+/* 이웃 정원에 남긴 물을 그 이웃에게 보내는 자리. 지금 이웃은 기기 안의
+   본보기 이웃이라 이 기기에 적어 두기만 한다(S.nbGardens). 서버가 붙으면
+   여기서 그 이웃의 「받은 물」 목록에 {from, iid, name, at}를 남기고, 이웃은
+   앱을 켤 때 receiveVisits()로 받는다. */
+function nbGardenState(nb){
+  if(!S.nbGardens) S.nbGardens={};
+  return S.nbGardens[nb.id] || (S.nbGardens[nb.id] = { growth:{...(nb.growth||{})}, likes:{} });
+}
 function waterNeighborPlant(nb, iid, name){
-  if(!S.neighborWater) S.neighborWater={};
-  const today=new Date().toISOString().slice(0,10);
-  const done=S.neighborWater[nb.id]||{};
-  if(done[iid]===today){ toast('오늘은 이미 물을 주었습니다'); return; }
-  done[iid]=today; S.neighborWater[nb.id]=done;
+  if(neighborWaterLeft()<=0) return toast('오늘 줄 수 있는 물을 다 주었습니다');
+  const today=todayKey();
+  if(!S.neighborWaterDay || S.neighborWaterDay.date!==today) S.neighborWaterDay={date:today, used:0};
+  S.neighborWaterDay.used++;
+  const grewTo = applyWater(visiting.growth, visiting.likes, iid, myName(), today);
+  save();
   waterFX=iid; drawScene();
-  const bonus=1;
-  S.coin+=bonus; save(); syncHUD();
-  queueReward({coin:bonus});
-  toast(`${name}에 물을 주었습니다 · 답례로 ${bonus}전을 받았습니다`);
-  setTimeout(()=>{ if(waterFX===iid){ waterFX=null; drawScene(); } }, WATER_MS);
+  const left=neighborWaterLeft();
+  toast(`${name}에 물을 주었습니다 · 좋구나 · 오늘 ${left}번 남음`);
+  setTimeout(()=>{
+    if(waterFX===iid){ waterFX=null; drawScene(); }
+    if(grewTo) toast(`${name} — ${grewTo} 단계가 되었습니다`);
+  }, WATER_MS);
+}
+
+/* ── 내 정원에 다녀간 이웃 ───────────────────
+   이웃이 내 화초에 준 물은 receiveVisits()로 들어온다(서버가 붙으면
+   앱을 켤 때 받아 온다). 받으면 곧장 내 정원에 반영하고(한 단계 성장 +
+   「좋구나」), 기록을 S.visitLog에 쌓아 두었다가 내 정원에 돌아왔을 때
+   아직 안 본 것 가운데 최근 것 몇 개만 알림으로 보여준다.
+   visits: [{from:'달래', iid:'seed_gu', at:밀리초}] */
+const VISIT_LOG_KEEP = 20;
+const VISIT_NOTICE_MAX = 3;
+function receiveVisits(visits){
+  if(!visits || !visits.length) return;
+  if(!S.visitLog) S.visitLog=[];
+  if(!S.likes) S.likes={};
+  visits.forEach(v=>{
+    if(!S.placed.includes(v.iid) || !ITEMS[typeOf(v.iid)]) return; // 이미 치운 화초
+    const grewTo = applyWater(S.growth, S.likes, v.iid, v.from, dateKey(v.at||Date.now()));
+    const it=ITEMS[typeOf(v.iid)];
+    if(grewTo && it.grow && growStageOf(it.grow, S.growth[v.iid])===growLastStage(it.grow)) payGrowBonus(v.iid);
+    S.visitLog.push({from:v.from, iid:v.iid, name:it.name, grewTo, at:v.at||Date.now(), seen:false});
+  });
+  S.visitLog.sort((a,b)=>a.at-b.at);
+  if(S.visitLog.length>VISIT_LOG_KEEP) S.visitLog.splice(0, S.visitLog.length-VISIT_LOG_KEEP);
+  save(); syncHUD();
+  if(where==='garden' && !visiting){ drawScene(); showVisitNotice(); }
+}
+function agoText(at){
+  const midnight=t=>{ const d=new Date(t); d.setHours(0,0,0,0); return d.getTime(); };
+  const days=Math.round((midnight(Date.now())-midnight(at))/86400000);
+  return days<=0 ? '오늘' : days===1 ? '어제' : `${days}일 전`;
+}
+function showVisitNotice(){
+  const unseen=(S.visitLog||[]).filter(v=>!v.seen);
+  if(!unseen.length || overlay.classList.contains('on')) return;
+  const recent=unseen.slice(-VISIT_NOTICE_MAX).reverse();
+  openSheetRaw('다녀간 이웃');
+  sheetBody.innerHTML = `
+    <div class="gulist">${recent.map(v=>`
+      <div class="gurow done" style="cursor:default">
+        <span class="gutext"><b>${escHTML(v.from)}${josa(v.from,'이','가')} ${escHTML(v.name)}에 물을 주었습니다</b><br>
+        <small>${agoText(v.at)} · 좋구나${v.grewTo?` · ${escHTML(v.grewTo)} 단계가 되었습니다`:''}</small></span>
+      </div>`).join('')}</div>
+    ${unseen.length>recent.length?`<p class="note" style="margin:4px 2px 12px">그 밖에 ${unseen.length-recent.length}번 더 다녀갔습니다.</p>`:''}
+    <button class="bigbtn" id="visitOk">고맙구나</button>`;
+  unseen.forEach(v=>{ v.seen=true; });
+  save();
+  document.getElementById('visitOk').addEventListener('click', closeSheet);
+}
+function escHTML(s){
+  return String(s).replace(/[&<>"']/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 }
 
 /* ── 배치 모드 ──────────────────────────── */
@@ -4309,8 +4505,133 @@ function toast(msg){
 function save(){ try{ localStorage.setItem(SAVE_KEY,JSON.stringify(S)); }catch(e){} }
 function load(){ try{ return JSON.parse(localStorage.getItem(SAVE_KEY)); }catch(e){ return null; } }
 
+/* ── 계정 ─────────────────────────────────────
+   위쪽 줄 급수 표시 오른쪽 끝의 동그라미(#acctBtn)를 누르면 계정 창이 뜬다.
+   로그인은 맨 아래 Firebase 모듈 스크립트가 맡고, 이 스크립트와는
+   window.cloud 하나로만 이어진다. 모듈은 이 스크립트가 다 돈 뒤에
+   불러와지므로, window.cloud가 아직 없을 수도 있다고 보고 쓴다.
+   로그인 팝업은 반드시 단추를 누른 그 자리에서 열어야 한다(다른 동작
+   뒤에 미뤄 열면 브라우저가 팝업을 막는다). */
+const ACCOUNT_TITLE = '계정';
+function openAccount(){
+  openSheetRaw(ACCOUNT_TITLE);
+  renderAccount();
+}
+const PERSON_SVG = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 21c1.5-4 4.5-6 8-6s6.5 2 8 6"/></svg>';
+function syncAcctBtn(){
+  const btn=document.getElementById('acctBtn');
+  const user=window.cloud && window.cloud.user;
+  btn.classList.toggle('in', !!user);
+  if(!user){
+    btn.innerHTML = PERSON_SVG;
+    btn.setAttribute('aria-label','들어가기');
+    return;
+  }
+  const name = user.displayName || user.email || '?';
+  const initial = Array.from(name)[0].toUpperCase();
+  btn.setAttribute('aria-label', `${name} — 계정`);
+  btn.innerHTML = '<span class="face"></span>';
+  const face = btn.firstChild;
+  face.textContent = initial;
+  if(user.photoURL){
+    // 구글 사진은 referrer를 보내면 막힐 때가 있어 보내지 않는다. 못 불러오면 첫 글자 그대로.
+    const img = new Image();
+    img.alt=''; img.referrerPolicy='no-referrer';
+    img.onload = ()=>{ face.textContent=''; face.appendChild(img); };
+    img.src = user.photoURL;
+  }
+}
+document.getElementById('acctBtn').addEventListener('click', openAccount);
+syncAcctBtn();
+function renderAccount(){
+  const cloud=window.cloud, user=cloud && cloud.user;
+  if(location.protocol==='file:'){
+    sheetBody.innerHTML = `<p class="note" style="margin:0 2px 12px">파일을 직접 연 화면에서는 로그인할 수 없습니다.
+      깃허브 페이지 주소나 localhost로 열어 주세요.</p>`;
+    return;
+  }
+  if(!cloud || !cloud.ready){
+    sheetBody.innerHTML = `<p class="note" style="margin:0 2px 12px">로그인 상태를 확인하는 중입니다…</p>`;
+    return;
+  }
+  if(user){
+    sheetBody.innerHTML = `
+      <div class="hanja-card" style="text-align:left">
+        <div class="hunum">${escHTML(user.displayName||'이름 없음')}</div>
+        <div class="hint">${escHTML(user.email||'')} 계정으로 들어와 있습니다.</div>
+      </div>
+      <button class="subbtn" id="signOutBtn">로그아웃</button>`;
+    document.getElementById('signOutBtn').addEventListener('click', ()=>cloud.signOut());
+    return;
+  }
+  sheetBody.innerHTML = `
+    <p class="note" style="margin:0 2px 12px">구글 계정으로 들어오면, 다른 기기에서도 이어서 공부하고 정원을 가꿀 수 있게 됩니다.
+      (지금은 로그인만 됩니다. 기록을 계정에 담는 것은 곧 붙습니다.)</p>
+    <button class="bigbtn" id="signInBtn">구글 계정으로 로그인</button>`;
+  document.getElementById('signInBtn').addEventListener('click', async ()=>{
+    try{ await cloud.signIn(); }
+    catch(e){
+      const code=e && e.code || '';
+      if(code==='auth/popup-closed-by-user' || code==='auth/cancelled-popup-request') return;
+      if(code==='auth/popup-blocked') return toast('팝업이 막혔습니다. 팝업을 허용해 주세요');
+      if(code==='auth/unauthorized-domain') return toast('이 주소에서는 로그인이 허용되지 않았습니다');
+      if(code==='auth/network-request-failed') return toast('인터넷 연결을 확인해 주세요');
+      console.error(e); toast('로그인하지 못했습니다');
+    }
+  });
+}
+/* 로그인 상태가 바뀔 때마다 모듈 스크립트가 부른다 (앱을 켤 때도 한 번) */
+function onCloudAuth(user, prev){
+  if(user && !prev && window.cloud.signedInNow) toast(`${user.displayName||'학동'}님, 어서 오세요`);
+  if(!user && prev) toast('로그아웃했습니다');
+  syncAcctBtn();
+  if(overlay.classList.contains('on') && sheetTitle.textContent===ACCOUNT_TITLE) renderAccount();
+}
+
 syncHUD();
 drawScene();
+if(where==='garden') setTimeout(showVisitNotice, 600);
+</script>
+<script type="module">
+/* ── Firebase: 로그인 ───────────────────────────
+   아래 설정값은 공개돼도 되는 값이다(어느 프로젝트인지 알려 줄 뿐).
+   데이터를 지키는 것은 Firestore 보안 규칙이 맡는다.
+   버전은 고정해 둔다. 올릴 때는 숫자만 바꾼다. */
+import { initializeApp } from 'https://www.gstatic.com/firebasejs/12.19.0/firebase-app.js';
+import { getAuth, GoogleAuthProvider, signInWithPopup, signOut, onAuthStateChanged }
+  from 'https://www.gstatic.com/firebasejs/12.19.0/firebase-auth.js';
+
+const firebaseConfig = {
+  apiKey: "AIzaSyBqZ_hdLPrEnPA7YHTV3H3cQ0sU7bhJKJs",
+  authDomain: "k-seodang.firebaseapp.com",
+  projectId: "k-seodang",
+  storageBucket: "k-seodang.firebasestorage.app",
+  messagingSenderId: "390746632752",
+  appId: "1:390746632752:web:25e37147f9fe5959dcb3f5"
+};
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+auth.languageCode = 'ko';
+
+const cloud = window.cloud = {
+  user: null,
+  ready: false,        // 처음 로그인 상태를 확인했는지
+  signedInNow: false,  // 이번에 단추를 눌러 들어왔는지(앱을 켤 때 자동 로그인과 구별)
+  async signIn(){
+    const provider = new GoogleAuthProvider();
+    provider.setCustomParameters({ prompt:'select_account' });
+    cloud.signedInNow = true;
+    try{ return await signInWithPopup(auth, provider); }
+    catch(e){ cloud.signedInNow = false; throw e; }
+  },
+  signOut(){ return signOut(auth); }
+};
+onAuthStateChanged(auth, user=>{
+  const prev = cloud.user;
+  cloud.user = user; cloud.ready = true;
+  window.onCloudAuth(user, prev);
+  cloud.signedInNow = false;
+});
 </script>
 </body>
 </html>
