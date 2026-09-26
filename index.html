@@ -54,6 +54,16 @@ body{font-family:'Gaegu',system-ui,sans-serif;color:var(--ink);-webkit-font-smoo
 /* 위쪽 줄에는 호를 넣지 않는다. 호는 8자까지라 좁은 화면에서 줄이 넘치므로,
    급수와 계정 동그라미만 두고 호는 정원의 이름 팻말과 계정 창에서 보인다. */
 #who .name{display:none}
+/* 로그인한 뒤 호를 급수·계정 동그라미 바로 아래 작은 글씨로 보여준다.
+   같은 판 안에 두되 판의 너비는 늘리지 않는다(width:0 + min-width:100% —
+   윗줄 너비만큼만 쓰고 넘치면 「…」). 위쪽 줄은 좁은 화면에서 남는 자리가
+   없어, 동그라미 옆(가로)에 두면 긴 호가 줄을 넘친다. */
+#who .nameRow{display:grid;grid-template-areas:"g b" "k k";column-gap:5px;row-gap:1px;align-items:center}
+#who .grade{grid-area:g}
+#acctBtn{grid-area:b}
+#who .nick{grid-area:k;font-size:12px;font-weight:700;line-height:1.1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+  width:0;min-width:100%;text-align:center}
+#who .nick:empty{display:none}
 /* 좁은 화면(앱 너비 460px 이하)에서는 위 줄의 여백을 줄여 한 줄에 다 들어가게 한다
    (앱 틀 #app의 실제 너비를 기준으로 한다) */
 #app{container:app / inline-size}
@@ -61,6 +71,9 @@ body{font-family:'Gaegu',system-ui,sans-serif;color:var(--ink);-webkit-font-smoo
   #hud{gap:3px;padding-left:6px;padding-right:6px}
   #who{padding:3px 6px}
   #who .grade{font-size:10px;padding:1px 5px}
+  #who .nameRow{column-gap:4px}
+  #acctBtn{margin-left:0}
+  #who .nick{font-size:11px}
   .plate .num{font-size:17px}
   #topupBtn,#bgmBtn,#helpBtn,#rankDemoBtn{padding:3px 4px}
   #bgmBtn svg,#helpBtn svg{width:18px;height:18px}
@@ -303,15 +316,15 @@ button.cell{cursor:pointer}
 <div id="app">
   <div id="hud">
     <div class="plate" id="who">
-      <span class="nameRow"><span class="name">푸믹</span><span class="grade" id="gradeTxt"></span><button id="acctBtn" aria-label="들어가기"></button></span>
+      <span class="nameRow"><span class="name">푸믹</span><span class="grade" id="gradeTxt"></span><button id="acctBtn" aria-label="들어가기"></button><span class="nick" id="nickTxt"></span></span>
     </div>
-    <div class="plate" id="coinPlate"><svg class="pip" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9.5" fill="#E8A33C" stroke="#3D3A36" stroke-width="2.4"/><rect x="8.6" y="8.6" width="6.8" height="6.8" rx="1.2" fill="#FBF3E4" stroke="#3D3A36" stroke-width="2"/></svg><span class="num" id="coinTxt">0</span></div>
+    <div class="plate" id="coinPlate"><svg class="pip" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9.5" fill="#E8A33C" stroke="#3D3A36" stroke-width="2.4"/><rect x="8.6" y="8.6" width="6.8" height="6.8" rx="1.2" fill="#FBF3E4" stroke="#3D3A36" stroke-width="2"/></svg><span class="num" id="coinTxt" data-num="coin">0</span></div>
     <button class="plate" id="topupBtn" aria-label="전 충전">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" style="width:16px;height:16px">
         <path d="M12 5v14M5 12h14"/>
       </svg>
     </button>
-    <div class="plate" id="growPlate" aria-label="성장수"><svg class="pip" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3 C8 9 5 13 5 16.5 A7 7 0 0 0 19 16.5 C19 13 16 9 12 3 Z" fill="#7FC4EA" stroke="#3D3A36" stroke-width="2"/><ellipse cx="9.5" cy="14" rx="2" ry="3" fill="#BEE6F7"/></svg><span class="num" id="growTxt">0</span></div>
+    <div class="plate" id="growPlate" aria-label="성장수"><svg class="pip" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3 C8 9 5 13 5 16.5 A7 7 0 0 0 19 16.5 C19 13 16 9 12 3 Z" fill="#7FC4EA" stroke="#3D3A36" stroke-width="2"/><ellipse cx="9.5" cy="14" rx="2" ry="3" fill="#BEE6F7"/></svg><span class="num" id="growTxt" data-num="grow">0</span></div>
     <button class="plate" id="bgmBtn" aria-label="배경음악 켜고 끄기">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" id="bgmIcon">
         <path d="M4 9v6h4l5 5V4L8 9H4Z"/><path d="M16.5 8a5 5 0 0 1 0 8"/>
@@ -1235,13 +1248,13 @@ function checkRankUp(){
     let bonus=0;
     for(let i=(P.rankSeen||0)+1;i<=idx;i++) bonus+=RANKS[i].bonus;
     P.rankSeen=idx;
-    if(bonus) S.coin+=bonus;
+    if(bonus){ S.coin+=bonus; holdReward({coin:bonus}); } // 급 오름 창에서 날아갈 때 숫자에 들어간다
     save(); syncHUD();
     // 문제 풀이 화면을 덮어쓰지 않도록, 지금 펼친 창을 닫을 때 보여준다
     pendingRankUp={rank:RANKS[idx], bonus};
   }
 }
-function showRankUp(rank, bonus){
+function showRankUp(rank, bonus, held){
   openSheetRaw('급이 올랐습니다!');
   sheetBody.innerHTML = resBarHTML() + `
     <div class="hanja-card" style="padding:30px 16px">
@@ -1250,7 +1263,7 @@ function showRankUp(rank, bonus){
         background:${rank.color};color:#fff;font-size:30px;font-weight:700;margin:10px 0 12px">${rank.name}</div>
       ${bonus?`<div class="hint">축하 <b>${bonus.toLocaleString()}</b>전을 받았습니다</div>`:''}
     </div>`;
-  if(bonus) queueReward({coin:bonus});
+  if(bonus) queueReward({coin:bonus}, {held});
 }
 /* 발표용: 실제 배움 점수는 그대로 두고 화면에 보이는 급만 잠깐 올린다 */
 function openRankDemo(){ openSheetRaw('급수 시험 (발표용)'); renderRankDemo(); }
@@ -1267,8 +1280,8 @@ function renderRankDemo(){
     if(i<0){ S.demoBoost=0; save(); syncHUD(); renderRankDemo(); return; }
     S.demoBoost=Math.max(0, RANKS[i].min-learnScore());
     save(); syncHUD();
-    showRankUp(RANKS[i], RANKS[i].bonus);
     if(RANKS[i].bonus){ S.coin+=RANKS[i].bonus; save(); syncHUD(); }
+    showRankUp(RANKS[i], RANKS[i].bonus, false);
   }));
 }
 
@@ -1717,8 +1730,17 @@ function likeTagSVG(o){
   const [sx,sy]=spotOf(o.iid);
   const h = (o.it.grow ? growVisual(o.iid, o.it.grow).box : o.it.box)[1];
   const label = n>1 ? `좋구나 ×${n}` : '좋구나';
-  const w = n>1 ? 62 : 44, top = sy - h*SIZE_SCALE - 22;
-  return `<g class="like-tag" transform="translate(${sx-w/2},${top})">
+  const w = n>1 ? 62 : 44;
+  let cx = sx, top = sy - h*SIZE_SCALE - 22;
+  if(o.iid===waterFX){
+    // 물을 주는 동안에는 떨어지는 물을 가리지 않게 물조리개 위로 올린다.
+    // 물조리개 몸통은 식물 가운데에서 오른쪽으로 32, 손잡이 꼭대기는 식물
+    // 머리 위 (clearance+42) 자리에 있다(waterFxSVG·waterCanSVG 그림 기준).
+    // 물을 부을 때 물조리개가 기울며 손잡이가 조금 더 올라가므로 넉넉히 띄운다.
+    cx = sx + 32*SIZE_SCALE;
+    top = sy - (h + waterClearance(h) + 54)*SIZE_SCALE - 22 - 4;
+  }
+  return `<g class="like-tag" transform="translate(${cx-w/2},${top})">
     <rect x="0" y="0" width="${w}" height="17" rx="8.5" fill="#FBF3E4" stroke="${LINE}" stroke-width="1.6"/>
     <path d="M${w/2-4} 17 l4 5 l4 -5" fill="#FBF3E4" stroke="${LINE}" stroke-width="1.6" stroke-linejoin="round"/>
     <rect x="${w/2-5}" y="15" width="10" height="3" fill="#FBF3E4"/>
@@ -1780,6 +1802,8 @@ function waterCanSVG(cx,cy){
     </g>
   </g></g>`;
 }
+/* 식물 머리 위로 물조리개를 띄우는 높이. 「좋구나」 팻말도 이 값으로 물조리개 위에 선다. */
+function waterClearance(h){ return Math.max(14, h*0.32); }
 function waterFxSVG(w,h){
   // 물뿌리개 주둥이(물이 실제로 떨어지는 자리)를 식물 너비의 한가운데(w/2)에
   // 맞춘다. 식물 그림의 위쪽 끝(y=0)에 딱 붙이면 꽃송이가 이미 그 자리
@@ -1789,7 +1813,7 @@ function waterFxSVG(w,h){
   // 그 그림 그대로 주둥이보다 오른쪽 위로 32,20만큼 물러나 있으므로,
   // 몸통 자리를 주둥이 자리 + (32,20)로 잡아주면 주둥이가 언제나 식물
   // 크기와 상관없이 한가운데·머리 위로 온다.
-  const clearance = Math.max(14, h*0.32);
+  const clearance = waterClearance(h);
   const sx=(w/2).toFixed(1), sy=(-clearance).toFixed(1);
   const cx=w/2+32, cy=-clearance-20;
   // 거의 수직으로 떨어지되, 안쪽/바깥쪽으로 살짝씩 퍼지도록 물방울마다
@@ -2285,11 +2309,12 @@ function waterPlant(iid, name){
   } else if(newCnt%3===0){
     laterMsg='무럭무럭 자랐습니다!'; // 기존 장식용 나무·화초는 그림은 안 바뀌고 알림만
   }
+  if(laterBonus) holdReward({coin:laterBonus}); // 물조리개가 끝난 뒤에 날아가 닿을 때 숫자에 들어간다
   save(); syncHUD();
   setTimeout(()=>{
     if(waterFX===iid){ waterFX=null; drawScene(); }
     if(laterMsg) toast(laterMsg);
-    if(laterBonus) queueReward({coin:laterBonus});
+    if(laterBonus) queueReward({coin:laterBonus}, {held:true});
   }, WATER_MS);
 }
 /* ── 정원 마실: 이웃의 화초·나무에 물 주기 ─────────
@@ -2460,7 +2485,7 @@ function closeSheet(){
   overlay.classList.remove('on'); drawScene();
   if(pendingRankUp){
     const r=pendingRankUp; pendingRankUp=null;
-    setTimeout(()=>showRankUp(r.rank, r.bonus), 260);
+    setTimeout(()=>showRankUp(r.rank, r.bonus, true), 260);
   }
 }
 document.getElementById('closeSheet').addEventListener('click', closeSheet);
@@ -4174,8 +4199,8 @@ function packPreview(season){
    덮개(overlay)가 떠 있을 때 보상이 이 자리로 날아가는 기준점이 된다. */
 function resBarHTML(){
   return `<div class="studyhead">
-    <span class="coin">${COIN_SVG}${S.coin.toLocaleString()}</span>
-    <span class="coin">${GROW_SVG}${(S.growWater||0).toLocaleString()}</span>
+    <span class="coin">${COIN_SVG}<span data-num="coin">${shownCoin().toLocaleString()}</span></span>
+    <span class="coin">${GROW_SVG}<span data-num="grow">${shownGrow().toLocaleString()}</span></span>
   </div>`;
 }
 function bindShopCells(){
@@ -4403,19 +4428,39 @@ function renderBag(){
 /* ── 재화 얻음 표시 ─────────────────────────
    화면 가운데에 얻은 것이 글자로 잠깐 뜨고, 엽전(또는 물방울)이 몇
    흩어져 나와 위쪽 표시 자리까지 곡선을 그리며 날아간다. 위쪽 숫자는
-   그 마지막 하나가 닿는 순간에야 세어 올라간다(coinFlights/growFlights
-   가 몇 개나 날아가고 있는지 세어, 그동안은 syncHUD가 숫자를 미리
-   바꾸지 않게 막아 둔다). 엽전이 다 날아간 뒤에야 물방울 차례가 와서
+   그 마지막 하나가 닿는 순간에야 세어 올라간다. 받았지만 아직 닿지 않은
+   양은 heldCoin/heldGrow로 들고 있다가, 위쪽 줄이든 펼친 창의 전·성장수
+   표시든 모든 숫자에서 빼고 보여준다(shownCoin/shownGrow). 닿으면 그만큼
+   풀어 주며 세어 올린다. 엽전이 다 날아간 뒤에야 물방울 차례가 와서
    둘이 겹치지 않는다. 눈으로 좇을 수 있게 조금 여유 있게 날아간다.
    움직임을 줄이는 설정에서는 particle 없이 글자만 옅게 보여주고
    숫자도 그 자리에서 곧장 바뀐다(움직임 요소만 뺀다). */
 const rewardQueue=[];
 let rewardBusy=false;
-let coinFlights=0, growFlights=0;
-function queueReward(parts){
+let heldCoin=0, heldGrow=0;
+function shownCoin(){ return S.coin - heldCoin; }
+function shownGrow(){ return (S.growWater||0) - heldGrow; }
+/* 받은 것을 곧장 날리지 않고 나중에 날릴 때(물 준 뒤, 급이 오른 창을 닫은 뒤)는
+   받는 순간 holdReward로 들고 있다가 queueReward(parts, {held:true})로 날린다. */
+function holdReward(parts){
+  heldCoin+=parts.coin||0; heldGrow+=parts.grow||0;
+  refreshNumbers(false);
+}
+function releaseReward(kind, amount){
+  if(kind==='coin') heldCoin=Math.max(0, heldCoin-amount);
+  else heldGrow=Math.max(0, heldGrow-amount);
+  refreshNumbers(true, kind);
+}
+/* 화면에 있는 전·성장수 숫자(위쪽 줄 + 펼친 창의 표시)를 보이는 값으로 맞춘다 */
+function refreshNumbers(animate, only){
+  [['coin', shownCoin()], ['grow', shownGrow()]].forEach(([k,v])=>{
+    if(only && only!==k) return;
+    document.querySelectorAll(`[data-num="${k}"]`).forEach(el=> animate ? animateNumber(el, v) : setNumber(el, v));
+  });
+}
+function queueReward(parts, opts){
   if(!parts || (!parts.coin && !parts.grow)) return;
-  if(parts.coin) coinFlights++;
-  if(parts.grow) growFlights++;
+  if(!(opts && opts.held)) holdReward(parts);
   rewardQueue.push(parts);
   if(!rewardBusy) playNextReward();
 }
@@ -4448,15 +4493,14 @@ function reducedMotionReward(parts){
     pop.animate([{opacity:0},{opacity:1,offset:.15},{opacity:1,offset:.8},{opacity:0}],
       {duration:900, easing:'ease', fill:'forwards'});
     setTimeout(()=>{
-      if(parts.coin){ coinFlights--; animateNumber(document.getElementById('coinTxt'), S.coin); }
-      if(parts.grow){ growFlights--; animateNumber(document.getElementById('growTxt'), S.growWater||0); }
+      if(parts.coin) releaseReward('coin', parts.coin);
+      if(parts.grow) releaseReward('grow', parts.grow);
       resolve();
     }, 900);
   });
 }
 const REWARD_UNIT={coin:'전', grow:'방울'};
 const REWARD_TARGET={coin:'coinPlate', grow:'growPlate'};
-const REWARD_TXT={coin:'coinTxt', grow:'growTxt'};
 /* 가게·서당 화면이 덮개(overlay)로 떠 있을 때는 맨 위 진짜 표시가 그
    덮개에 가려 안 보인다. 그럴 때는 지금 펼쳐진 화면 자기 것(.studyhead
    안의 전·성장수 표시)으로 날아가게 하고, 덮개가 없을 때만(정원에서
@@ -4521,8 +4565,7 @@ function flightPhase(kind, amount){
     // 영영 안 바뀌는 일이 없도록, 다 날아갈 시간이 지나면 그냥 넘어간다.
     lastDone=Promise.race([lastDone, new Promise(res=>setTimeout(res, total+250))]);
     lastDone.then(()=>{
-      if(kind==='coin') coinFlights--; else growFlights--;
-      animateNumber(document.getElementById(REWARD_TXT[kind]), kind==='coin'?S.coin:(S.growWater||0));
+      releaseReward(kind, amount);
       resolve();
     });
   });
@@ -4538,17 +4581,20 @@ async function runRewardFlight(parts){
 function prefersReducedMotion(){
   return window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 }
+function setNumber(el, to){ el._numTok=(el._numTok||0)+1; el.textContent=to.toLocaleString(); }
 function animateNumber(el, to){
   const from=parseInt((el.textContent||'0').replace(/,/g,''),10) || 0;
   if(from===to) return;
+  const tok = el._numTok = (el._numTok||0)+1; // 더 새로 세기 시작하면 이 세기는 멈춘다
   const plate=el.closest('.plate');
   if(plate){ plate.classList.remove('flash'); void plate.offsetWidth; plate.classList.add('flash'); }
   if(prefersReducedMotion()){ el.textContent=to.toLocaleString(); return; }
   const dur=500, start=performance.now();
   // 탭이 뒤로 밀려 화면이 안 그려지는 동안은 requestAnimationFrame이 멈추므로,
   // 그래도 값은 맞게 끝나도록 타이머로 최종값을 한 번 더 못박아 둔다.
-  setTimeout(()=>{ el.textContent=to.toLocaleString(); }, dur);
+  setTimeout(()=>{ if(el._numTok===tok) el.textContent=to.toLocaleString(); }, dur);
   (function tick(now){
+    if(el._numTok!==tok) return;
     const t=Math.min(1, (now-start)/dur);
     const eased=1-Math.pow(1-t,3);
     el.textContent=Math.round(from+(to-from)*eased).toLocaleString();
@@ -4558,13 +4604,14 @@ function animateNumber(el, to){
 
 /* ── 공용 ───────────────────────────────── */
 function syncHUD(){
-  // 엽전·물방울이 화면을 날아가는 중이면, 닿을 때까지는 위쪽 숫자를 미리 바꾸지 않는다
-  if(coinFlights<=0) animateNumber(document.getElementById('coinTxt'), S.coin);
-  if(growFlights<=0) animateNumber(document.getElementById('growTxt'), S.growWater||0);
+  // 숫자는 한 박자 뒤(microtask)에 맞춘다. 보통 「save(); syncHUD(); queueReward(...)」
+  // 순서로 불리므로, 그래야 방금 받은 것이 날아가기 전에 숫자에 먼저 들어가지 않는다.
+  queueMicrotask(()=>refreshNumbers(true));
   const rk = rankInfo(curRankIdx());
   const gt = document.getElementById('gradeTxt');
   gt.textContent = rk.name; gt.style.background = rk.color;
   document.querySelector('#who .name').textContent = myName();
+  syncNickTxt();
   document.getElementById('navDot').style.display=(P.gu<GUJEOL.length||dueChars(P).length)?'block':'none';
 }
 let toastTimer;
@@ -4593,7 +4640,13 @@ function openAccount(){
   renderAccount();
 }
 const PERSON_SVG = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 21c1.5-4 4.5-6 8-6s6.5 2 8 6"/></svg>';
+/* 위쪽 줄 계정 동그라미 옆의 호 — 로그인했고 호를 정했을 때만 */
+function syncNickTxt(){
+  const user=window.cloud && window.cloud.user;
+  document.getElementById('nickTxt').textContent = (user && S.nick) ? S.nick : '';
+}
 function syncAcctBtn(){
+  syncNickTxt();
   const btn=document.getElementById('acctBtn');
   const user=window.cloud && window.cloud.user;
   btn.classList.toggle('in', !!user);
