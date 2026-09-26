@@ -6,7 +6,8 @@ rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
 
-    function isOwner(uid) { return request.auth != null && request.auth.uid == uid; }
+    function signedIn() { return request.auth != null; }
+    function isOwner(uid) { return signedIn() && request.auth.uid == uid; }
 
     // 내 기록 users/{uid} — 나만 읽고 쓴다.
     // { data: 기록 전체(JSON 문자열), updatedAt: 저장한 때(밀리초), v: 형식 버전 }
@@ -19,6 +20,39 @@ service cloud.firestore {
         && request.resource.data.updatedAt is number;
     }
 
-    // 그 밖의 곳은 모두 막힌다 (공개 정원 gardens는 다음 단계에서 연다)
+    // 공개 정원 gardens/{uid} — 로그인한 사람은 누구나 읽고, 쓰기는 주인만.
+    // 배열·맵 안의 값 하나하나는 규칙으로 다 검사할 수 없으므로, 앱이 남의
+    // 정원을 화면에 그리기 전에 반드시 거른다(index.html의 sanitizeGarden).
+    match /gardens/{uid} {
+      allow read: if signedIn();
+      allow delete: if isOwner(uid);
+      allow create, update: if isOwner(uid) && validGarden(request.resource.data);
+
+      // 이웃이 물을 준 기록 — 다른 사람이 남기고, 주인만 읽고 지운다
+      match /visits/{vid} {
+        allow create: if signedIn() && request.auth.uid != uid
+          && request.resource.data.keys().hasOnly(['fromUid', 'from', 'iid', 'at'])
+          && request.resource.data.fromUid == request.auth.uid
+          && request.resource.data.from is string && request.resource.data.from.size() <= 8
+          && request.resource.data.iid is string && request.resource.data.iid.size() <= 40
+          && request.resource.data.at == request.time;
+        allow read, delete: if isOwner(uid);
+      }
+    }
+
+    function validGarden(d) {
+      return d.keys().hasOnly(['nick', 'rankIdx', 'chars', 'placed', 'spot', 'growth', 'likes', 'wear', 'updatedAt'])
+        && d.nick is string && d.nick.size() >= 2 && d.nick.size() <= 8
+        && d.rankIdx is int && d.rankIdx >= 0 && d.rankIdx <= 5
+        && d.chars is int && d.chars >= 0 && d.chars <= 1000
+        && d.placed is list && d.placed.size() <= 200
+        && d.spot is map && d.spot.size() <= 200
+        && d.growth is map && d.growth.size() <= 200
+        && d.likes is map && d.likes.size() <= 200
+        && d.wear is map
+        && d.updatedAt == request.time;
+    }
+
+    // 그 밖의 곳은 모두 막힌다
   }
 }

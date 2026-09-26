@@ -51,17 +51,16 @@ body{font-family:'Gaegu',system-ui,sans-serif;color:var(--ink);-webkit-font-smoo
 /* 위 줄의 표시는 줄어들며 글자가 꺾이지 않게 한다 */
 #hud > *{flex-shrink:0}
 #who .name,.grade{white-space:nowrap}
-/* 좁은 화면에서는 위 줄의 여백을 줄여 한 줄에 다 들어가게 한다
+/* 위쪽 줄에는 호를 넣지 않는다. 호는 8자까지라 좁은 화면에서 줄이 넘치므로,
+   급수와 계정 동그라미만 두고 호는 정원의 이름 팻말과 계정 창에서 보인다. */
+#who .name{display:none}
+/* 좁은 화면(앱 너비 460px 이하)에서는 위 줄의 여백을 줄여 한 줄에 다 들어가게 한다
    (앱 틀 #app의 실제 너비를 기준으로 한다) */
 #app{container:app / inline-size}
-@container app (max-width:420px){
+@container app (max-width:460px){
   #hud{gap:3px;padding-left:6px;padding-right:6px}
   #who{padding:3px 6px}
-  /* 이름 위, 급수 아래로 쌓고 계정 동그라미는 그 오른쪽에 */
-  #who .nameRow{display:grid;grid-template-areas:"n b" "g b";column-gap:5px;row-gap:1px;align-items:center}
-  #who .name{grid-area:n;font-size:14px;line-height:1}
-  #who .grade{grid-area:g;font-size:10px;padding:0 5px}
-  #acctBtn{grid-area:b;margin-left:0}
+  #who .grade{font-size:10px;padding:1px 5px}
   .plate .num{font-size:17px}
   #topupBtn,#bgmBtn,#helpBtn,#rankDemoBtn{padding:3px 4px}
   #bgmBtn svg,#helpBtn svg{width:18px;height:18px}
@@ -1392,17 +1391,63 @@ const NEIGHBORS = [
     placed:['win_06','win_01','win_02','win_03','win_04','win_05','win_07','mhs_22','mhs_23','mhs_12','mhs_20','sap_gam'],
     spot:{ sap_gam:[110,578] }, growth:{ sap_gam:9 } }
 ];
-function fetchNeighbors(){ return NEIGHBORS; }
+/* 로그인 중이면 서버의 공개 정원(gardens)을 최근 순으로 받아 온다. 손님이거나
+   서버에 닿지 않으면, 또는 아직 정원을 연 이웃이 없으면 본보기 이웃을 쓴다.
+   받아 온 목록은 NEIGHBOR_CACHE_MS 동안 다시 쓴다(열 때마다 읽지 않게). */
+const NEIGHBOR_CACHE_MS = 5*60*1000;
+let neighborCache = null; // {at, list}
+async function fetchNeighbors(){
+  const user = window.cloud && window.cloud.user;
+  if(!user || syncState!=='ready') return { list:NEIGHBORS, sample:true };
+  if(neighborCache && Date.now()-neighborCache.at < NEIGHBOR_CACHE_MS) return neighborCache.res;
+  let res;
+  try{
+    const docs = await window.cloud.listGardens();
+    const list = docs.filter(d=>d.id!==user.uid).map(sanitizeGarden).filter(Boolean);
+    res = list.length ? { list, sample:false } : { list:NEIGHBORS, sample:true, empty:true };
+  }catch(e){
+    console.warn('이웃 정원을 받지 못함', e);
+    return { list:NEIGHBORS, sample:true, failed:true };
+  }
+  neighborCache = { at:Date.now(), res };
+  return res;
+}
+/* 남의 정원 자료는 화면에 그리기 전에 반드시 거른다. 보안 규칙은 배열 안의
+   값까지 검사하지 못하고, 지금 코드는 물건 번호 등을 HTML에 끼워 넣기 때문이다.
+   알 수 없는 물건·옷·이상한 값은 버린다. */
+const IID_RE = /^[a-z0-9_]+(__\d+)?$/;
+function sanitizeGarden(d){
+  if(!d || typeof d.id!=='string') return null;
+  const int=(v,lo,hi)=>Number.isFinite(v) ? Math.max(lo,Math.min(hi,Math.round(v))) : lo;
+  const placed = (Array.isArray(d.placed)?d.placed:[])
+    .filter(iid=>typeof iid==='string' && IID_RE.test(iid) && ITEMS[typeOf(iid)]).slice(0,200);
+  const pick=(m, f)=>{ const out={}; placed.forEach(iid=>{ const v=f(m && m[iid]); if(v!=null) out[iid]=v; }); return out; };
+  const spot = pick(d.spot, v=>Array.isArray(v)&&v.length===2&&v.every(Number.isFinite) ? [int(v[0],0,400),int(v[1],0,600)] : null);
+  const growth = pick(d.growth, v=>Number.isFinite(v) ? int(v,0,1000) : null);
+  const likes = pick(d.likes, v=>Number.isFinite(v)&&v>0 ? int(v,0,99) : null);
+  const wear = {};
+  WEAR_SLOTS.forEach(([slot])=>{ const id=d.wear && d.wear[slot]; wear[slot] = (typeof id==='string' && WEAR[slot] && WEAR[slot][id]) ? id : null; });
+  const nick = typeof d.nick==='string' ? d.nick.trim().slice(0,8) : '';
+  if(!nick) return null;
+  return { id:d.id, name:nick, rankIdx:int(d.rankIdx,0,RANKS.length-1), chars:int(d.chars,0,1000),
+           placed, spot, growth, likes, wear, updatedAtMs:int(d.updatedAtMs,0,1e15), real:true };
+}
 
-function openNeighborList(){
+async function openNeighborList(){
   openSheetRaw('이웃');
-  const nbs = fetchNeighbors();
-  sheetBody.innerHTML = `<p class="note" style="margin:0 2px 12px">골라서 그 정원을 구경하러 갑니다.</p>`
+  sheetBody.innerHTML = `<p class="note" style="margin:0 2px 12px">이웃을 찾는 중입니다…</p>`;
+  const { list:nbs, sample, empty, failed } = await fetchNeighbors();
+  if(sheetTitle.textContent!=='이웃') return; // 기다리는 사이에 다른 창으로 갔다
+  const note = !sample ? '골라서 그 정원을 구경하러 갑니다.'
+    : empty ? '아직 정원을 연 이웃이 없어 본보기 이웃을 보여 드립니다.'
+    : failed ? '이웃을 불러오지 못해 본보기 이웃을 보여 드립니다.'
+    : '로그인하면 다른 학동들의 정원을 구경할 수 있습니다. 지금은 본보기 이웃입니다.';
+  sheetBody.innerHTML = `<p class="note" style="margin:0 2px 12px">${note}</p>`
     + nbs.map(nb=>{
       const rk = RANKS[nb.rankIdx];
-      return `<button class="neighbor-row" data-nb="${nb.id}">
+      return `<button class="neighbor-row" data-nb="${escHTML(nb.id)}">
         <span class="grade" style="background:${rk.color}">${rk.name}</span>
-        <span class="nname">${nb.name}</span>
+        <span class="nname">${escHTML(nb.name)}</span>
         <span class="nchars">${nb.chars}자 익힘</span>
       </button>`;
     }).join('');
@@ -1619,7 +1664,7 @@ if(!S.grownPaid){
 /* 이름 팻말 — 돈으로 살 수 없고 학습으로만(급이 오르면) 바뀐다.
    나중에 이웃이 왔을 때 이 팻말로 급을 알아볼 수 있게 된다. */
 function nameplateSVG(name, rk){
-  name = name || '푸믹';
+  name = escHTML(name || myName()); // 남이 정한 호가 들어오므로 반드시 바꿔 넣는다
   rk = rk || rankInfo(curRankIdx());
   const w=78;
   return `
@@ -2076,7 +2121,10 @@ function goScene(name){
   document.getElementById('placeBar').classList.remove('on');
   overlay.classList.remove('on');
   drawScene();
-  if(name==='garden') setTimeout(showVisitNotice, 300); // 내 정원에 돌아오면 다녀간 이웃 알림
+  if(name==='garden'){ // 내 정원에 돌아오면 다녀간 이웃을 받아 오고 알림
+    checkVisits();
+    setTimeout(showVisitNotice, 300);
+  }
 }
 function enterNeighborGarden(nb){
   // 이웃 자료에 그 정원의 성장·「좋구나」 기록을 붙여서 구경한다
@@ -2285,9 +2333,22 @@ function applyWater(growth, likes, iid, from, date){
    본보기 이웃이라 이 기기에 적어 두기만 한다(S.nbGardens). 서버가 붙으면
    여기서 그 이웃의 「받은 물」 목록에 {from, iid, name, at}를 남기고, 이웃은
    앱을 켤 때 receiveVisits()로 받는다. */
+/* 실제 이웃(nb.real)은 서버의 정원이 기준이다. 주인이 내 물을 받아 정원을
+   새로 올렸으면(updatedAtMs가 더 새로우면) 서버 것으로 다시 맞추고, 그 전까지는
+   내가 준 물이 이 기기에서 보이도록 남겨 둔다. 서버의 「좋구나」는 수(n)로
+   오므로, 화면에서 쓰는 목록 모양으로 바꿔 둔다. */
 function nbGardenState(nb){
   if(!S.nbGardens) S.nbGardens={};
-  return S.nbGardens[nb.id] || (S.nbGardens[nb.id] = { growth:{...(nb.growth||{})}, likes:{} });
+  let st = S.nbGardens[nb.id];
+  const base = nb.updatedAtMs || 0;
+  if(!st || (nb.real && base > (st.base||0))){
+    const likes={};
+    Object.entries(nb.likes||{}).forEach(([iid,n])=>{
+      likes[iid] = Array.from({length:Math.min(n,LIKES_KEEP)}, ()=>({from:'', date:''}));
+    });
+    st = S.nbGardens[nb.id] = { growth:{...(nb.growth||{})}, likes, base };
+  }
+  return st;
 }
 function waterNeighborPlant(nb, iid, name){
   if(neighborWaterLeft()<=0) return toast('오늘 줄 수 있는 물을 다 주었습니다');
@@ -2295,6 +2356,9 @@ function waterNeighborPlant(nb, iid, name){
   if(!S.neighborWaterDay || S.neighborWaterDay.date!==today) S.neighborWaterDay={date:today, used:0};
   S.neighborWaterDay.used++;
   const grewTo = applyWater(visiting.growth, visiting.likes, iid, myName(), today);
+  // 실제 이웃이면 그 정원에 「다녀감」을 남긴다. 주인이 앱을 켤 때 receiveVisits()로 받는다.
+  if(nb.real) window.cloud.sendVisit(nb.id, { from:myName(), iid })
+    .catch(e=>console.warn('물 준 것을 이웃에게 보내지 못함', e));
   save();
   waterFX=iid; drawScene();
   const left=neighborWaterLeft();
@@ -4500,6 +4564,7 @@ function syncHUD(){
   const rk = rankInfo(curRankIdx());
   const gt = document.getElementById('gradeTxt');
   gt.textContent = rk.name; gt.style.background = rk.color;
+  document.querySelector('#who .name').textContent = myName();
   document.getElementById('navDot').style.display=(P.gu<GUJEOL.length||dueChars(P).length)?'block':'none';
 }
 let toastTimer;
@@ -4537,7 +4602,7 @@ function syncAcctBtn(){
     btn.setAttribute('aria-label','들어가기');
     return;
   }
-  const name = user.displayName || user.email || '?';
+  const name = user.displayName || user.email || (user.isAnonymous ? '익명' : '?');
   const initial = Array.from(name)[0].toUpperCase();
   btn.setAttribute('aria-label', `${name} — 계정`);
   btn.innerHTML = '<span class="face"></span>';
@@ -4570,31 +4635,47 @@ function renderAccount(){
       : (syncState==='error' ? '계정과 이어지지 않았습니다. 이 기기에만 저장하고 있습니다.' : '계정의 기록을 맞추는 중입니다…');
     sheetBody.innerHTML = `
       <div class="hanja-card" style="text-align:left">
-        <div class="hunum">${escHTML(user.displayName||'이름 없음')}</div>
+        <div class="hunum">${escHTML(user.displayName || (user.isAnonymous ? '시험용 익명 계정' : '이름 없음'))}</div>
         <div class="hint">${escHTML(user.email||'')} 계정으로 들어와 있습니다.</div>
         <div class="hint">${synced}</div>
       </div>
+      <div class="hanja-card" style="text-align:left">
+        <div class="hint">호</div>
+        <div class="hunum">${S.nick ? escHTML(S.nick) : '아직 정하지 않았습니다'}</div>
+        <div class="hint">${S.nick ? '이웃들이 내 정원을 구경할 수 있습니다.' : '호를 정하면 내 정원이 이웃들에게 공개됩니다.'}</div>
+      </div>
+      <button class="bigbtn" id="nickBtn">${S.nick ? '호 바꾸기' : '호 정하기'}</button>
       <p class="note" style="margin:0 2px 12px">로그아웃하면 이 기기는 처음 상태로 돌아갑니다. 기록은 계정에 남아 있어 다시 들어오면 이어집니다.</p>
       <button class="subbtn" id="signOutBtn">로그아웃</button>`;
+    document.getElementById('nickBtn').addEventListener('click', ()=>openNickSheet(false));
     document.getElementById('signOutBtn').addEventListener('click', signOutAndReset);
     return;
   }
   sheetBody.innerHTML = `
     <p class="note" style="margin:0 2px 12px">구글 계정으로 들어오면 공부한 것과 정원이 계정에 담겨, 다른 기기에서도 이어서 할 수 있습니다.
       이 기기에서 하던 것은 처음 들어올 때 계정에 담깁니다. (이미 다른 기기에서 쓰던 계정이면 계정에 담긴 기록을 불러옵니다.)</p>
-    <button class="bigbtn" id="signInBtn">구글 계정으로 로그인</button>`;
-  document.getElementById('signInBtn').addEventListener('click', async ()=>{
-    try{ await cloud.signIn(); }
+    <button class="bigbtn" id="signInBtn">구글 계정으로 로그인</button>
+    ${isLocalTest() ? `<button class="subbtn" id="anonBtn">시험용 익명 계정으로 들어가기</button>
+      <p class="note" style="margin:4px 2px 12px">(시험용 단추 — 이 컴퓨터에서 localhost로 열 때만 보입니다)</p>` : ''}`;
+  const signInWith = fn=>async ()=>{
+    try{ await fn(); }
     catch(e){
       const code=e && e.code || '';
       if(code==='auth/popup-closed-by-user' || code==='auth/cancelled-popup-request') return;
       if(code==='auth/popup-blocked') return toast('팝업이 막혔습니다. 팝업을 허용해 주세요');
       if(code==='auth/unauthorized-domain') return toast('이 주소에서는 로그인이 허용되지 않았습니다');
       if(code==='auth/network-request-failed') return toast('인터넷 연결을 확인해 주세요');
+      if(code==='auth/operation-not-allowed' || code==='auth/admin-restricted-operation')
+        return toast('Firebase 콘솔에서 익명 로그인이 꺼져 있습니다');
       console.error(e); toast('로그인하지 못했습니다');
     }
-  });
+  };
+  document.getElementById('signInBtn').addEventListener('click', signInWith(()=>cloud.signIn()));
+  const anonBtn=document.getElementById('anonBtn');
+  if(anonBtn) anonBtn.addEventListener('click', signInWith(()=>cloud.signInAnon()));
 }
+/* 이 컴퓨터에서 시험하는 중인가 (localhost로 연 경우만). 시험용 단추는 이때만 보인다. */
+function isLocalTest(){ return ['localhost','127.0.0.1'].includes(location.hostname); }
 /* 로그인 상태가 바뀔 때마다 모듈 스크립트가 부른다 (앱을 켤 때도 한 번) */
 function onCloudAuth(user, prev){
   if(user && !prev && window.cloud.signedInNow) toast(`${user.displayName||'학동'}님, 어서 오세요`);
@@ -4627,12 +4708,82 @@ async function cloudPushNow(){
   clearTimeout(pushTimer); pushTimer=null;
   const user = window.cloud && window.cloud.user;
   if(syncState!=='ready' || !user || S.ownerUid!==user.uid) return;
-  if((S.updatedAt||0) <= (S.syncBase||0)) return; // 올릴 것이 없다
-  const at = S.updatedAt;
+  if((S.updatedAt||0) > (S.syncBase||0)){
+    const at = S.updatedAt;
+    try{
+      await window.cloud.push({ data: JSON.stringify(S), updatedAt: at, v: 1 });
+      S.syncBase = at; persistLocal(); // updatedAt은 건드리지 않는다
+    }catch(e){ console.warn('계정에 올리지 못함', e); return; }
+  }
+  await publishGardenIfChanged();
+}
+
+/* ── 공개 정원 gardens/{uid} ───────────────────
+   이웃이 구경하는 내 정원. 호를 정해야 공개된다. 정원·옷·호·급·익힌 글자 수
+   가운데 하나라도 바뀌었을 때만 올린다(학습만 했을 때는 올리지 않는다). */
+function gardenSnapshot(){
+  const placed = S.placed.filter(iid=>IID_RE.test(iid)).slice(0,200);
+  const spot={}, growth={}, likes={};
+  placed.forEach(iid=>{
+    if(Array.isArray(S.spot[iid])) spot[iid]=S.spot[iid];
+    if(S.growth[iid]) growth[iid]=S.growth[iid];
+    const n=(S.likes[iid]||[]).length; if(n) likes[iid]=n;
+  });
+  const wear={}; WEAR_SLOTS.forEach(([slot])=>{ wear[slot]=S.wear[slot]||null; });
+  return { nick:S.nick, rankIdx:curRankIdx(), chars:metCount(), placed, spot, growth, likes, wear };
+}
+async function publishGardenIfChanged(){
+  if(!S.nick) return;
+  const g=gardenSnapshot(), sig=JSON.stringify(g);
+  if(sig===S.gardenSig) return;
+  try{ await window.cloud.publishGarden(g); S.gardenSig=sig; persistLocal(); }
+  catch(e){ console.warn('공개 정원을 올리지 못함', e); }
+}
+/* 이웃이 내 정원에 남긴 물(visits)을 받아 온다. 앱을 켤 때 한 번, 그 뒤로는
+   내 정원에 돌아올 때 VISIT_CHECK_MS에 한 번씩. 받은 것은 서버에서 지운다. */
+const VISIT_CHECK_MS = 2*60*1000;
+let lastVisitCheck = 0;
+async function checkVisits(force){
+  if(syncState!=='ready') return;
+  if(!force && Date.now()-lastVisitCheck < VISIT_CHECK_MS) return;
+  lastVisitCheck = Date.now();
   try{
-    await window.cloud.push({ data: JSON.stringify(S), updatedAt: at, v: 1 });
-    S.syncBase = at; persistLocal(); // updatedAt은 건드리지 않는다
-  }catch(e){ console.warn('계정에 올리지 못함', e); }
+    const visits = (await window.cloud.takeVisits())
+      .filter(v=>typeof v.iid==='string' && typeof v.from==='string')
+      .map(v=>({ from:v.from.trim().slice(0,8)||'이웃', iid:v.iid, at:v.at }));
+    if(visits.length) receiveVisits(visits);
+  }catch(e){ console.warn('다녀간 이웃을 받지 못함', e); }
+}
+
+/* ── 호 ───────────────────────────────────
+   이름 팻말과 위쪽 줄에 나오는 이름. 호를 정해야 내 정원이 이웃에게 공개된다.
+   로그인한 뒤 호가 없으면 한 번 묻는다(나중에 계정 창에서 바꿀 수 있다). */
+const NICK_RE = /^[가-힣A-Za-z0-9]{2,8}$/;
+function promptNickIfNeeded(){
+  if(S.nick || sessionStorage.getItem('kseodang_nick_asked')) return;
+  if(overlay.classList.contains('on')) return; // 다른 창을 보고 있으면 끼어들지 않는다
+  sessionStorage.setItem('kseodang_nick_asked','1');
+  openNickSheet(true);
+}
+function openNickSheet(first){
+  openSheetRaw('호 정하기');
+  sheetBody.innerHTML = `
+    <p class="note" style="margin:0 2px 12px">서당에서 불릴 이름(호)을 정합니다. 이름 팻말에 나오고, 이웃들이 내 정원을 구경할 때 보입니다.
+      한글·영문·숫자로 2~8자.</p>
+    <input id="nickInput" maxlength="8" value="${escHTML(S.nick||'')}" autocomplete="off"
+      style="width:100%;box-sizing:border-box;font-family:inherit;font-size:20px;padding:10px 12px;border:2.5px solid var(--ink);border-radius:12px;background:#fff;margin-bottom:6px">
+    <div class="hint" id="nickMsg" style="min-height:20px;margin:0 2px 10px"></div>
+    <button class="bigbtn" id="nickOk">정하기</button>
+    ${first?'<button class="subbtn" id="nickLater">나중에</button>':'<button class="subbtn" id="nickLater">돌아가기</button>'}`;
+  const input=document.getElementById('nickInput');
+  document.getElementById('nickOk').addEventListener('click', ()=>{
+    const v=input.value.trim();
+    if(!NICK_RE.test(v)) { document.getElementById('nickMsg').textContent='한글·영문·숫자로 2~8자를 적어 주세요 (띄어쓰기·기호는 안 됩니다)'; return; }
+    S.nick=v; save(); syncHUD(); drawScene();
+    toast(`이제 「${v}」(으)로 불립니다`);
+    if(first) closeSheet(); else openAccount();
+  });
+  document.getElementById('nickLater').addEventListener('click', ()=> first ? closeSheet() : openAccount());
 }
 async function cloudSync(user){
   syncState='syncing';
@@ -4665,7 +4816,9 @@ async function cloudSync(user){
 function syncReady(){
   syncState='ready';
   sessionStorage.removeItem(ADOPTED_KEY);
+  neighborCache = null;
   if(overlay.classList.contains('on') && sheetTitle.textContent===ACCOUNT_TITLE) renderAccount();
+  setTimeout(()=>{ checkVisits(true); promptNickIfNeeded(); }, 800);
 }
 function adoptRemote(remote, user, note){
   // 같은 것을 두 번 받으려 하면(무엇인가 어긋난 경우) 새로고침을 되풀이하지 않는다
@@ -4708,9 +4861,10 @@ if(where==='garden') setTimeout(showVisitNotice, 600);
    데이터를 지키는 것은 Firestore 보안 규칙이 맡는다.
    버전은 고정해 둔다. 올릴 때는 숫자만 바꾼다. */
 import { initializeApp } from 'https://www.gstatic.com/firebasejs/12.19.0/firebase-app.js';
-import { getAuth, GoogleAuthProvider, signInWithPopup, signOut, onAuthStateChanged }
+import { getAuth, GoogleAuthProvider, signInWithPopup, signInAnonymously, signOut, onAuthStateChanged }
   from 'https://www.gstatic.com/firebasejs/12.19.0/firebase-auth.js';
-import { getFirestore, doc, getDoc, setDoc }
+import { getFirestore, doc, getDoc, setDoc, collection, query, orderBy, limit, getDocs,
+         addDoc, writeBatch, serverTimestamp }
   from 'https://www.gstatic.com/firebasejs/12.19.0/firebase-firestore.js';
 
 const firebaseConfig = {
@@ -4738,6 +4892,12 @@ const cloud = window.cloud = {
     try{ return await signInWithPopup(auth, provider); }
     catch(e){ cloud.signedInNow = false; throw e; }
   },
+  // 시험용 익명 로그인 — 앱에서는 localhost로 열 때만 단추가 보인다(isLocalTest)
+  async signInAnon(){
+    cloud.signedInNow = true;
+    try{ return await signInAnonymously(auth); }
+    catch(e){ cloud.signedInNow = false; throw e; }
+  },
   signOut(){ return signOut(auth); },
   // 계정 기록 읽기: 없으면 null, 있으면 { data, updatedAt, v }
   async pull(){
@@ -4745,7 +4905,38 @@ const cloud = window.cloud = {
     return snap.exists() ? snap.data() : null;
   },
   // 계정 기록 쓰기 (통째로 바꾼다)
-  push(payload){ return setDoc(myDoc(), payload); }
+  push(payload){ return setDoc(myDoc(), payload); },
+  // 내 공개 정원 쓰기 gardens/{uid}
+  publishGarden(g){
+    return setDoc(doc(db, 'gardens', auth.currentUser.uid), { ...g, updatedAt: serverTimestamp() });
+  },
+  // 공개 정원 최근 순 20곳. 걸러 쓰는 것은 앱 쪽(sanitizeGarden)이 맡는다
+  async listGardens(){
+    const snap = await getDocs(query(collection(db, 'gardens'), orderBy('updatedAt', 'desc'), limit(20)));
+    return snap.docs.map(d=>{
+      const v = d.data();
+      return { ...v, id: d.id, updatedAtMs: v.updatedAt && v.updatedAt.toMillis ? v.updatedAt.toMillis() : 0 };
+    });
+  },
+  // 이웃 정원에 물 준 것을 남긴다 gardens/{이웃uid}/visits/{자동}
+  sendVisit(ownerUid, { from, iid }){
+    return addDoc(collection(db, 'gardens', ownerUid, 'visits'),
+      { fromUid: auth.currentUser.uid, from, iid, at: serverTimestamp() });
+  },
+  // 내 정원에 남은 visits를 모두 읽고 지운다
+  async takeVisits(){
+    // 한 번에 지울 수 있는 수(500)보다 적게 받는다. 남은 것은 다음 번에
+    const snap = await getDocs(query(collection(db, 'gardens', auth.currentUser.uid, 'visits'), limit(400)));
+    if(snap.empty) return [];
+    const batch = writeBatch(db);
+    const list = snap.docs.map(d=>{
+      batch.delete(d.ref);
+      const v = d.data();
+      return { from: v.from, iid: v.iid, at: v.at && v.at.toMillis ? v.at.toMillis() : Date.now() };
+    });
+    await batch.commit();
+    return list;
+  }
 };
 onAuthStateChanged(auth, user=>{
   const prev = cloud.user;
