@@ -1,0 +1,24 @@
+rules_version = '2';
+
+// 운교서당 Firestore 보안 규칙
+// Firebase 콘솔 → Firestore Database → 규칙 탭에 이 내용을 그대로 붙여 넣고 「게시」한다.
+// 이 파일은 공개돼도 괜찮다(규칙은 숨겨서 지키는 것이 아니다).
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    function isOwner(uid) { return request.auth != null && request.auth.uid == uid; }
+
+    // 내 기록 users/{uid} — 나만 읽고 쓴다.
+    // { data: 기록 전체(JSON 문자열), updatedAt: 저장한 때(밀리초), v: 형식 버전 }
+    match /users/{uid} {
+      allow read, delete: if isOwner(uid);
+      allow create, update: if isOwner(uid)
+        && request.resource.data.keys().hasOnly(['data', 'updatedAt', 'v'])
+        && request.resource.data.data is string
+        && request.resource.data.data.size() < 900000
+        && request.resource.data.updatedAt is number;
+    }
+
+    // 그 밖의 곳은 모두 막힌다 (공개 정원 gardens는 다음 단계에서 연다)
+  }
+}

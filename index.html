@@ -412,6 +412,12 @@ button.cell{cursor:pointer}
 const SIZE_SCALE = 0.7;
 
 const SAVE_KEY = 'kseodang_v12';
+// 계정 저장 상태 — save()가 앱이 켜지는 도중에도 불리므로 맨 앞에 둔다 (자세한 설명은 「계정에 저장하고 불러오기」)
+const CLOUD_PUSH_DELAY = 30000;
+const SYNC_NOTE_KEY = 'kseodang_sync_note'; // 새로고침 뒤에 띄울 알림
+const ADOPTED_KEY = 'kseodang_adopted';     // 계정 기록을 받아 새로고침한 표시(되풀이 막기)
+let syncState = 'off'; // off | syncing | ready | error
+let pushTimer = null;
 
 /* ── 천자문 1000자 ────────────────────────
    토큰 = 한자 + 훈 + 음   (예: 天하늘천)
@@ -4502,7 +4508,11 @@ function toast(msg){
   t.textContent=msg; t.classList.add('on');
   clearTimeout(toastTimer); toastTimer=setTimeout(()=>t.classList.remove('on'),1800);
 }
-function save(){ try{ localStorage.setItem(SAVE_KEY,JSON.stringify(S)); }catch(e){} }
+/* 저장은 늘 이 기기(localStorage)에 곧장 하고, 로그인 중이면 계정에는
+   모아서 올린다(scheduleCloudPush). 기기 저장이 곧 「올릴 것」 줄이므로,
+   올리기 전에 앱이 닫혀도 다음에 켤 때 올라간다. */
+function save(){ S.updatedAt=Date.now(); persistLocal(); scheduleCloudPush(); }
+function persistLocal(){ try{ localStorage.setItem(SAVE_KEY,JSON.stringify(S)); }catch(e){} }
 function load(){ try{ return JSON.parse(localStorage.getItem(SAVE_KEY)); }catch(e){ return null; } }
 
 /* ── 계정 ─────────────────────────────────────
@@ -4555,18 +4565,23 @@ function renderAccount(){
     return;
   }
   if(user){
+    const synced = S.ownerUid===user.uid && S.syncBase
+      ? `계정에 마지막으로 담은 때: ${agoText(S.syncBase)} ${new Date(S.syncBase).toTimeString().slice(0,5)}`
+      : (syncState==='error' ? '계정과 이어지지 않았습니다. 이 기기에만 저장하고 있습니다.' : '계정의 기록을 맞추는 중입니다…');
     sheetBody.innerHTML = `
       <div class="hanja-card" style="text-align:left">
         <div class="hunum">${escHTML(user.displayName||'이름 없음')}</div>
         <div class="hint">${escHTML(user.email||'')} 계정으로 들어와 있습니다.</div>
+        <div class="hint">${synced}</div>
       </div>
+      <p class="note" style="margin:0 2px 12px">로그아웃하면 이 기기는 처음 상태로 돌아갑니다. 기록은 계정에 남아 있어 다시 들어오면 이어집니다.</p>
       <button class="subbtn" id="signOutBtn">로그아웃</button>`;
-    document.getElementById('signOutBtn').addEventListener('click', ()=>cloud.signOut());
+    document.getElementById('signOutBtn').addEventListener('click', signOutAndReset);
     return;
   }
   sheetBody.innerHTML = `
-    <p class="note" style="margin:0 2px 12px">구글 계정으로 들어오면, 다른 기기에서도 이어서 공부하고 정원을 가꿀 수 있게 됩니다.
-      (지금은 로그인만 됩니다. 기록을 계정에 담는 것은 곧 붙습니다.)</p>
+    <p class="note" style="margin:0 2px 12px">구글 계정으로 들어오면 공부한 것과 정원이 계정에 담겨, 다른 기기에서도 이어서 할 수 있습니다.
+      이 기기에서 하던 것은 처음 들어올 때 계정에 담깁니다. (이미 다른 기기에서 쓰던 계정이면 계정에 담긴 기록을 불러옵니다.)</p>
     <button class="bigbtn" id="signInBtn">구글 계정으로 로그인</button>`;
   document.getElementById('signInBtn').addEventListener('click', async ()=>{
     try{ await cloud.signIn(); }
@@ -4583,9 +4598,104 @@ function renderAccount(){
 /* 로그인 상태가 바뀔 때마다 모듈 스크립트가 부른다 (앱을 켤 때도 한 번) */
 function onCloudAuth(user, prev){
   if(user && !prev && window.cloud.signedInNow) toast(`${user.displayName||'학동'}님, 어서 오세요`);
-  if(!user && prev) toast('로그아웃했습니다');
   syncAcctBtn();
+  if(user) cloudSync(user);
+  else { syncState='off'; clearTimeout(pushTimer); pushTimer=null; }
   if(overlay.classList.contains('on') && sheetTitle.textContent===ACCOUNT_TITLE) renderAccount();
+}
+
+/* ── 계정에 저장하고 불러오기 ───────────────────
+   계정 문서 users/{uid} = { data: S를 JSON 문자열로, updatedAt, v }.
+   S 안에 두 가지를 적어 둔다.
+     S.ownerUid  이 기기의 기록이 어느 계정 것인지 (없으면 손님 기록)
+     S.syncBase  이 기기가 마지막으로 계정과 맞춘 때의 계정 쪽 updatedAt
+   로그인하면(앱을 켤 때 자동 로그인 포함) 계정 문서를 한 번 읽어 맞춘다.
+     계정에 기록이 없다          → 이 기기 기록을 올린다 (처음 로그인)
+     손님 기록 / 다른 계정 기록  → 계정 기록을 받는다 (새 기기에서 비어 있던
+                                  기록이 계정 기록을 덮지 않게)
+     계정이 그대로다             → 이 기기에서 바뀐 게 있으면 올린다
+     이 기기는 그대로, 계정은 바뀜 → 계정 기록을 받는다
+     둘 다 바뀜                  → 나중에 저장한 쪽을 쓴다
+   받을 때는 기기 저장을 바꾼 뒤 새로고침한다(앱이 켜질 때 한 번에 S를
+   만드는 지금 구조를 그대로 쓰기 위해). 올리기는 30초씩 모아서 하고,
+   화면을 벗어날 때는 곧장 올린다. */
+function scheduleCloudPush(){
+  if(syncState!=='ready' || pushTimer) return;
+  pushTimer = setTimeout(cloudPushNow, CLOUD_PUSH_DELAY);
+}
+async function cloudPushNow(){
+  clearTimeout(pushTimer); pushTimer=null;
+  const user = window.cloud && window.cloud.user;
+  if(syncState!=='ready' || !user || S.ownerUid!==user.uid) return;
+  if((S.updatedAt||0) <= (S.syncBase||0)) return; // 올릴 것이 없다
+  const at = S.updatedAt;
+  try{
+    await window.cloud.push({ data: JSON.stringify(S), updatedAt: at, v: 1 });
+    S.syncBase = at; persistLocal(); // updatedAt은 건드리지 않는다
+  }catch(e){ console.warn('계정에 올리지 못함', e); }
+}
+async function cloudSync(user){
+  syncState='syncing';
+  let remote;
+  try{ remote = await window.cloud.pull(); }
+  catch(e){
+    console.warn('계정 기록을 읽지 못함', e);
+    syncState='error';
+    return toast('계정 기록을 불러오지 못했습니다. 이 기기에만 저장합니다');
+  }
+  const mine = S.ownerUid===user.uid, guest = !S.ownerUid;
+  if(!remote){
+    if(mine || guest){
+      S.ownerUid=user.uid; S.syncBase=0; S.updatedAt=S.updatedAt||Date.now(); persistLocal();
+      syncReady();
+      await cloudPushNow();
+      if(guest) toast('이 기기의 기록을 계정에 담았습니다');
+      return;
+    }
+    return adoptRemote(null, user, '새 계정이라 처음부터 시작합니다');
+  }
+  if(!mine) return adoptRemote(remote, user, '계정의 기록을 불러왔습니다');
+  const localChanged = (S.updatedAt||0) > (S.syncBase||0);
+  if(remote.updatedAt===S.syncBase || (localChanged && S.updatedAt>=remote.updatedAt)){
+    syncReady();
+    return cloudPushNow();
+  }
+  return adoptRemote(remote, user, '다른 기기에서 한 것을 불러왔습니다');
+}
+function syncReady(){
+  syncState='ready';
+  sessionStorage.removeItem(ADOPTED_KEY);
+  if(overlay.classList.contains('on') && sheetTitle.textContent===ACCOUNT_TITLE) renderAccount();
+}
+function adoptRemote(remote, user, note){
+  // 같은 것을 두 번 받으려 하면(무엇인가 어긋난 경우) 새로고침을 되풀이하지 않는다
+  const mark = `${user.uid}:${remote ? remote.updatedAt : 'fresh'}`;
+  if(sessionStorage.getItem(ADOPTED_KEY)===mark){ syncState='error'; return; }
+  sessionStorage.setItem(ADOPTED_KEY, mark);
+  try{
+    if(remote){
+      const next = JSON.parse(remote.data);
+      next.ownerUid=user.uid; next.syncBase=remote.updatedAt; next.updatedAt=remote.updatedAt;
+      localStorage.setItem(SAVE_KEY, JSON.stringify(next));
+    } else localStorage.removeItem(SAVE_KEY);
+    sessionStorage.setItem(SYNC_NOTE_KEY, note);
+  }catch(e){ console.warn('계정 기록을 받지 못함', e); syncState='error'; return; }
+  location.reload();
+}
+async function signOutAndReset(){
+  await cloudPushNow();             // 남은 것을 올리고
+  syncState='off';
+  sessionStorage.removeItem(ADOPTED_KEY);
+  await window.cloud.signOut();
+  try{ localStorage.removeItem(SAVE_KEY); }catch(e){}
+  sessionStorage.setItem(SYNC_NOTE_KEY, '로그아웃했습니다');
+  location.reload();                // 이 기기는 처음 상태(손님)로
+}
+document.addEventListener('visibilitychange', ()=>{ if(document.visibilityState==='hidden') cloudPushNow(); });
+window.addEventListener('pagehide', ()=>{ cloudPushNow(); });
+{
+  const note = sessionStorage.getItem(SYNC_NOTE_KEY);
+  if(note){ sessionStorage.removeItem(SYNC_NOTE_KEY); setTimeout(()=>toast(note), 400); }
 }
 
 syncHUD();
@@ -4600,6 +4710,8 @@ if(where==='garden') setTimeout(showVisitNotice, 600);
 import { initializeApp } from 'https://www.gstatic.com/firebasejs/12.19.0/firebase-app.js';
 import { getAuth, GoogleAuthProvider, signInWithPopup, signOut, onAuthStateChanged }
   from 'https://www.gstatic.com/firebasejs/12.19.0/firebase-auth.js';
+import { getFirestore, doc, getDoc, setDoc }
+  from 'https://www.gstatic.com/firebasejs/12.19.0/firebase-firestore.js';
 
 const firebaseConfig = {
   apiKey: "AIzaSyBqZ_hdLPrEnPA7YHTV3H3cQ0sU7bhJKJs",
@@ -4612,6 +4724,8 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 auth.languageCode = 'ko';
+const db = getFirestore(app);
+const myDoc = ()=>doc(db, 'users', auth.currentUser.uid); // 내 기록 문서 users/{uid}
 
 const cloud = window.cloud = {
   user: null,
@@ -4624,7 +4738,14 @@ const cloud = window.cloud = {
     try{ return await signInWithPopup(auth, provider); }
     catch(e){ cloud.signedInNow = false; throw e; }
   },
-  signOut(){ return signOut(auth); }
+  signOut(){ return signOut(auth); },
+  // 계정 기록 읽기: 없으면 null, 있으면 { data, updatedAt, v }
+  async pull(){
+    const snap = await getDoc(myDoc());
+    return snap.exists() ? snap.data() : null;
+  },
+  // 계정 기록 쓰기 (통째로 바꾼다)
+  push(payload){ return setDoc(myDoc(), payload); }
 };
 onAuthStateChanged(auth, user=>{
   const prev = cloud.user;
