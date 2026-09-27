@@ -945,7 +945,7 @@ aut_01:{name:'단풍나무',slot:'mid',rar:'SR',cur:'coin',amt:25,box:[156,168],
   svg:`<path d="M82 166 q7 -56 -2 -84 q-8 -22 -28 -36" stroke="#7A5540" stroke-width="12" fill="none" stroke-linecap="round"/><path d="M78 96 q26 -14 42 -40 M76 124 q-22 -8 -34 -24" stroke="#7A5540" stroke-width="8" fill="none" stroke-linecap="round"/><g fill="#D9541F"><circle cx="40" cy="52" r="24"/><circle cx="82" cy="30" r="26"/><circle cx="122" cy="52" r="22"/><circle cx="58" cy="80" r="22"/><circle cx="108" cy="88" r="21"/><circle cx="30" cy="88" r="16"/></g><g fill="#F0873A"><circle cx="82" cy="26" r="12"/><circle cx="42" cy="48" r="10"/><circle cx="108" cy="84" r="10"/><circle cx="58" cy="76" r="9"/><circle cx="122" cy="48" r="8"/></g><g fill="#F7BE4C"><circle cx="82" cy="22" r="5"/><circle cx="42" cy="44" r="4.5"/><circle cx="108" cy="80" r="4.5"/></g>`},
 
 aut_02:{name:'감나무',slot:'mid',rar:'R',cur:'coin',amt:13,box:[150,176],at:[312,448],anchor:'bc',plant:true,
-  media:'img',src:'items/persimmon-08.png',imgSize:[843,1264],crop:[22,179,806,943],
+  media:'img',src:'items/persimmon/persimmon-08.png',imgSize:[843,1264],crop:[22,179,806,943],
   svg:`<path d="M66 140 q-5 -42 2 -62 q5 -18 20 -28" stroke="#6F5A3E" stroke-width="8" fill="none" stroke-linecap="round"/><path d="M68 88 q20 -8 32 -22 M66 102 q-18 -6 -28 -20" stroke="#6F5A3E" stroke-width="6" fill="none" stroke-linecap="round"/><g fill="#5E8A3C"><circle cx="34" cy="52" r="20"/><circle cx="66" cy="34" r="22"/><circle cx="98" cy="52" r="19"/><circle cx="46" cy="76" r="19"/><circle cx="88" cy="76" r="19"/></g><g fill="#6F9E45"><circle cx="66" cy="30" r="11"/><circle cx="38" cy="70" r="9"/><circle cx="94" cy="70" r="9"/></g><g fill="#EE8C22"><circle cx="38" cy="58" r="9"/><circle cx="80" cy="44" r="9.5"/><circle cx="62" cy="80" r="9"/><circle cx="104" cy="60" r="8"/></g><g fill="#F5A93F"><circle cx="36" cy="56" r="3.6"/><circle cx="78" cy="42" r="3.8"/><circle cx="60" cy="78" r="3.6"/></g><g fill="#4A7030"><rect x="34" y="50" width="8" height="2.6" rx="1.3"/><rect x="76" y="36" width="8" height="2.6" rx="1.3"/><rect x="58" y="72" width="8" height="2.6" rx="1.3"/></g>`},
 
 aut_03:{name:'억새',slot:'mid',rar:'N',cur:'coin',amt:3,box:[110,96],at:[58,524],anchor:'bc',plant:true,
@@ -1003,10 +1003,12 @@ Object.assign(ITEMS, {
     svg:`<ellipse cx="15" cy="20" rx="13" ry="4" fill="rgba(43,36,28,.22)"/><ellipse cx="15" cy="15" rx="12" ry="5" fill="#8B6A4E" stroke="#2B2620" stroke-width="2.4"/><ellipse cx="15" cy="13" rx="8" ry="3" fill="#A9744F"/><path d="M15 13 v-4" stroke="#2B2620" stroke-width="2" stroke-linecap="round"/><circle cx="15" cy="8" r="3" fill="#D9718F" stroke="#2B2620" stroke-width="1.8"/>`},
   sap_mh:{name:'매화나무 묘목',slot:'mid',rar:'R',cur:'coin',amt:4,box:[40,50],at:[180,540],anchor:'bc',grow:'sapling',season:'all',
     svg:`<ellipse cx="20" cy="50" rx="12.8" ry="2.3" fill="rgba(43,36,28,.28)"/><path d="M20 50 L20 24" stroke="#2B2620" stroke-width="5.6" stroke-linecap="round"/><path d="M20 50 L20 24" stroke="#8B6A4E" stroke-width="3" stroke-linecap="round"/><path d="M20 30 l-7 -6" stroke="#2B2620" stroke-width="4.6" stroke-linecap="round"/><path d="M20 30 l-7 -6" stroke="#8B6A4E" stroke-width="2" stroke-linecap="round"/><path d="M20 28 l7 -5" stroke="#2B2620" stroke-width="4.6" stroke-linecap="round"/><path d="M20 28 l7 -5" stroke="#8B6A4E" stroke-width="2" stroke-linecap="round"/><circle cx="11" cy="20" r="7" fill="#6E9A50" stroke="#2B2620" stroke-width="2.6"/><circle cx="13.9" cy="22.1" r="3.9" fill="#527E34"/><circle cx="22" cy="15" r="7.5" fill="#6E9A50" stroke="#2B2620" stroke-width="2.6"/><circle cx="24.1" cy="17.3" r="4.1" fill="#527E34"/><circle cx="28" cy="23" r="6.5" fill="#6E9A50" stroke="#2B2620" stroke-width="2.6"/><circle cx="29.8" cy="24.9" r="3.6" fill="#527E34"/>`},
-  sap_gam:{name:'감나무 묘목',slot:'mid',rar:'R',cur:'coin',amt:3,box:[40,50],at:[100,540],anchor:'bc',grow:'sapling',growTable:'gam',season:'all',
+  sap_gam:{name:'감나무 묘목',slot:'mid',rar:'R',cur:'coin',amt:3,box:[40,50],at:[100,540],anchor:'bc',grow:'sapling',season:'all',
     svg:`<ellipse cx="20" cy="50" rx="12.8" ry="2.3" fill="rgba(43,36,28,.28)"/><path d="M20 50 L20 24" stroke="#2B2620" stroke-width="5.6" stroke-linecap="round"/><path d="M20 50 L20 24" stroke="#8B6A4E" stroke-width="3" stroke-linecap="round"/><path d="M20 30 l-7 -6" stroke="#2B2620" stroke-width="4.6" stroke-linecap="round"/><path d="M20 30 l-7 -6" stroke="#8B6A4E" stroke-width="2" stroke-linecap="round"/><path d="M20 28 l7 -5" stroke="#2B2620" stroke-width="4.6" stroke-linecap="round"/><path d="M20 28 l7 -5" stroke="#8B6A4E" stroke-width="2" stroke-linecap="round"/><circle cx="11" cy="20" r="7" fill="#7FA94A" stroke="#2B2620" stroke-width="2.6"/><circle cx="13.9" cy="22.1" r="3.9" fill="#5C7D33"/><circle cx="22" cy="15" r="7.5" fill="#7FA94A" stroke="#2B2620" stroke-width="2.6"/><circle cx="24.1" cy="17.3" r="4.1" fill="#5C7D33"/><circle cx="28" cy="23" r="6.5" fill="#7FA94A" stroke="#2B2620" stroke-width="2.6"/><circle cx="29.8" cy="24.9" r="3.6" fill="#5C7D33"/>`},
   sap_bam:{name:'밤나무 묘목',slot:'mid',rar:'R',cur:'coin',amt:2,box:[40,50],at:[260,540],anchor:'bc',grow:'sapling',season:'all',
-    svg:`<ellipse cx="20" cy="50" rx="12.8" ry="2.3" fill="rgba(43,36,28,.28)"/><path d="M20 50 L20 24" stroke="#2B2620" stroke-width="5.6" stroke-linecap="round"/><path d="M20 50 L20 24" stroke="#8B6A4E" stroke-width="3" stroke-linecap="round"/><path d="M20 30 l-7 -6" stroke="#2B2620" stroke-width="4.6" stroke-linecap="round"/><path d="M20 30 l-7 -6" stroke="#8B6A4E" stroke-width="2" stroke-linecap="round"/><path d="M20 28 l7 -5" stroke="#2B2620" stroke-width="4.6" stroke-linecap="round"/><path d="M20 28 l7 -5" stroke="#8B6A4E" stroke-width="2" stroke-linecap="round"/><circle cx="11" cy="20" r="7" fill="#5E8A3C" stroke="#2B2620" stroke-width="2.6"/><circle cx="13.9" cy="22.1" r="3.9" fill="#3F5F27"/><circle cx="22" cy="15" r="7.5" fill="#5E8A3C" stroke="#2B2620" stroke-width="2.6"/><circle cx="24.1" cy="17.3" r="4.1" fill="#3F5F27"/><circle cx="28" cy="23" r="6.5" fill="#5E8A3C" stroke="#2B2620" stroke-width="2.6"/><circle cx="29.8" cy="24.9" r="3.6" fill="#3F5F27"/>`}
+    svg:`<ellipse cx="20" cy="50" rx="12.8" ry="2.3" fill="rgba(43,36,28,.28)"/><path d="M20 50 L20 24" stroke="#2B2620" stroke-width="5.6" stroke-linecap="round"/><path d="M20 50 L20 24" stroke="#8B6A4E" stroke-width="3" stroke-linecap="round"/><path d="M20 30 l-7 -6" stroke="#2B2620" stroke-width="4.6" stroke-linecap="round"/><path d="M20 30 l-7 -6" stroke="#8B6A4E" stroke-width="2" stroke-linecap="round"/><path d="M20 28 l7 -5" stroke="#2B2620" stroke-width="4.6" stroke-linecap="round"/><path d="M20 28 l7 -5" stroke="#8B6A4E" stroke-width="2" stroke-linecap="round"/><circle cx="11" cy="20" r="7" fill="#5E8A3C" stroke="#2B2620" stroke-width="2.6"/><circle cx="13.9" cy="22.1" r="3.9" fill="#3F5F27"/><circle cx="22" cy="15" r="7.5" fill="#5E8A3C" stroke="#2B2620" stroke-width="2.6"/><circle cx="24.1" cy="17.3" r="4.1" fill="#3F5F27"/><circle cx="28" cy="23" r="6.5" fill="#5E8A3C" stroke="#2B2620" stroke-width="2.6"/><circle cx="29.8" cy="24.9" r="3.6" fill="#3F5F27"/>`},
+  sap_baerong:{name:'배롱나무 묘목',slot:'mid',rar:'R',cur:'coin',amt:4,box:[21,50],at:[340,540],anchor:'bc',grow:'sapling',season:'all',
+    media:'img',src:'items/baerong/baerong-1.png'},
 });
 
 /* ── 흥부전 대목을 처음 마쳐야만 얻는 것 ─────────
@@ -1590,30 +1592,6 @@ const PLUM_STAGES = [
   {name:'열매 맺은 나무',w:120,h:150, draw:plumFruit}
 ];
 
-/* ── 감나무 열 단계 — 그림 파일(items/persimmon-01~10.png) ─────────
-   그림마다 캔버스 속 자리와 크기가 제각각이라, 실제로 그려진 부분(crop,
-   원본 픽셀)만 잘라 단계 칸(w×h)에 채운다. 칸 크기는 단계가 오를수록
-   넓이가 커지고 높이가 줄지 않게 잡았다(묘목 22×47 ~ 열매 맺은 큰 나무
-   179×143). 그림에는 그림자가 없어 발치에 타원 그림자를 코드로 붙인다. */
-function gamStage(name, file, size, crop, w, h){
-  const src='items/'+file;
-  return { name, w, h, draw:()=> plantShadow(w,h)
-    + `<svg x="0" y="0" width="${w}" height="${h}" viewBox="${crop.join(' ')}" preserveAspectRatio="xMidYMax meet">
-        <image href="${src}" xlink:href="${src}" x="0" y="0" width="${size[0]}" height="${size[1]}"/></svg>` };
-}
-const GAM_STAGES = [
-  gamStage('묘목', 'persimmon-01.png', [843,1264], [251,254,345,757], 22, 47),
-  gamStage('새순', 'persimmon-02.png', [1408,768], [265,411,111,192], 29, 50),
-  gamStage('어린나무', 'persimmon-03.png', [1408,768], [383,321,151,300], 32, 63),
-  gamStage('곧게 자란 나무', 'persimmon-04.png', [1408,768], [549,264,167,358], 37, 79),
-  gamStage('가지 뻗은 나무', 'persimmon-05.png', [843,1264], [60,71,300,287], 84, 80),
-  gamStage('우거진 나무', 'persimmon-06.png', [843,1264], [456,34,352,337], 96, 92),
-  gamStage('풋감 달린 나무', 'persimmon-07.png', [843,1264], [22,435,385,356], 112, 104),
-  gamStage('감 익는 나무', 'persimmon-08.png', [843,1264], [22,179,806,943], 115, 134),
-  gamStage('감 주렁주렁한 나무', 'persimmon-09.png', [843,1264], [440,437,384,357], 145, 135),
-  gamStage('열매 맺은 큰 나무', 'persimmon-10.png', [843,1264], [179,851,490,391], 179, 143),
-];
-
 /* ── 국화(첫 화초) 다섯 단계 + 시든 모습 ─────
    씨앗·새싹은 다른 화초와 비슷해도 되고, 떡잎부터 잎 모양(들쭉날쭉한
    국화잎)을 살리고, 봉오리·꽃은 뚜렷이 구별한다. 시든 모습은 줄기가
@@ -1692,9 +1670,151 @@ const GUK_WITHER = {name:'시든 모습',w:60,h:72, draw:gukWither}; // 자라�
    단계 계산은 모두 아래 함수들을 거친다. 숫자 4나 5를 코드에 직접 쓰지 않는다. */
 const GROW_TYPES = {
   seed:    { kind:'화초', stages:GUK_STAGES,  dropsPerStage:3, bonus:3 },
-  sapling: { kind:'나무', stages:PLUM_STAGES, dropsPerStage:3, bonus:5 },
-  gam:     { kind:'나무', stages:GAM_STAGES,  dropsPerStage:3, bonus:5 }  // 감나무 묘목(sap_gam)만
+  sapling: { kind:'나무', stages:PLUM_STAGES, dropsPerStage:3, bonus:5 }
 };
+/* ── 그림 파일로 자라는 나무 ─────────────────────────
+   나무 한 종 = TREE_ART 한 줄. 새 나무를 더하려면
+     1) items/<폴더>/ 에 단계 그림을 차례대로 넣는다(파일 이름에 01, 02 … 번호)
+     2) 아래 표에 한 줄을 적는다: 어느 묘목 아이템이 쓸지, 폴더, 파일 이름 모양, 장수
+   나머지는 앱이 그림을 불러오면서 알아서 한다.
+     - 실제로 그려진 부분만 잘라 낸다(둘레 여백)
+     - 바탕이 투명하지 않은 그림은 가장자리에서 이어진 바탕색을 투명하게 만든다.
+       가지 사이에 갇힌 바탕도 어느 정도 크면 걷는다. 원본 파일은 그대로 두며,
+       바탕이 투명한 PNG를 넣는 것이 가장 깔끔하다
+     - 단계가 오를수록 커지게 칸 크기를 정한다. 키는 TREE_HEIGHT_FROM에서
+       TREE_HEIGHT_TO까지 자라며(TREE_SIZE_CURVE로 앞쪽 단계가 빨리 자라게),
+       앞 단계보다 적어도 TREE_MIN_STEP배 커진다. 가로는 그림 비율대로.
+       앞뒤 위치와 상관없이 늘 이 기준 크기로 그린다
+     - 발치에 타원 그림자를 붙인다
+   file 안의 {nn}은 01, 02 …, {n}은 1, 2 … 로 바뀐다.
+   names  단계 이름(없으면 TREE_DEFAULT_NAMES)
+   scale  몇몇 단계만 기준 크기를 바꿀 때 {단계 번호: 배율}
+   그림은 그 나무가 화면에 나올 때 처음 불러온다(다 불러오기 전에는 그림자만). */
+const TREE_ART = {
+  gam: { item:'sap_gam', dir:'items/persimmon', file:'persimmon-{nn}.png', count:10, scale:{10:1.2},
+         names:['묘목','새순','어린나무','곧게 자란 나무','가지 뻗은 나무','우거진 나무','풋감 달린 나무','감 익는 나무','감 주렁주렁한 나무','열매 맺은 큰 나무'] },
+  bam: { item:'sap_bam', dir:'items/chestnut', file:'chestnut-{nn}.png', count:10, scale:{10:1.2},
+         names:['묘목','새순','어린나무','가지 뻗은 나무','잎 무성한 나무','우거진 나무','풋밤송이 달린 나무','밤송이 여무는 나무','밤송이 벌어진 나무','열매 맺은 큰 나무'] },
+  baerong: { item:'sap_baerong', dir:'items/baerong', file:'baerong-{n}.png', count:10, scale:{10:1.2},
+         names:['묘목','가지 뻗는 묘목','어린나무','잎 무성한 나무','우거진 나무','둥글게 자란 나무','굵어진 나무','꽃봉오리 맺은 나무','꽃 핀 나무','꽃 만발한 큰 나무'] }
+};
+const TREE_HEIGHT_FROM = 46, TREE_HEIGHT_TO = 150; // 첫 단계·마지막 단계의 키(기준 크기, 화면에는 SIZE_SCALE배)
+const TREE_SIZE_CURVE = 0.8; // 1보다 작을수록 앞쪽 단계에서 빨리 자란다(1이면 고르게)
+const TREE_MIN_STEP = 1.06;  // 단계가 오를 때 키가 적어도 이만큼(6%)은 커진다
+const TREE_DEFAULT_NAMES = ['묘목','새순','어린나무','자라는 나무','가지 뻗은 나무','우거진 나무','꽃 핀 나무','열매 달린 나무','열매 익는 나무','열매 맺은 큰 나무'];
+const TREE_PREP_MAX = 512;   // 그림을 손질할 때 줄이는 크기(긴 쪽 픽셀). 화면에는 이것으로 넉넉하다
+const TREE_BG_TOLERANCE = 40; // 바탕색으로 볼 색 차이(RGB 차이의 합)
+const TREE_BG_MIN_PATCH = 12;  // 안쪽에 갇힌 바탕 덩어리를 걷어 낼 최소 크기(손질 크기 기준 픽셀 수)
+
+function sizeTreeStages(art, stages){
+  const n=stages.length; let prevH=0;
+  stages.forEach((st,i)=>{
+    // 나무 크기는 키로 정하고 가로는 그림 비율대로(가늘고 긴 어린나무도 키는 제대로 자란다)
+    const t = n>1 ? i/(n-1) : 1;
+    let h = TREE_HEIGHT_FROM + (TREE_HEIGHT_TO-TREE_HEIGHT_FROM)*Math.pow(t, TREE_SIZE_CURVE);
+    h = Math.max(h, prevH*TREE_MIN_STEP); // 키가 앞 단계보다 눈에 띄게 커지게
+    const w = h*(st.aspect || 1);
+    prevH=h;
+    const s=(art.scale && art.scale[i+1]) || 1;
+    st.w=Math.round(w*s); st.h=Math.round(h*s);
+  });
+}
+/* 그림 한 장을 불러와 손질한다 → { url(잘라 낸 그림), aspect(가로/세로) } */
+function prepareTreeImage(src){
+  return new Promise(resolve=>{
+    const img=new Image();
+    img.onerror=()=>resolve(null);
+    img.onload=()=>{
+      const k=Math.min(1, TREE_PREP_MAX/Math.max(img.naturalWidth, img.naturalHeight));
+      const W=Math.max(1,Math.round(img.naturalWidth*k)), H=Math.max(1,Math.round(img.naturalHeight*k));
+      const cv=document.createElement('canvas'); cv.width=W; cv.height=H;
+      const ctx=cv.getContext('2d'); ctx.drawImage(img,0,0,W,H);
+      let data;
+      try{ data=ctx.getImageData(0,0,W,H); }
+      catch(e){ return resolve({ url:src, aspect:img.naturalWidth/img.naturalHeight }); } // 파일로 연 화면 등: 손질 없이
+      const d=data.data;
+      // 가장자리가 거의 다 불투명하면 바탕이 칠해진 그림 → 가장자리에서 이어진 바탕색을 걷어 낸다
+      let edge=0, solid=0, r=0, g=0, b=0;
+      const look=(x,y)=>{ const i=(y*W+x)*4; edge++; if(d[i+3]>200){ solid++; r+=d[i]; g+=d[i+1]; b+=d[i+2]; } };
+      for(let x=0;x<W;x++){ look(x,0); look(x,H-1); }
+      for(let y=1;y<H-1;y++){ look(0,y); look(W-1,y); }
+      if(solid > edge*0.6){
+        r/=solid; g/=solid; b/=solid;
+        const T=TREE_BG_TOLERANCE, seen=new Uint8Array(W*H), stack=[];
+        const push=(x,y)=>{ if(x<0||y<0||x>=W||y>=H) return; const p=y*W+x; if(!seen[p]){ seen[p]=1; stack.push(p); } };
+        for(let x=0;x<W;x++){ push(x,0); push(x,H-1); }
+        for(let y=0;y<H;y++){ push(0,y); push(W-1,y); }
+        while(stack.length){
+          const p=stack.pop(), i=p*4;
+          const dist=Math.abs(d[i]-r)+Math.abs(d[i+1]-g)+Math.abs(d[i+2]-b);
+          if(dist<=T){
+            d[i+3]=0;
+            const x=p%W, y=(p-x)/W; push(x+1,y); push(x-1,y); push(x,y+1); push(x,y-1);
+          } else if(dist<=T*2){
+            d[i+3]=Math.min(d[i+3], Math.round(255*(dist-T)/T)); // 그림 가장자리는 부드럽게
+          }
+        }
+        // 가지·잎 사이에 갇혀 가장자리와 이어지지 않은 바탕도, 바탕색 덩어리가
+        // TREE_BG_MIN_PATCH 이상이면 걷어 낸다(잎의 밝은 반짝임 같은 작은 점은 둔다)
+        const near=p=>{ const i=p*4; return d[i+3]>0 && Math.abs(d[i]-r)+Math.abs(d[i+1]-g)+Math.abs(d[i+2]-b)<=T; };
+        for(let p0=0;p0<W*H;p0++){
+          if(seen[p0] || !near(p0)) continue;
+          const patch=[p0]; seen[p0]=1;
+          for(let q=0;q<patch.length;q++){
+            const p=patch[q], x=p%W, y=(p-x)/W;
+            for(const [nx,ny] of [[x+1,y],[x-1,y],[x,y+1],[x,y-1]]){
+              if(nx<0||ny<0||nx>=W||ny>=H) continue;
+              const np=ny*W+nx; if(!seen[np] && near(np)){ seen[np]=1; patch.push(np); }
+            }
+          }
+          if(patch.length>=TREE_BG_MIN_PATCH) patch.forEach(p=>{ d[p*4+3]=0; });
+        }
+        ctx.putImageData(data,0,0);
+      }
+      // 실제로 그려진 부분
+      let x0=W, y0=H, x1=-1, y1=-1;
+      for(let y=0;y<H;y++) for(let x=0;x<W;x++){
+        if(d[(y*W+x)*4+3]>24){ if(x<x0)x0=x; if(x>x1)x1=x; if(y<y0)y0=y; y1=y; }
+      }
+      if(x1<0) return resolve({ url:src, aspect:W/H });
+      const bw=x1-x0+1, bh=y1-y0+1, out=document.createElement('canvas');
+      out.width=bw; out.height=bh; out.getContext('2d').drawImage(cv, x0,y0,bw,bh, 0,0,bw,bh);
+      resolve({ url:out.toDataURL('image/png'), aspect:bw/bh });
+    };
+    img.src=src;
+  });
+}
+const treeArtState = {}; // key → 'loading' | 'ready'
+function ensureTreeArt(key){
+  if(treeArtState[key]) return;
+  treeArtState[key]='loading';
+  const art=TREE_ART[key], stages=GROW_TYPES[key].stages;
+  Promise.all(stages.map(st=>prepareTreeImage(st.src))).then(results=>{
+    results.forEach((r,i)=>{ if(r){ stages[i].url=r.url; stages[i].aspect=r.aspect; } });
+    sizeTreeStages(art, stages);
+    stages.forEach(st=>{ st.ready=!!st.url; });
+    treeArtState[key]='ready';
+    drawScene();
+  });
+}
+Object.entries(TREE_ART).forEach(([key, art])=>{
+  const pad=n=>String(n).padStart(2,'0');
+  const stages = Array.from({length:art.count}, (_,i)=>({
+    name: (art.names && art.names[i]) || (art.count===TREE_DEFAULT_NAMES.length ? TREE_DEFAULT_NAMES[i] : `${i+1}단계`),
+    src: `${art.dir}/${art.file.replace('{nn}', pad(i+1)).replace('{n}', i+1)}`,
+    aspect:1, w:0, h:0, ready:false,
+    draw(){
+      ensureTreeArt(key);
+      const shadow=plantShadow(this.w, this.h);
+      return this.ready
+        ? shadow+`<image href="${this.url}" xlink:href="${this.url}" x="0" y="0" width="${this.w}" height="${this.h}" preserveAspectRatio="xMidYMax meet"/>`
+        : shadow;
+    }
+  }));
+  sizeTreeStages(art, stages); // 그림을 불러오기 전 어림 크기
+  GROW_TYPES[key] = { kind:'나무', stages, dropsPerStage:art.dropsPerStage||3, bonus:art.bonus||5 };
+  ITEMS[art.item].growTable = key;
+});
 /* 아이템이 쓰는 단계 표의 이름. it.grow(seed/sapling)는 가게·목록에서 종류를
    가르는 데 쓰고, 단계 그림이 따로 있는 나무는 it.growTable로 제 표를 고른다. */
 function growKey(it){ return it.growTable || it.grow; }
@@ -4239,7 +4359,7 @@ function renderShop(){
 }
 /* ── 화수전: 씨앗 · 묘목 (계절 상관없이 상시 판매) ─── */
 const SEED_IDS=['seed_pr','seed_bs','seed_np','seed_gu','seed_md','seed_mr'];
-const SAPLING_IDS=['sap_mh','sap_gam','sap_bam'];
+const SAPLING_IDS=['sap_mh','sap_gam','sap_bam','sap_baerong'];
 function openGrowShop(){
   openSheetRaw('운교장터 · 화수전');
   activeShopRender=renderGrowShop;
@@ -4706,6 +4826,7 @@ function renderAccount(){
       <button class="subbtn" id="signOutBtn">로그아웃</button>`;
     document.getElementById('nickBtn').addEventListener('click', ()=>openNickSheet(false));
     document.getElementById('signOutBtn').addEventListener('click', signOutAndReset);
+    addTestTools();
     return;
   }
   sheetBody.innerHTML = `
@@ -4730,6 +4851,21 @@ function renderAccount(){
   document.getElementById('signInBtn').addEventListener('click', signInWith(()=>cloud.signIn()));
   const anonBtn=document.getElementById('anonBtn');
   if(anonBtn) anonBtn.addEventListener('click', signInWith(()=>cloud.signInAnon()));
+  addTestTools();
+}
+/* 시험용 도구 — 이 컴퓨터에서 localhost로 열 때만 계정 창 맨 아래에 보인다 */
+const TEST_GROW_AMOUNT = 100;
+function addTestTools(){
+  if(!isLocalTest()) return;
+  sheetBody.insertAdjacentHTML('beforeend', `
+    <div class="hanja-card" style="text-align:left;margin-top:16px">
+      <div class="hint">시험용 도구 (localhost에서만 보입니다)</div>
+      <button class="subbtn" id="testGrowBtn" style="margin-top:8px">성장수 ${TEST_GROW_AMOUNT}방울 넣기</button>
+    </div>`);
+  document.getElementById('testGrowBtn').addEventListener('click', ()=>{
+    S.growWater=(S.growWater||0)+TEST_GROW_AMOUNT; save(); syncHUD();
+    toast(`성장수 ${TEST_GROW_AMOUNT}방울을 넣었습니다 · 지금 ${S.growWater}방울`);
+  });
 }
 /* 이 컴퓨터에서 시험하는 중인가 (localhost로 연 경우만). 시험용 단추는 이때만 보인다. */
 function isLocalTest(){ return ['localhost','127.0.0.1'].includes(location.hostname); }
