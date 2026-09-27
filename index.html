@@ -1001,6 +1001,8 @@ Object.assign(ITEMS, {
     svg:`<ellipse cx="15" cy="20" rx="13" ry="4" fill="rgba(43,36,28,.22)"/><ellipse cx="15" cy="15" rx="12" ry="5" fill="#8B6A4E" stroke="#2B2620" stroke-width="2.4"/><ellipse cx="15" cy="13" rx="8" ry="3" fill="#A9744F"/><path d="M15 13 v-4" stroke="#2B2620" stroke-width="2" stroke-linecap="round"/><circle cx="15" cy="8" r="3" fill="#B03040" stroke="#2B2620" stroke-width="1.8"/>`},
   seed_mr:{name:'모란씨',slot:'front',rar:'N',cur:'coin',amt:2,pack:3,box:[30,20],at:[290,560],anchor:'bc',grow:'seed',season:'all',
     svg:`<ellipse cx="15" cy="20" rx="13" ry="4" fill="rgba(43,36,28,.22)"/><ellipse cx="15" cy="15" rx="12" ry="5" fill="#8B6A4E" stroke="#2B2620" stroke-width="2.4"/><ellipse cx="15" cy="13" rx="8" ry="3" fill="#A9744F"/><path d="M15 13 v-4" stroke="#2B2620" stroke-width="2" stroke-linecap="round"/><circle cx="15" cy="8" r="3" fill="#D9718F" stroke="#2B2620" stroke-width="1.8"/>`},
+  seed_ysh:{name:'영산홍씨',slot:'front',rar:'N',cur:'coin',amt:2,pack:3,box:[30,20],at:[320,560],anchor:'bc',grow:'seed',season:'all',
+    svg:`<ellipse cx="15" cy="20" rx="13" ry="4" fill="rgba(43,36,28,.22)"/><ellipse cx="15" cy="15" rx="12" ry="5" fill="#8B6A4E" stroke="#2B2620" stroke-width="2.4"/><ellipse cx="15" cy="13" rx="8" ry="3" fill="#A9744F"/><path d="M15 13 v-4" stroke="#2B2620" stroke-width="2" stroke-linecap="round"/><circle cx="15" cy="8" r="3" fill="#D9304A" stroke="#2B2620" stroke-width="1.8"/>`},
   sap_mh:{name:'매화나무 묘목',slot:'mid',rar:'R',cur:'coin',amt:4,box:[40,50],at:[180,540],anchor:'bc',grow:'sapling',season:'all',
     svg:`<ellipse cx="20" cy="50" rx="12.8" ry="2.3" fill="rgba(43,36,28,.28)"/><path d="M20 50 L20 24" stroke="#2B2620" stroke-width="5.6" stroke-linecap="round"/><path d="M20 50 L20 24" stroke="#8B6A4E" stroke-width="3" stroke-linecap="round"/><path d="M20 30 l-7 -6" stroke="#2B2620" stroke-width="4.6" stroke-linecap="round"/><path d="M20 30 l-7 -6" stroke="#8B6A4E" stroke-width="2" stroke-linecap="round"/><path d="M20 28 l7 -5" stroke="#2B2620" stroke-width="4.6" stroke-linecap="round"/><path d="M20 28 l7 -5" stroke="#8B6A4E" stroke-width="2" stroke-linecap="round"/><circle cx="11" cy="20" r="7" fill="#6E9A50" stroke="#2B2620" stroke-width="2.6"/><circle cx="13.9" cy="22.1" r="3.9" fill="#527E34"/><circle cx="22" cy="15" r="7.5" fill="#6E9A50" stroke="#2B2620" stroke-width="2.6"/><circle cx="24.1" cy="17.3" r="4.1" fill="#527E34"/><circle cx="28" cy="23" r="6.5" fill="#6E9A50" stroke="#2B2620" stroke-width="2.6"/><circle cx="29.8" cy="24.9" r="3.6" fill="#527E34"/>`},
   sap_gam:{name:'감나무 묘목',slot:'mid',rar:'R',cur:'coin',amt:3,box:[40,50],at:[100,540],anchor:'bc',grow:'sapling',season:'all',
@@ -1008,7 +1010,7 @@ Object.assign(ITEMS, {
   sap_bam:{name:'밤나무 묘목',slot:'mid',rar:'R',cur:'coin',amt:2,box:[40,50],at:[260,540],anchor:'bc',grow:'sapling',season:'all',
     svg:`<ellipse cx="20" cy="50" rx="12.8" ry="2.3" fill="rgba(43,36,28,.28)"/><path d="M20 50 L20 24" stroke="#2B2620" stroke-width="5.6" stroke-linecap="round"/><path d="M20 50 L20 24" stroke="#8B6A4E" stroke-width="3" stroke-linecap="round"/><path d="M20 30 l-7 -6" stroke="#2B2620" stroke-width="4.6" stroke-linecap="round"/><path d="M20 30 l-7 -6" stroke="#8B6A4E" stroke-width="2" stroke-linecap="round"/><path d="M20 28 l7 -5" stroke="#2B2620" stroke-width="4.6" stroke-linecap="round"/><path d="M20 28 l7 -5" stroke="#8B6A4E" stroke-width="2" stroke-linecap="round"/><circle cx="11" cy="20" r="7" fill="#5E8A3C" stroke="#2B2620" stroke-width="2.6"/><circle cx="13.9" cy="22.1" r="3.9" fill="#3F5F27"/><circle cx="22" cy="15" r="7.5" fill="#5E8A3C" stroke="#2B2620" stroke-width="2.6"/><circle cx="24.1" cy="17.3" r="4.1" fill="#3F5F27"/><circle cx="28" cy="23" r="6.5" fill="#5E8A3C" stroke="#2B2620" stroke-width="2.6"/><circle cx="29.8" cy="24.9" r="3.6" fill="#3F5F27"/>`},
   sap_baerong:{name:'배롱나무 묘목',slot:'mid',rar:'R',cur:'coin',amt:4,box:[21,50],at:[340,540],anchor:'bc',grow:'sapling',season:'all',
-    media:'img',src:'items/baerong/baerong-1.png'},
+    media:'img',src:'items/baerong/baerong-01.png'},
 });
 
 /* ── 흥부전 대목을 처음 마쳐야만 얻는 것 ─────────
@@ -1686,17 +1688,23 @@ const GROW_TYPES = {
        앞 단계보다 적어도 TREE_MIN_STEP배 커진다. 가로는 그림 비율대로.
        앞뒤 위치와 상관없이 늘 이 기준 크기로 그린다
      - 발치에 타원 그림자를 붙인다
-   file 안의 {nn}은 01, 02 …, {n}은 1, 2 … 로 바뀐다.
+   file 안의 {nn}은 01, 02 …, {n}은 1, 2 … 로 바뀐다(파일 이름이 다른 모양이어도 한 번 더 찾아본다).
    names  단계 이름(없으면 TREE_DEFAULT_NAMES)
    scale  몇몇 단계만 기준 크기를 바꿀 때 {단계 번호: 배율}
+   화초도 같은 표에 적는다. kind:'화초'와 함께 height:[첫 단계 키, 마지막 단계 키]로
+   나무보다 작게, bonus로 다 자랐을 때 주는 전(화초 3, 나무 5)을 적는다.
    그림은 그 나무가 화면에 나올 때 처음 불러온다(다 불러오기 전에는 그림자만). */
 const TREE_ART = {
   gam: { item:'sap_gam', dir:'items/persimmon', file:'persimmon-{nn}.png', count:10, scale:{10:1.2},
          names:['묘목','새순','어린나무','곧게 자란 나무','가지 뻗은 나무','우거진 나무','풋감 달린 나무','감 익는 나무','감 주렁주렁한 나무','열매 맺은 큰 나무'] },
   bam: { item:'sap_bam', dir:'items/chestnut', file:'chestnut-{nn}.png', count:10, scale:{10:1.2},
          names:['묘목','새순','어린나무','가지 뻗은 나무','잎 무성한 나무','우거진 나무','풋밤송이 달린 나무','밤송이 여무는 나무','밤송이 벌어진 나무','열매 맺은 큰 나무'] },
-  baerong: { item:'sap_baerong', dir:'items/baerong', file:'baerong-{n}.png', count:10, scale:{10:1.2},
-         names:['묘목','가지 뻗는 묘목','어린나무','잎 무성한 나무','우거진 나무','둥글게 자란 나무','굵어진 나무','꽃봉오리 맺은 나무','꽃 핀 나무','꽃 만발한 큰 나무'] }
+  baerong: { item:'sap_baerong', dir:'items/baerong', file:'baerong-{nn}.png', count:10, scale:{10:1.2},
+         names:['묘목','가지 뻗는 묘목','어린나무','잎 무성한 나무','우거진 나무','둥글게 자란 나무','굵어진 나무','꽃봉오리 맺은 나무','꽃 핀 나무','꽃 만발한 큰 나무'] },
+  // 화초 — 국화(다 피면 키 72)보다 조금 큰 떨기. 다 자라면 학동 허리를 조금 넘는다
+  ysh: { item:'seed_ysh', dir:'items/youngsanhong', file:'youngsanhong-{nn}.png', count:7,
+         kind:'화초', height:[22,84], bonus:3,
+         names:['새싹','떡잎','어린 떨기','잎 무성한 떨기','꽃봉오리 맺은 떨기','꽃 핀 떨기','꽃 만발한 떨기'] }
 };
 const TREE_HEIGHT_FROM = 46, TREE_HEIGHT_TO = 150; // 첫 단계·마지막 단계의 키(기준 크기, 화면에는 SIZE_SCALE배)
 const TREE_SIZE_CURVE = 0.8; // 1보다 작을수록 앞쪽 단계에서 빨리 자란다(1이면 고르게)
@@ -1711,7 +1719,8 @@ function sizeTreeStages(art, stages){
   stages.forEach((st,i)=>{
     // 나무 크기는 키로 정하고 가로는 그림 비율대로(가늘고 긴 어린나무도 키는 제대로 자란다)
     const t = n>1 ? i/(n-1) : 1;
-    let h = TREE_HEIGHT_FROM + (TREE_HEIGHT_TO-TREE_HEIGHT_FROM)*Math.pow(t, TREE_SIZE_CURVE);
+    const [hFrom, hTo] = art.height || [TREE_HEIGHT_FROM, TREE_HEIGHT_TO];
+    let h = hFrom + (hTo-hFrom)*Math.pow(t, TREE_SIZE_CURVE);
     h = Math.max(h, prevH*TREE_MIN_STEP); // 키가 앞 단계보다 눈에 띄게 커지게
     const w = h*(st.aspect || 1);
     prevH=h;
@@ -1720,10 +1729,17 @@ function sizeTreeStages(art, stages){
   });
 }
 /* 그림 한 장을 불러와 손질한다 → { url(잘라 낸 그림), aspect(가로/세로) } */
-function prepareTreeImage(src){
+function prepareTreeImage(src, altSrc){
   return new Promise(resolve=>{
     const img=new Image();
-    img.onerror=()=>resolve(null);
+    // 못 받으면: 같은 이름으로 잠시 뒤 한 번 더(인터넷이 잠깐 끊긴 경우) → 번호 모양을 바꾼 이름
+    let tries=0;
+    img.onerror=()=>{
+      tries++;
+      if(tries===1) setTimeout(()=>{ img.src=src+(src.includes('?')?'&':'?')+'r=1'; }, 800);
+      else if(tries===2 && altSrc && altSrc!==src){ console.warn(`${src}를 받지 못해 ${altSrc}를 찾아봅니다`); src=altSrc; img.src=altSrc; }
+      else resolve(null);
+    };
     img.onload=()=>{
       const k=Math.min(1, TREE_PREP_MAX/Math.max(img.naturalWidth, img.naturalHeight));
       const W=Math.max(1,Math.round(img.naturalWidth*k)), H=Math.max(1,Math.round(img.naturalHeight*k));
@@ -1789,11 +1805,13 @@ function ensureTreeArt(key){
   if(treeArtState[key]) return;
   treeArtState[key]='loading';
   const art=TREE_ART[key], stages=GROW_TYPES[key].stages;
-  Promise.all(stages.map(st=>prepareTreeImage(st.src))).then(results=>{
+  Promise.all(stages.map(st=> st.url ? { url:st.url, aspect:st.aspect } : prepareTreeImage(st.src, st.altSrc))).then(results=>{
     results.forEach((r,i)=>{ if(r){ stages[i].url=r.url; stages[i].aspect=r.aspect; } });
     sizeTreeStages(art, stages);
     stages.forEach(st=>{ st.ready=!!st.url; });
     treeArtState[key]='ready';
+    // 못 받은 단계가 남았으면 조금 뒤에 다시 불러온다(그동안은 그 단계에 그림자만)
+    if(stages.some(st=>!st.ready)) setTimeout(()=>{ if(treeArtState[key]==='ready') delete treeArtState[key]; }, 15000);
     drawScene();
   });
 }
@@ -1802,6 +1820,8 @@ Object.entries(TREE_ART).forEach(([key, art])=>{
   const stages = Array.from({length:art.count}, (_,i)=>({
     name: (art.names && art.names[i]) || (art.count===TREE_DEFAULT_NAMES.length ? TREE_DEFAULT_NAMES[i] : `${i+1}단계`),
     src: `${art.dir}/${art.file.replace('{nn}', pad(i+1)).replace('{n}', i+1)}`,
+    // 파일 이름의 번호를 01 ↔ 1 로 바꿔 두어도 찾도록 다른 모양의 이름도 적어 둔다
+    altSrc: `${art.dir}/${art.file.replace('{nn}', i+1).replace('{n}', pad(i+1))}`,
     aspect:1, w:0, h:0, ready:false,
     draw(){
       ensureTreeArt(key);
@@ -1812,7 +1832,7 @@ Object.entries(TREE_ART).forEach(([key, art])=>{
     }
   }));
   sizeTreeStages(art, stages); // 그림을 불러오기 전 어림 크기
-  GROW_TYPES[key] = { kind:'나무', stages, dropsPerStage:art.dropsPerStage||3, bonus:art.bonus||5 };
+  GROW_TYPES[key] = { kind:art.kind||'나무', stages, dropsPerStage:art.dropsPerStage||3, bonus:art.bonus||5 };
   ITEMS[art.item].growTable = key;
 });
 /* 아이템이 쓰는 단계 표의 이름. it.grow(seed/sapling)는 가게·목록에서 종류를
@@ -4358,7 +4378,7 @@ function renderShop(){
   bindShopCells();
 }
 /* ── 화수전: 씨앗 · 묘목 (계절 상관없이 상시 판매) ─── */
-const SEED_IDS=['seed_pr','seed_bs','seed_np','seed_gu','seed_md','seed_mr'];
+const SEED_IDS=['seed_pr','seed_bs','seed_np','seed_gu','seed_md','seed_mr','seed_ysh'];
 const SAPLING_IDS=['sap_mh','sap_gam','sap_bam','sap_baerong'];
 function openGrowShop(){
   openSheetRaw('운교장터 · 화수전');
