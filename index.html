@@ -432,7 +432,7 @@ button.cell{cursor:pointer}
    줄거나 커지므로, 여기 숫자만 바꿔서 미세 조정한다. */
 const SIZE_SCALE = 0.7;
 /* 학동(아바타)만 따로 키우는 배율. 정원 물건 크기는 SIZE_SCALE 그대로 두고 학동만 이만큼 더 크게 그린다. */
-const AVATAR_SCALE = 1.5;
+const AVATAR_SCALE = 1;
 
 const SAVE_KEY = 'kseodang_v12';
 // 계정 저장 상태 — save()가 앱이 켜지는 도중에도 불리므로 맨 앞에 둔다 (자세한 설명은 「계정에 저장하고 불러오기」)
@@ -852,22 +852,10 @@ const BOOKS = {
    quest    이야기를 마쳐야 얻는 것(가게에서 팔지 않는다)
    ------------------------------------- */
 const ITEMS = {
-  // 목석방
-  mhs_16:{name:'삿갓 장독',slot:'front',rar:'N',cur:'coin',amt:3,box:[70,60],at:[250,592],anchor:'bc',season:'all',
-    media:'img',src:'items/jangdok.png'},
-  aut_02:{name:'감나무',slot:'mid',rar:'R',cur:'coin',amt:13,box:[150,176],at:[312,448],anchor:'bc',plant:true,season:'autumn',
-    media:'img',src:'items/persimmon/persimmon-08.png',imgSize:[843,1264],crop:[22,179,806,943]},
-  win_03:{name:'석등',slot:'front',rar:'R',cur:'coin',amt:11,box:[76,116],at:[334,548],anchor:'bc',season:'winter',
-    media:'img',src:'items/Firefly_lantern.png',imgSize:[1024,1024],crop:[236,84,552,856]},
-  // 화수전(계절과 상관없이 판다)
-  seed_ysh:{name:'영산홍씨',slot:'front',rar:'N',cur:'coin',amt:2,pack:3,box:[34,22],at:[320,560],anchor:'bc',grow:'seed',season:'all',
-    media:'img',src:'items/youngsanhong/youngsanhong-01.png'},
-  sap_gam:{name:'감나무 묘목',slot:'mid',rar:'R',cur:'coin',amt:3,box:[22,47],at:[100,540],anchor:'bc',grow:'sapling',season:'all',
-    media:'img',src:'items/persimmon/persimmon-01.png'},
-  sap_bam:{name:'밤나무 묘목',slot:'mid',rar:'R',cur:'coin',amt:2,box:[24,46],at:[260,540],anchor:'bc',grow:'sapling',season:'all',
-    media:'img',src:'items/chestnut/chestnut-01.png'},
-  sap_baerong:{name:'배롱나무 묘목',slot:'mid',rar:'R',cur:'coin',amt:4,box:[21,50],at:[340,540],anchor:'bc',grow:'sapling',season:'all',
-    media:'img',src:'items/baerong/baerong-01.png'}
+  // 비어 있다 — 정원 물건은 주제별로 다시 올린다. 한 줄 예:
+  // mhs_16:{name:'삿갓 장독',slot:'front',rar:'N',cur:'coin',amt:3,box:[70,60],at:[250,592],anchor:'bc',season:'all',
+  //   media:'img',src:'items/jangdok.png'},
+  // 자라는 씨앗·묘목은 grow:'seed' 또는 'sapling'을 적고, 단계 그림은 아래 TREE_ART에 한 줄 더한다.
 };
 const RAR_COLOR = {SR:'#E8A33C',R:'#6FA8C8',N:'#B3AEA6'};
 const COIN_SVG = `<svg class="pip" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9.5" fill="#E8A33C" stroke="#3D3A36" stroke-width="2.4"/><rect x="8.6" y="8.6" width="6.8" height="6.8" rx="1.2" fill="#FBF3E4" stroke="#3D3A36" stroke-width="2"/></svg>`;
@@ -899,8 +887,8 @@ function itemMedia(it){
 
 /* 「매화 핀 언덕」 사철 샘플은 걷어내고, 지금 배경 그림과 어울리는
    작은 것들만 남긴다 — 걷는 자리와 심을 자리를 넉넉히 비움 */
-const SAMPLE_PLACED = ['mhs_16'];
-const SAMPLE_SPOT = { mhs_16:[280,320] };
+const SAMPLE_PLACED = [];   // 처음 정원에 깔아 둘 물건(비어 있음)
+const SAMPLE_SPOT = {};
 const SAMPLE_GROWTH = {};
 
 
@@ -940,9 +928,10 @@ if(!S.spot) S.spot={};
 delete S.neighborWater;
 delete S.likes;                  // 「좋구나」 표시는 없앴다(예전 저장 자료에 남은 것 정리)
 if(!S.visitLog) S.visitLog=[];   // 내 정원에 다녀간 이웃 기록
-// SVG로 그리던 정원 물건을 없앴다. 예전 저장 자료에서 그것들을 빼고, 전으로 산 것은 산 값을 돌려준다(한 번만).
-const REMOVED_ITEM_REFUND = {"mhs_04": 3.0, "mhs_12": 3.0, "mhs_23": 8.0, "mhs_24": 20.0, "mhs_07": 24.0, "mhs_08": 11.0, "mhs_09": 10.0, "mhs_22": 23.0, "mhs_21": 21.0, "mhs_10": 4.0, "mhs_11": 4.0, "mhs_15": 10.0, "mhs_13": 9.0, "mhs_20": 5.0, "mhs_17": 8.0, "spr_08": 28.0, "sum_06": 4.0, "sum_01": 12.0, "sum_02": 5.0, "sum_03": 29.0, "sum_04": 5.0, "sum_05": 30.0, "sum_07": 9.0, "aut_06": 4.0, "aut_01": 25.0, "aut_03": 3.0, "aut_04": 5.0, "aut_05": 12.0, "aut_07": 14.0, "win_06": 4.0, "win_01": 26.0, "win_02": 13.0, "win_04": 3.0, "win_05": 5.0, "win_07": 15.0, "seed_pr": 0.333, "seed_bs": 0.333, "seed_np": 0.333, "seed_gu": 0.333, "seed_md": 0.333, "seed_mr": 0.667, "sap_mh": 4.0};
-if(!S.svgItemsPurged){
+// 앱에서 없앤 정원 물건을 저장 자료에서 뺀다. 전으로 산 것은 산 값을 돌려준다(REMOVED_ITEM_REFUND).
+// 앱을 켤 때마다 살피므로, 물건을 없앨 때 이 표에 값만 더하면 된다.
+const REMOVED_ITEM_REFUND = {"mhs_04": 3.0, "mhs_12": 3.0, "mhs_23": 8.0, "mhs_24": 20.0, "mhs_07": 24.0, "mhs_08": 11.0, "mhs_09": 10.0, "mhs_22": 23.0, "mhs_21": 21.0, "mhs_10": 4.0, "mhs_11": 4.0, "mhs_15": 10.0, "mhs_13": 9.0, "mhs_20": 5.0, "mhs_17": 8.0, "spr_08": 28.0, "sum_06": 4.0, "sum_01": 12.0, "sum_02": 5.0, "sum_03": 29.0, "sum_04": 5.0, "sum_05": 30.0, "sum_07": 9.0, "aut_06": 4.0, "aut_01": 25.0, "aut_03": 3.0, "aut_04": 5.0, "aut_05": 12.0, "aut_07": 14.0, "win_06": 4.0, "win_01": 26.0, "win_02": 13.0, "win_04": 3.0, "win_05": 5.0, "win_07": 15.0, "seed_pr": 0.333, "seed_bs": 0.333, "seed_np": 0.333, "seed_gu": 0.333, "seed_md": 0.333, "seed_mr": 0.667, "sap_mh": 4.0, "mhs_16": 3, "aut_02": 13, "win_03": 11, "seed_ysh": 0.667, "sap_gam": 3, "sap_bam": 2, "sap_baerong": 4};
+{
   const gone = id => !ITEMS[id];
   let back = 0;
   Object.keys(S.owned).forEach(id=>{
@@ -952,8 +941,7 @@ if(!S.svgItemsPurged){
   });
   S.placed = S.placed.filter(iid=>{ const keep=!gone(typeOf(iid)); if(!keep){ delete S.spot[iid]; delete S.growth[iid]; } return keep; });
   back = Math.round(back);
-  if(back>0){ S.coin += back; S.svgRefund = back; setTimeout(()=>toast(`없어진 물건 값 ${back}전을 돌려받았습니다`), 1200); }
-  S.svgItemsPurged = true;
+  if(back>0){ S.coin += back; setTimeout(()=>toast(`없어진 물건 값 ${back}전을 돌려받았습니다`), 1200); }
 }
 if(!S.pos.inside) S.pos.inside={x:200,y:520};
 if(!S.pos.sarangbang) S.pos.sarangbang={x:200,y:500};
@@ -1135,20 +1123,16 @@ function signboard(x,y,w,label){
 const NEIGHBORS = [
   { id:'dallae', hakdong:'hakdong-02',  name:'달래', rankIdx:1, chars:82,  season:'spring',
     wear:{ top:'jg_baek',   bottom:'ch_bunhong', outer:null,      shoes:'sh_jip'   },
-    placed:['mhs_16','sap_baerong','seed_ysh'],
-    spot:{ mhs_16:[300,470], sap_baerong:[110,575], seed_ysh:[255,585] }, growth:{ sap_baerong:9, seed_ysh:3 } },
+    placed:[], spot:{}, growth:{} },
   { id:'doryeon', hakdong:'hakdong-04', name:'도련', rankIdx:2, chars:210, season:'summer',
     wear:{ top:'jg_yeondu', bottom:'ba_jaet',    outer:null,      shoes:'sh_namak' },
-    placed:['win_03','sap_bam'],
-    spot:{ win_03:[320,560], sap_bam:[110,575] }, growth:{ sap_bam:6 } },
+    placed:[], spot:{}, growth:{} },
   { id:'dume', hakdong:'hakdong-06',    name:'두메', rankIdx:3, chars:420, season:'autumn',
     wear:{ top:'jg_dahong', bottom:'ba_huin',    outer:'du_huin', shoes:'sh_gomu'  },
-    placed:['aut_02','sap_gam','seed_ysh'],
-    spot:{ aut_02:[300,470], sap_gam:[110,578], seed_ysh:[255,585] }, growth:{ sap_gam:9, seed_ysh:9 } },
+    placed:[], spot:{}, growth:{} },
   { id:'haneui', hakdong:'hakdong-07',  name:'하늬', rankIdx:4, chars:680, season:'winter',
     wear:{ top:'jg_jaju',   bottom:'ch_namsaek', outer:'du_ok',   shoes:'sh_jang'  },
-    placed:['win_03','mhs_16','sap_gam'],
-    spot:{ win_03:[320,560], mhs_16:[90,470], sap_gam:[150,585] }, growth:{ sap_gam:15 } }
+    placed:[], spot:{}, growth:{} }
 ];
 /* 로그인 중이면 서버의 공개 정원(gardens)을 최근 순으로 받아 온다. 손님이거나
    서버에 닿지 않으면, 또는 아직 정원을 연 이웃이 없으면 본보기 이웃을 쓴다.
@@ -1282,16 +1266,11 @@ const GROW_TYPES = {}; // 모든 단계 표는 아래 TREE_ART(그림 파일)에
    나무보다 작게, bonus로 다 자랐을 때 주는 전(화초 3, 나무 5)을 적는다.
    그림은 그 나무가 화면에 나올 때 처음 불러온다(다 불러오기 전에는 그림자만). */
 const TREE_ART = {
-  gam: { item:'sap_gam', dir:'items/persimmon', file:'persimmon-{nn}.png', count:10, scale:{10:1.2},
-         names:['묘목','새순','어린나무','곧게 자란 나무','가지 뻗은 나무','우거진 나무','풋감 달린 나무','감 익는 나무','감 주렁주렁한 나무','열매 맺은 큰 나무'] },
-  bam: { item:'sap_bam', dir:'items/chestnut', file:'chestnut-{nn}.png', count:10, scale:{10:1.2},
-         names:['묘목','새순','어린나무','가지 뻗은 나무','잎 무성한 나무','우거진 나무','풋밤송이 달린 나무','밤송이 여무는 나무','밤송이 벌어진 나무','열매 맺은 큰 나무'] },
-  baerong: { item:'sap_baerong', dir:'items/baerong', file:'baerong-{nn}.png', count:10, scale:{10:1.2},
-         names:['묘목','가지 뻗는 묘목','어린나무','잎 무성한 나무','우거진 나무','둥글게 자란 나무','굵어진 나무','꽃봉오리 맺은 나무','꽃 핀 나무','꽃 만발한 큰 나무'] },
-  // 화초 — 국화(다 피면 키 72)보다 조금 큰 떨기. 다 자라면 학동 허리를 조금 넘는다
-  ysh: { item:'seed_ysh', dir:'items/youngsanhong', file:'youngsanhong-{nn}.png', count:7,
-         kind:'화초', height:[22,84], bonus:3,
-         names:['새싹','떡잎','어린 떨기','잎 무성한 떨기','꽃봉오리 맺은 떨기','꽃 핀 떨기','꽃 만발한 떨기'] }
+  // 비어 있다 — 자라는 나무·화초를 다시 올릴 때 한 줄씩. 예:
+  // gam: { item:'sap_gam', dir:'items/persimmon', file:'persimmon-{nn}.png', count:10, scale:{10:1.2},
+  //        names:['묘목','새순', …, '열매 맺은 큰 나무'] },
+  // ysh: { item:'seed_ysh', dir:'items/youngsanhong', file:'youngsanhong-{nn}.png', count:7,
+  //        kind:'화초', height:[22,84], bonus:3, names:[…] },
 };
 const TREE_HEIGHT_FROM = 46, TREE_HEIGHT_TO = 150; // 첫 단계·마지막 단계의 키(기준 크기, 화면에는 SIZE_SCALE배)
 const TREE_SIZE_CURVE = 0.8; // 1보다 작을수록 앞쪽 단계에서 빨리 자란다(1이면 고르게)
@@ -1673,13 +1652,13 @@ function seoanSVG(cx, y){
 }
 /* 서안에 앉은 학동 — 앉은 그림이 따로 없어, 선 그림을 서안 뒤에 두고
    SEAT_HIDE_Y 아래를 잘라 낸다. 잘린 선은 서안 앞판 뒤에 숨어, 앉아서 책을
-   보는 것처럼 보인다. 어깨(키의 SEAT_SHOULDER, 머리 꼭대기에서 잰 비율)가
-   펼친 책 윗선(SEAT_BOOK_TOP_Y)에 오도록 높이를 정해, 학동 크기(AVATAR_SCALE)를
-   바꿔도 앉은 모습이 틀어지지 않는다. 앉은 그림이 생기면 이 함수만 바꾸면 된다. */
-const SEAT_X = 200, SEAT_BOOK_TOP_Y = 319, SEAT_SHOULDER = 0.45, SEAT_HIDE_Y = 366;
+   보는 것처럼 보인다. 저고리 끝(키의 SEAT_WAIST, 머리 꼭대기에서 잰 비율)이
+   서안 윗면(SEAT_DESK_TOP_Y)에 오도록 높이를 정해, 학동 크기(AVATAR_SCALE)를
+   바꿔도 바지는 늘 서안에 가려진다. 앉은 그림이 생기면 이 함수만 바꾸면 된다. */
+const SEAT_X = 200, SEAT_DESK_TOP_Y = 346, SEAT_WAIST = 0.70, SEAT_HIDE_Y = 366;
 function seatedAvatarSVG(){
   const tall = HAKDONG_H*SIZE_SCALE*AVATAR_SCALE;        // 화면에서의 키
-  const feetY = SEAT_BOOK_TOP_Y - tall*SEAT_SHOULDER + tall; // 선 그림이라면 발이 올 자리
+  const feetY = SEAT_DESK_TOP_Y - tall*SEAT_WAIST + tall; // 선 그림이라면 발이 올 자리
   return `<defs><clipPath id="seatClip"><rect x="0" y="0" width="400" height="${SEAT_HIDE_Y}"/></clipPath></defs>
     <g clip-path="url(#seatClip)">${avatarSVG(SEAT_X, feetY)}</g>`;
 }
@@ -3947,14 +3926,15 @@ function renderShop(){
       <div class="sub">${SEASON_NAME[shopTab]} · ${ids.length}종 입고 · ${mine}종 보유</div>
     </div>
     <div class="grid">${ids.map(id=>cellHTML(id,'shop')).join('')}</div>
+    ${ids.length ? '' : '<p class="note" style="margin:14px 2px">정원 물건을 새로 들이는 중입니다. 조금만 기다려 주세요.</p>'}
     <p class="note">산 물건은 정원보따리에 들어갑니다. 정원에 놓는 것은 보따리에서 고르세요.</p>`;
   sheetBody.querySelectorAll('.tabs button').forEach(b=>
     b.addEventListener('click',()=>{ shopTab=b.dataset.tab; renderShop(); sheetBody.scrollTop=0; }));
   bindShopCells();
 }
 /* ── 화수전: 씨앗 · 묘목 (계절 상관없이 상시 판매) ─── */
-const SEED_IDS=['seed_ysh'];
-const SAPLING_IDS=['sap_gam','sap_bam','sap_baerong'];
+const SEED_IDS=[];
+const SAPLING_IDS=[];
 function openGrowShop(){
   openSheetRaw('운교장터 · 화수전');
   activeShopRender=renderGrowShop;
@@ -3966,10 +3946,11 @@ function renderGrowShop(){
       <div class="strip" style="background:#8AB566"><h2>화수전</h2></div>
       <div class="sub">심어서 키우는 것 · 계절과 상관없이 살 수 있습니다</div>
     </div>
-    <p class="note" style="margin:14px 2px 8px;font-weight:700;color:#5C5346">씨앗</p>
-    <div class="grid">${SEED_IDS.map(id=>cellHTML(id,'shop')).join('')}</div>
-    <p class="note" style="margin:14px 2px 8px;font-weight:700;color:#5C5346">묘목</p>
-    <div class="grid">${SAPLING_IDS.map(id=>cellHTML(id,'shop')).join('')}</div>
+    ${SEED_IDS.length ? `<p class="note" style="margin:14px 2px 8px;font-weight:700;color:#5C5346">씨앗</p>
+    <div class="grid">${SEED_IDS.map(id=>cellHTML(id,'shop')).join('')}</div>` : ''}
+    ${SAPLING_IDS.length ? `<p class="note" style="margin:14px 2px 8px;font-weight:700;color:#5C5346">묘목</p>
+    <div class="grid">${SAPLING_IDS.map(id=>cellHTML(id,'shop')).join('')}</div>` : ''}
+    ${SEED_IDS.length+SAPLING_IDS.length ? '' : '<p class="note" style="margin:14px 2px">씨앗과 묘목을 새로 들이는 중입니다. 조금만 기다려 주세요.</p>'}
     <p class="note">산 것은 정원보따리에 들어갑니다. 정원에 심는 것은 보따리에서 고르세요.</p>
     <p class="note">성장수는 서당에서 글을 익혀야만 모입니다.</p>`;
   bindShopCells();
@@ -4056,7 +4037,7 @@ function renderBag(){
           <div class="grid">${ids.map(id=>cellHTML(id,'bag')).join('')}</div>`;
       }).join('') +
       `<button class="subbtn" id="sampleBtn">처음 배치로 되돌리기</button>
-       <p class="note">삿갓 장독만 처음 자리에 다시 놓습니다. 옮겨둔 자리는 지워집니다.</p>`;
+       <p class="note">처음 배치로 되돌립니다. 옮겨둔 자리는 지워집니다.</p>`;
     }
     sheetBody.innerHTML = tabs +
       `<p class="note" style="margin:0 2px 4px">${ownedIds.length}종 보유 · ${S.placed.length}개 정원에 놓임</p>` + body;
