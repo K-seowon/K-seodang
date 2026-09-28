@@ -431,6 +431,8 @@ button.cell{cursor:pointer}
    1보다 작으면 작아짐. 서로의 비례는 그대로 유지된 채 다 같이
    줄거나 커지므로, 여기 숫자만 바꿔서 미세 조정한다. */
 const SIZE_SCALE = 0.7;
+/* 학동(아바타)만 따로 키우는 배율. 정원 물건 크기는 SIZE_SCALE 그대로 두고 학동만 이만큼 더 크게 그린다. */
+const AVATAR_SCALE = 2;
 
 const SAVE_KEY = 'kseodang_v12';
 // 계정 저장 상태 — save()가 앱이 켜지는 도중에도 불리므로 맨 앞에 둔다 (자세한 설명은 「계정에 저장하고 불러오기」)
@@ -1307,6 +1309,7 @@ function renderRankDemo(){
 }
 
 /* ── 아바타 ─────────────────────────────── */
+/* 신 모양 — 옷 가게(의전)의 신 썸네일이 쓴다 */
 const A = { git:'#FFFFFF', beoseon:'#F7F1E4', hair:'#2B2620', skin:'#F7DFC8' };
 
 function shoeSVG(cx, sh){
@@ -1326,52 +1329,20 @@ function shoeSVG(cx, sh){
   return `<ellipse cx="${cx}" cy="-2" rx="6.6" ry="3.6" fill="${c}" stroke="${A.hair}" stroke-width="1.3"/>
     <path d="M${cx-6.6} -3 q1.5 -3 4.5 -2.4" fill="none" stroke="${A.hair}" stroke-width="1.2"/>`;
 }
-function bottomSVG(bot){
-  if(!bot) return '';
-  if(bot.kind==='baji')
-    return `<path d="M-14 -14 q-2 -18 1 -22 h26 q3 4 1 22 h-9 q-1 -11 -4 -15 q-3 4 -4 15 Z" fill="${bot.c}"/>
-      <path d="M-13 -30 h26" stroke="rgba(0,0,0,.12)" stroke-width="1.4"/>`;
-  return `<path d="M-16 -14 q0 -22 16 -22 q16 0 16 22 Z" fill="${bot.c}"/>
-    <path d="M-15 -17 q15 4 30 0" fill="none" stroke="rgba(0,0,0,.12)" stroke-width="1.4"/>`;
-}
-function outerSVG(out){
-  if(!out) return '';
-  return `<path d="M-19 -9 q-3 -30 5 -43 q14 -6 28 0 q8 13 5 43 Z" fill="${out.c}"/>
-    <path d="M-9 -52 q9 7 9 16 q0 -9 9 -16" fill="none" stroke="${A.git}" stroke-width="4.5" stroke-linejoin="round"/>
-    <path d="M0 -36 q4 8 -1 15" fill="none" stroke="${A.git}" stroke-width="3" stroke-linecap="round"/>
-    <path d="M0 -9 v-30" stroke="rgba(0,0,0,.1)" stroke-width="1.4"/>`;
-}
-
+/* ── 학동 ───────────────────────────────
+   학동 그림 한 장(items/학동.png, 여백을 잘라 낸 투명 PNG)을 발끝 가운데를
+   기준점으로 세운다. 부위별 그림(얼굴·머리·옷·신)을 겹치는 방식으로 바꿀
+   때까지는 옷을 바꿔 입어도 모습은 이 그림 그대로다.
+   HAKDONG_H는 기준 키(칸). 화면에는 SIZE_SCALE × AVATAR_SCALE 배로 그린다. */
+const HAKDONG_IMG = 'items/학동.png';
+const HAKDONG_H = 84, HAKDONG_W = Math.round(84*323/512); // 그림 비율 323×512
 function avatarSVG(x,y,wearOverride,withId){
   if(withId===undefined) withId=true; // 정원에 잠깐 세워두는 이웃 학동은 false로 불러, hakdong과 자리표가 겹치지 않게 한다
-  const w   = wearOverride || S.wear || {};
-  const top = WEAR.top[w.top]       || WEAR.top.jg_dahong;
-  const bot = WEAR.bottom[w.bottom] || WEAR.bottom.ch_namsaek;
-  const out = w.outer ? WEAR.outer[w.outer] : null;
-  const sh  = WEAR.shoes[w.shoes]   || WEAR.shoes.sh_gomu;
-  const legC = bot.kind==='baji' ? bot.c : '#F1E8D8';
-  const armC = out ? out.c : top.c;
-  return `<g${withId?' id="hakdong"':''} transform="translate(${x},${y}) scale(${SIZE_SCALE})">
-    <ellipse cx="0" cy="2" rx="17" ry="5" fill="rgba(61,58,54,.16)"/>
+  return `<g${withId?' id="hakdong"':''} transform="translate(${x},${y}) scale(${SIZE_SCALE*AVATAR_SCALE})">
+    <ellipse cx="0" cy="1" rx="17" ry="4.5" fill="rgba(61,58,54,.16)"/>
     <g${withId?' id="hakLegs"':''}>
-      <path d="M-9 -14 v10" stroke="${legC}" stroke-width="8" stroke-linecap="round"/>
-      <path d="M9 -14 v10" stroke="${legC}" stroke-width="8" stroke-linecap="round"/>
-      ${shoeSVG(-9, sh)}
-      ${shoeSVG(9, sh)}
+      <image href="${HAKDONG_IMG}" xlink:href="${HAKDONG_IMG}" x="${-HAKDONG_W/2}" y="${-HAKDONG_H}" width="${HAKDONG_W}" height="${HAKDONG_H}" preserveAspectRatio="xMidYMax meet"/>
     </g>
-    ${bottomSVG(bot)}
-    <path d="M-15 -36 q0 -16 15 -16 q15 0 15 16 q-15 7 -30 0 Z" fill="${top.c}"/>
-    <path d="M-9 -52 q9 6 9 14 q0 -8 9 -14" fill="none" stroke="${A.git}" stroke-width="4.5" stroke-linejoin="round"/>
-    <path d="M0 -38 q3 6 -1 12" fill="none" stroke="${A.git}" stroke-width="3" stroke-linecap="round"/>
-    ${outerSVG(out)}
-    <path d="M-15 -40 v${out?14:8}" stroke="${armC}" stroke-width="7" stroke-linecap="round"/>
-    <path d="M15 -40 v${out?14:8}" stroke="${armC}" stroke-width="7" stroke-linecap="round"/>
-    <circle cx="0" cy="-62" r="14" fill="${A.skin}"/>
-    <path d="M-14 -64 q0 -16 14 -16 q14 0 14 16 q-6 -7 -14 -7 q-8 0 -14 7 Z" fill="${A.hair}"/>
-    <circle cx="-5" cy="-60" r="1.9" fill="${A.hair}"/><circle cx="5" cy="-60" r="1.9" fill="${A.hair}"/>
-    <ellipse cx="-9" cy="-56" rx="3" ry="1.8" fill="#F3A9A0" opacity=".8"/>
-    <ellipse cx="9" cy="-56" rx="3" ry="1.8" fill="#F3A9A0" opacity=".8"/>
-    <path d="M-2.5 -55 q2.5 2 5 0" fill="none" stroke="${A.hair}" stroke-width="1.4" stroke-linecap="round"/>
   </g>`;
 }
 
@@ -2140,6 +2111,8 @@ function sarangRoomZone(x, label, act){
 }
 function drawSarangbang(){
   const p = S.pos.sarangbang;
+  // 학동 발이 가운데 상의 앞쪽 끝(y 564)보다 뒤에 있으면 상 뒤에 선다(학동이 커져 겹침이 잘 보인다)
+  const behind = p.y < 564;
   scene.innerHTML = `
     <rect x="0" y="0" width="400" height="600" fill="#FBF3E4"/>
     <rect x="0" y="0" width="400" height="356" fill="#F2E4CB"/>
@@ -2151,6 +2124,7 @@ function drawSarangbang(){
     ${sarangRoomZone(16, '오늘의 글귀', 'sr-quotes')}
     ${sarangRoomZone(145,'훈장님 말씀', 'sr-notices')}
     ${sarangRoomZone(274,'정원 마실',   'sr-visit')}
+    ${behind ? avatarSVG(p.x,p.y) : ''}
     <g transform="translate(150,470)">
       <ellipse cx="50" cy="94" rx="66" ry="10" fill="rgba(43,36,28,.16)"/>
       <rect x="6" y="18" width="88" height="10" fill="#5C4130"/>
@@ -2160,7 +2134,7 @@ function drawSarangbang(){
       <rect x="20" y="58" width="64" height="34" rx="6" fill="#8B4B3A" stroke="#3D3A36" stroke-width="2.6"/>
       <rect x="28" y="64" width="48" height="6" fill="#B0684F"/>
     </g>
-    ${avatarSVG(p.x,p.y)}`;
+    ${behind ? '' : avatarSVG(p.x,p.y)}`;
 }
 function drawMarket(){
   const p = S.pos.market;
@@ -2404,7 +2378,8 @@ function walkTo(x,y,done){
   const t0=performance.now();
   const tick=(t)=>{
     const k=Math.min(1,(t-t0)/dur);
-    g.setAttribute('transform',`translate(${sx+(x-sx)*k},${sy+(y-sy)*k}) scale(${SIZE_SCALE*flip},${SIZE_SCALE})`);
+    const as=SIZE_SCALE*AVATAR_SCALE;
+    g.setAttribute('transform',`translate(${sx+(x-sx)*k},${sy+(y-sy)*k}) scale(${as*flip},${as})`);
     if(legs) legs.setAttribute('transform',`translate(0,${Math.abs(Math.sin((t-t0)/90))*-2.2})`);
     if(k<1) requestAnimationFrame(tick);
     else {
