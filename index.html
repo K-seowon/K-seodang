@@ -1330,12 +1330,12 @@ function shoeSVG(cx, sh){
     <path d="M${cx-6.6} -3 q1.5 -3 4.5 -2.4" fill="none" stroke="${A.hair}" stroke-width="1.2"/>`;
 }
 /* ── 학동 ───────────────────────────────
-   학동 그림 한 장(items/학동.png, 여백을 잘라 낸 투명 PNG)을 발끝 가운데를
+   학동 그림 한 장(items/운교서당학동.png, 여백을 잘라 낸 투명 PNG)을 발끝 가운데를
    기준점으로 세운다. 부위별 그림(얼굴·머리·옷·신)을 겹치는 방식으로 바꿀
    때까지는 옷을 바꿔 입어도 모습은 이 그림 그대로다.
    HAKDONG_H는 기준 키(칸). 화면에는 SIZE_SCALE × AVATAR_SCALE 배로 그린다. */
-const HAKDONG_IMG = 'items/학동.png';
-const HAKDONG_H = 84, HAKDONG_W = Math.round(84*323/512); // 그림 비율 323×512
+const HAKDONG_IMG = 'items/운교서당학동.png';
+const HAKDONG_H = 84, HAKDONG_W = Math.round(84*259/512); // 그림 비율 259×512
 function avatarSVG(x,y,wearOverride,withId){
   if(withId===undefined) withId=true; // 정원에 잠깐 세워두는 이웃 학동은 false로 불러, hakdong과 자리표가 겹치지 않게 한다
   return `<g${withId?' id="hakdong"':''} transform="translate(${x},${y}) scale(${SIZE_SCALE*AVATAR_SCALE})">
