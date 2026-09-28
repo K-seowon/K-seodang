@@ -847,21 +847,92 @@ const BOOKS = {
    모두 그림 파일(media:'img', src)이다.
    slot     ground(깔개) / mid / front / air
    at       가게 머리 그림과 처음 놓을 때의 자리
-   season   목석방 계절 탭(all 사철 / spring / summer / autumn / winter)
+   theme    목석방의 테마(THEMES). 테마 물건은 THEMES 표에서 저절로 만들어진다
    grow     화수전에서 파는 자라는 것(seed 씨앗 / sapling 묘목). 단계 그림은 TREE_ART
    quest    이야기를 마쳐야 얻는 것(가게에서 팔지 않는다)
    ------------------------------------- */
 const ITEMS = {
   // 비어 있다 — 정원 물건은 주제별로 다시 올린다. 한 줄 예:
-  // mhs_16:{name:'삿갓 장독',slot:'front',rar:'N',cur:'coin',amt:3,box:[70,60],at:[250,592],anchor:'bc',season:'all',
-  //   media:'img',src:'items/jangdok.png'},
+  // 목석방 물건은 아래 THEMES에 적는다. 여기에는 테마에 속하지 않는 물건만 적는다. 한 줄 예:
+  // jangdok:{name:'삿갓 장독',slot:'front',rar:'N',cur:'coin',amt:3,box:[70,60],at:[250,592],anchor:'bc',
+  //   media:'img',src:'items/anygarden/jangdok.png'},
   // 자라는 씨앗·묘목은 grow:'seed' 또는 'sapling'을 적고, 단계 그림은 아래 TREE_ART에 한 줄 더한다.
 };
+/* ── 정원 테마 ─────────────────────────────
+   목석방은 테마별로 판다. 테마 하나 = THEMES 한 블록. 새 테마를 더하려면
+     1) items/<폴더>/ 에 물건 그림(투명 PNG)을 넣고
+     2) 아래에 블록 하나를 적는다: 테마 이름, 폴더, 그림마다 한 줄(이름·값·크기)
+   나머지는 앱이 알아서 한다.
+     - 아이템 식별자는 「테마-파일이름」(예: youngsanhong-pine). 다른 테마에 같은
+       종류(소나무·연못…)가 와도 서로 다른 물건이 된다
+     - 그림을 처음 보일 때 불러와 여백을 자르고, 칠해진 바탕이 있으면 걷는다
+       (나무 단계 그림과 같은 손질 prepareTreeImage)
+     - 발치에 타원 그림자를 붙인다(땅에 깔리는 ground 물건은 붙이지 않는다)
+   한 줄의 칸
+     file   그림 파일 이름      name  가게에 보이는 이름     amt  값(전)     rar  N / R / SR
+     h      기준 키(칸, 화면에는 SIZE_SCALE배)  — 서 있는 물건
+     w      폭(화면 그대로)                     — 땅에 깔리는 물건(ground:true)과 함께
+     at     가게 머리 그림 속 자리 [x, 바닥 y]
+     id     식별자 뒤쪽을 파일 이름 대신 따로 정할 때(예: id:'doldam' → any-doldam)
+     tile   여러 개를 옆으로 이어 붙이는 물건(돌담 등). 가까이 놓으면 옆에 착 붙는다
+     grow   심어서 물을 주면 자라는 것. { dir(테마 폴더 안 단계 그림 폴더), file, count,
+            kind('화초'|'나무'), height:[첫 단계 키, 마지막 키], bonus, names } — 나무 단계
+            그림(TREE_ART)과 같은 방식으로 자란다. 가게에서는 씨앗(첫 단계)만 팔고, 심은 뒤에는
+            성장수로 자란다. file은 가게에 보일 씨앗 그림
+   모든 물건은 하나씩 따로 사고, 여러 개를 사서 여러 개를 놓을 수 있으며 하나하나
+   따로 옮길 수 있다(묶음 판매 없음). any는 어느 테마와도 상관없는 공용 물건이다. */
+const THEMES = {
+  any: { name:'사철 두는 것', dir:'items/anygarden', items:[
+    { file:'doldam1.png', id:'doldam',  name:'돌담', amt:5,  rar:'N', h:48,  tile:true, at:[140,560] },
+    { file:'lantern.png', id:'lantern', name:'석등', amt:12, rar:'R', h:110, at:[320,570] },
+    { file:'jangdok.png', id:'jangdok', name:'장독', amt:8,  rar:'N', h:62,  at:[250,592] }
+  ]},
+  youngsanhong: { name:'영산홍정원', dir:'items/youngsanhongGarden', items:[
+    { file:'moran-01.png', name:'분홍 모란',   amt:8,  rar:'N',  h:58,  at:[262,556] },
+    { file:'moran-02.png', name:'흰 모란',     amt:8,  rar:'N',  h:58,  at:[330,580] },
+    { file:'moran-03.png', name:'연노랑 모란', amt:10, rar:'R',  h:58,  at:[70,586] },
+    { file:'pine.png',     name:'소나무',      amt:20, rar:'SR', h:165, at:[92,512] },
+    { file:'pond.png',     name:'연못',        amt:15, rar:'R',  w:130, ground:true, at:[190,598] },
+    { file:'youngsanhong/youngsanhong-01.png', id:'azalea', name:'영산홍씨', amt:6, rar:'R', h:22, at:[372,592],
+      grow:{ dir:'youngsanhong', file:'youngsanhong-{nn}.png', count:7, kind:'화초', height:[22,84], bonus:3,
+             names:['씨앗 심은 흙','새싹','어린 떨기','잎 무성한 떨기','꽃봉오리 맺은 떨기','꽃 핀 떨기','꽃 만발한 떨기'] } }
+  ]}
+};
+function themeItemId(key, t){ return `${key}-${t.id || t.file.replace(/\.[^.]+$/,'')}`; }
+Object.entries(THEMES).forEach(([key, th])=>{
+  th.items.forEach(t=>{
+    const box = t.w ? [t.w, Math.round(t.w*0.75)] : [t.h, t.h]; // 그림을 불러오면 비율대로 고친다
+    ITEMS[themeItemId(key, t)] = {
+      name:t.name, slot:t.ground?'ground':'mid', rar:t.rar||'N', cur:'coin', amt:t.amt,
+      box, at:t.at||[200,580], anchor:'bc', theme:key, tile:!!t.tile,
+      ...(t.grow ? { grow: t.grow.kind==='나무' ? 'sapling' : 'seed' } : {}),
+      art:{ src:`${th.dir}/${t.file}`, h:t.h, w:t.w, shadow:!t.ground, ready:false }
+    };
+  });
+});
+/* 테마 물건 그림을 불러와 손질한다(테마 단위로 한 번). 다 되면 화면을 다시 그린다 */
+const themeArtState = {};
+function ensureThemeArt(key){
+  if(themeArtState[key]) return;
+  themeArtState[key]='loading';
+  const ids=Object.keys(ITEMS).filter(id=>ITEMS[id].theme===key && ITEMS[id].art && !ITEMS[id].art.ready);
+  Promise.all(ids.map(id=>prepareTreeImage(ITEMS[id].art.src))).then(results=>{
+    results.forEach((r,i)=>{
+      const it=ITEMS[ids[i]], a=it.art; if(!r) return;
+      a.url=r.url; a.ready=true;
+      it.box = a.w ? [a.w, Math.round(a.w/r.aspect)] : [Math.round(a.h*r.aspect), a.h];
+    });
+    themeArtState[key] = ids.every(id=>ITEMS[id].art.ready) ? 'ready' : undefined; // 못 받은 것은 다음에 다시
+    drawScene();
+    if(overlay.classList.contains('on')){
+      if(sheetTitle.textContent.includes('목석방')) renderShop();
+      else if(sheetTitle.textContent==='보따리') renderBag();
+    }
+  });
+}
 const RAR_COLOR = {SR:'#E8A33C',R:'#6FA8C8',N:'#B3AEA6'};
 const COIN_SVG = `<svg class="pip" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9.5" fill="#E8A33C" stroke="#3D3A36" stroke-width="2.4"/><rect x="8.6" y="8.6" width="6.8" height="6.8" rx="1.2" fill="#FBF3E4" stroke="#3D3A36" stroke-width="2"/></svg>`;
 const GROW_SVG = `<svg class="pip" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3 C8 9 5 13 5 16.5 A7 7 0 0 0 19 16.5 C19 13 16 9 12 3 Z" fill="#7FC4EA" stroke="#3D3A36" stroke-width="2"/><ellipse cx="9.5" cy="14" rx="2" ry="3" fill="#BEE6F7"/></svg>`;
-const SEASON_TABS = [['all','사철'],['spring','봄'],['summer','여름'],['autumn','가을'],['winter','겨울']];
-const SEASON_NAME = {all:'사철', spring:'봄', summer:'여름', autumn:'가을', winter:'겨울'};
 
 /* ── 아이템 그림 ─────────────────────────
    it.src 그림 파일을 it.box 크기에 맞춰 불러온다.
@@ -871,6 +942,12 @@ const SEASON_NAME = {all:'사철', spring:'봄', summer:'여름', autumn:'가을
    imgSize:[원본 너비,원본 높이]를 적는다. 그러면 그 부분만 box에 꽉 차게,
    아래쪽 가운데를 맞춰(바닥에 서도록) 그린다. */
 function itemMedia(it){
+  if(it.art){
+    ensureThemeArt(it.theme);
+    const [w,h]=it.box, a=it.art;
+    const shadow = a.shadow ? plantShadow(w,h) : '';
+    return shadow + (a.ready ? `<image href="${a.url}" xlink:href="${a.url}" x="0" y="0" width="${w}" height="${h}" preserveAspectRatio="xMidYMax meet"/>` : '');
+  }
   if(!it.src) return '';
   const [w,h]=it.box;
   const fail = `onerror="const s=this.closest('svg.crop')||this;s.style.display='none';s.nextElementSibling.style.display=''"`;
@@ -1158,7 +1235,7 @@ async function fetchNeighbors(){
 /* 남의 정원 자료는 화면에 그리기 전에 반드시 거른다. 보안 규칙은 배열 안의
    값까지 검사하지 못하고, 지금 코드는 물건 번호 등을 HTML에 끼워 넣기 때문이다.
    알 수 없는 물건·옷·이상한 값은 버린다. */
-const IID_RE = /^[a-z0-9_]+(__\d+)?$/;
+const IID_RE = /^[a-z0-9_-]+(__\d+)?$/;
 function sanitizeGarden(d){
   if(!d || typeof d.id!=='string') return null;
   const int=(v,lo,hi)=>Number.isFinite(v) ? Math.max(lo,Math.min(hi,Math.round(v))) : lo;
@@ -1381,6 +1458,13 @@ function ensureTreeArt(key){
     drawScene();
   });
 }
+// 테마 안의 자라는 물건도 TREE_ART에 올린다(식별자를 그대로 단계 표 이름으로)
+Object.entries(THEMES).forEach(([key, th])=>th.items.forEach(t=>{
+  if(!t.grow) return;
+  const id=themeItemId(key, t), g=t.grow;
+  TREE_ART[id] = { item:id, dir:`${th.dir}/${g.dir}`, file:g.file, count:g.count, kind:g.kind,
+                   height:g.height, bonus:g.bonus, names:g.names, scale:g.scale };
+}));
 Object.entries(TREE_ART).forEach(([key, art])=>{
   const pad=n=>String(n).padStart(2,'0');
   const stages = Array.from({length:art.count}, (_,i)=>({
@@ -1953,7 +2037,7 @@ scene.addEventListener('pointerup', e=>{
   if(!P) return;
   if(D){
     D.g.classList.remove('dragging');
-    if(P.moved){ save(); drawScene(); }
+    if(P.moved){ S.spot[D.id]=snapTile(D.id, ...S.spot[D.id]); save(); drawScene(); }
     return;
   }
   if(P.moved || walking) return;
@@ -2187,11 +2271,33 @@ function startPlacing(id){
   document.getElementById('placeMsg').textContent=`${it.name} — 놓을 자리를 누르세요`;
   document.getElementById('placeBar').classList.add('on');
 }
+/* 이어 붙이는 물건(tile) — 같은 물건이 같은 줄(높이 차 TILE_SNAP_Y 안)에 있고
+   그 옆자리(폭만큼 떨어진 곳)에 가까우면, 그 옆에 딱 붙는 자리로 옮긴다.
+   이음매가 벌어지지 않게 TILE_OVERLAP만큼 살짝 겹친다. */
+const TILE_SNAP_Y = 18, TILE_SNAP_X = 0.4, TILE_OVERLAP = 0.02;
+function snapTile(iid, x, y){
+  const it=ITEMS[typeOf(iid)];
+  if(!it || !it.tile) return [x,y];
+  if(it.art && !it.art.ready){ ensureThemeArt(it.theme); return [x,y]; } // 그림을 불러오기 전에는 폭을 몰라 붙이지 않는다
+  const wScene = it.box[0]*(it.slot==='ground'?1:SIZE_SCALE), step = wScene*(1-TILE_OVERLAP);
+  let best=null;
+  S.placed.forEach(other=>{
+    if(other===iid || typeOf(other)!==typeOf(iid)) return;
+    const [ox,oy]=spotOf(other);
+    if(Math.abs(y-oy)>TILE_SNAP_Y) return;
+    [-1,1].forEach(side=>{
+      const tx=ox+side*step, d=Math.abs(x-tx);
+      if(tx<16 || tx>384) return; // 정원 밖으로는 붙이지 않는다
+      if(d<wScene*TILE_SNAP_X && (!best || d<best.d)) best={d, x:tx, y:oy};
+    });
+  });
+  return best ? [Math.round(best.x), best.y] : [x,y];
+}
 function dropItem(x,y){
   const id=placingId; if(!id) return;
   const [y0,y1,x0,x1]=FLOOR.garden;
   const iid=newIid(id);
-  S.spot[iid]=[Math.round(clamp(x,x0,x1)),Math.round(clamp(y,y0,y1))];
+  S.spot[iid]=snapTile(iid, Math.round(clamp(x,x0,x1)), Math.round(clamp(y,y0,y1)));
   S.placed.push(iid);
   placingId=null; document.getElementById('placeBar').classList.remove('on');
   save(); drawScene(); toast(`${ITEMS[id].name}을(를) 놓았습니다`);
@@ -3869,24 +3975,23 @@ function runReview(list){
 }
 
 /* ── 상점 ───────────────────────────────── */
-const PACK_NAME = { all:'사철 두는 것', spring:'매화 핀 언덕', summer:'연꽃 뜬 못',
-                    autumn:'단풍 드는 뜰', winter:'눈 내린 뜰' };
 
 function placeAt(o){
   const it=o.it, [w,h]=it.box; let [x,y]=it.at;
   if(it.anchor==='bc'){ x-=w/2; y-=h; } else y-=h;
   return `<g transform="translate(${x},${y})">${itemMedia(it)}</g>`;
 }
-/* 가게 머리 그림: 그 계절 물건을 모두 제자리(it.at)에 놓아 본 모습 */
-function packPreview(season){
-  const list=Object.keys(ITEMS).filter(id=>ITEMS[id].season===season && !ITEMS[id].grow && !ITEMS[id].quest).map(id=>({id,it:ITEMS[id]}));
+/* 가게 머리 그림: 그 테마 물건을 모두 제자리(it.at)에 놓아 본 모습 */
+function themeItemIds(key){ return Object.keys(ITEMS).filter(id=>ITEMS[id].theme===key && !ITEMS[id].quest); }
+function packPreview(key){
+  const list=themeItemIds(key).map(id=>({id,it:ITEMS[id]}));
   const ground=list.filter(o=>o.it.slot==='ground')
     .sort((a,b)=>(a.it.gkind==='cover'?0:1)-(b.it.gkind==='cover'?0:1));
   const body=list.filter(o=>o.it.slot==='mid'||o.it.slot==='front')
     .sort((a,b)=>a.it.at[1]-b.it.at[1]);
   const airHtml=list.filter(o=>o.it.slot==='air').map(placeAt).join('');
   return `<svg class="preview" viewBox="0 264 400 336" preserveAspectRatio="xMidYMid meet" role="img"
-      aria-label="${PACK_NAME[season]} 꾸민 모습">
+      aria-label="${(THEMES[key]||{}).name||''} 꾸민 모습">
     <rect x="0" y="258" width="400" height="40" fill="#C6D89C"/>${emptyLand()}${ground.map(placeAt).join('')}${body.map(placeAt).join('')}${airHtml}</svg>`;
 }
 /* 목록·읽기·퀴즈 등 여러 화면 위쪽에 늘 붙는 재화 표시(전·성장수).
@@ -3901,7 +4006,7 @@ function bindShopCells(){
   sheetBody.querySelectorAll('.cell[data-id]').forEach(c=>
     c.addEventListener('click',()=>buy(c.dataset.id)));
 }
-let shopTab='all';
+let shopTab=Object.keys(THEMES)[0]||'';
 let activeShopRender=null; // buy()가 지금 열려 있는 상점 화면을 다시 그릴 수 있게
 function openShop(){
   openSheetRaw('운교장터 · 목석방');
@@ -3912,18 +4017,17 @@ function ownedCount(id){ return (S.owned && S.owned[id]) || 0; }
 function placedInstances(id){ return S.placed.filter(iid=>typeOf(iid)===id); }
 function placedCount(id){ return placedInstances(id).length; }
 function renderShop(){
-  // 물건이 있는 계절 탭만 보인다
-  const inSeason=k=>Object.keys(ITEMS).filter(id=>ITEMS[id].season===k && !ITEMS[id].grow && !ITEMS[id].quest);
-  const tabs=SEASON_TABS.filter(([k])=>inSeason(k).length);
+  // 테마마다 탭 하나(물건이 있는 테마만)
+  const tabs=Object.entries(THEMES).map(([k,t])=>[k,t.name]).filter(([k])=>themeItemIds(k).length);
   if(tabs.length && !tabs.some(([k])=>k===shopTab)) shopTab=tabs[0][0];
-  const ids=inSeason(shopTab);
+  const ids=themeItemIds(shopTab);
   const mine=ids.filter(id=>ownedCount(id)>0).length;
   sheetBody.innerHTML= resBarHTML() + `
     <div class="tabs">${tabs.map(([k,label])=>
       `<button data-tab="${k}" class="${k===shopTab?'on':''}">${label}</button>`).join('')}</div>
     <div class="packhead banner">
-      <div class="art">${packPreview(shopTab)}<div class="strip"><h2>${PACK_NAME[shopTab]}</h2></div></div>
-      <div class="sub">${SEASON_NAME[shopTab]} · ${ids.length}종 입고 · ${mine}종 보유</div>
+      <div class="art">${packPreview(shopTab)}<div class="strip"><h2>${(THEMES[shopTab]||{}).name||''}</h2></div></div>
+      <div class="sub">${ids.length}종 · 하나씩 삽니다 · ${mine}종 보유</div>
     </div>
     <div class="grid">${ids.map(id=>cellHTML(id,'shop')).join('')}</div>
     ${ids.length ? '' : '<p class="note" style="margin:14px 2px">정원 물건을 새로 들이는 중입니다. 조금만 기다려 주세요.</p>'}
@@ -4030,8 +4134,10 @@ function renderBag(){
     if(!ownedIds.length){
       body=`<p class="note">아직 가진 물건이 없습니다. 저잣거리 화수전에서 골라보세요.</p>`;
     } else {
-      body = SEASON_TABS.map(([k,label])=>{
-        const ids=ownedIds.filter(id=>ITEMS[id] && ITEMS[id].season===k);
+      // 테마별로 묶고, 자라는 씨앗·묘목은 「화수전」으로
+      const groups=Object.entries(THEMES).map(([k,t])=>[k,t.name]).concat([['_grow','화수전']]);
+      body = groups.map(([k,label])=>{
+        const ids=ownedIds.filter(id=>ITEMS[id] && (k==='_grow' ? ITEMS[id].grow && !ITEMS[id].theme : ITEMS[id].theme===k));
         if(!ids.length) return '';
         return `<p class="note" style="margin:14px 2px 8px;font-weight:700;color:#5C5346">${label} · ${ids.length}종</p>
           <div class="grid">${ids.map(id=>cellHTML(id,'bag')).join('')}</div>`;
