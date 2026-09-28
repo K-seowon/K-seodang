@@ -1101,6 +1101,7 @@ const SAMPLE_GROWTH = { seed_gu:12 }; // 12방울 = 국화가 꽃 단계까지 �
    slot   top(저고리) / bottom(치마·바지) / outer(두루마기) / shoes(신)
    kind   같은 칸 안에서 모양이 다른 것을 가름
    ------------------------------------- */
+/* [쓰지 않음 — 부위별 조합 학동으로 갈 때 다시 쓴다] 옷 표와 찾기
 const WEAR = {
   top: {
     jg_dahong:{name:'다홍 저고리', c:'#D94A3D', rar:'N', cur:'coin', amt:7},
@@ -1130,9 +1131,10 @@ function findWear(id){
   for(const s of Object.keys(WEAR)) if(WEAR[s][id]) return {slot:s, ...WEAR[s][id]};
   return null;
 }
+*/
 
 /* ── 저장 상태 ─────────────────────────── */
-const START_WEAR = ['jg_dahong','ch_namsaek','sh_gomu'];
+// [쓰지 않음 — 부위별 조합 때 다시] const START_WEAR = ['jg_dahong','ch_namsaek','sh_gomu'];
 const S = load() || {
   coin: 10,
   prog: { gu:0, stage:0, ci:0, done:[], char:{} },
@@ -1142,8 +1144,8 @@ const S = load() || {
   growth: {...SAMPLE_GROWTH},
   seq: 0,
   locked: false,
-  closet: START_WEAR.slice(),
-  wear: { top:'jg_dahong', bottom:'ch_namsaek', outer:null, shoes:'sh_gomu' },
+  hakdong: 'hakdong-03',
+  // [쓰지 않음 — 부위별 조합 때 다시] closet: START_WEAR.slice(), wear: { top:'jg_dahong', bottom:'ch_namsaek', outer:null, shoes:'sh_gomu' },
   pos: { garden:{x:200,y:470}, seodang:{x:200,y:500}, inside:{x:200,y:520}, market:{x:200,y:500}, sarangbang:{x:200,y:500} }
 };
 // 예전 저장 자료( owned가 배열 )를 개수 표(맵)로 바꿔준다
@@ -1181,8 +1183,9 @@ if(!S.sampleGukAdded){
 }
 if(!S.pos.inside) S.pos.inside={x:200,y:520};
 if(!S.pos.sarangbang) S.pos.sarangbang={x:200,y:500};
-if(!S.closet) S.closet=START_WEAR.slice();
-if(!S.wear) S.wear={ top:'jg_dahong', bottom:'ch_namsaek', outer:null, shoes:'sh_gomu' };
+// [쓰지 않음 — 부위별 조합 때 다시] if(!S.closet) S.closet=START_WEAR.slice();
+// [쓰지 않음 — 부위별 조합 때 다시] if(!S.wear) S.wear={ top:'jg_dahong', bottom:'ch_namsaek', outer:null, shoes:'sh_gomu' };
+if(!S.hakdong) S.hakdong='hakdong-03'; // 고른 학동 그림(계정에 함께 저장된다). 처음에는 지금까지의 학동
 if(!S.prog) S.prog={ gu:0, stage:0, ci:0, done:[], char:{} };
 if(S.prog.ci===undefined) S.prog.ci=0;
 
@@ -1309,7 +1312,7 @@ function renderRankDemo(){
 }
 
 /* ── 아바타 ─────────────────────────────── */
-/* 신 모양 — 옷 가게(의전)의 신 썸네일이 쓴다 */
+/* [쓰지 않음 — 부위별 조합 때 다시] 신 모양. 의전의 신 썸네일이 쓰던 것
 const A = { git:'#FFFFFF', beoseon:'#F7F1E4', hair:'#2B2620', skin:'#F7DFC8' };
 
 function shoeSVG(cx, sh){
@@ -1329,19 +1332,38 @@ function shoeSVG(cx, sh){
   return `<ellipse cx="${cx}" cy="-2" rx="6.6" ry="3.6" fill="${c}" stroke="${A.hair}" stroke-width="1.3"/>
     <path d="M${cx-6.6} -3 q1.5 -3 4.5 -2.4" fill="none" stroke="${A.hair}" stroke-width="1.2"/>`;
 }
+*/
 /* ── 학동 ───────────────────────────────
-   학동 그림 한 장(items/운교서당학동.png, 여백을 잘라 낸 투명 PNG)을 발끝 가운데를
-   기준점으로 세운다. 부위별 그림(얼굴·머리·옷·신)을 겹치는 방식으로 바꿀
-   때까지는 옷을 바꿔 입어도 모습은 이 그림 그대로다.
-   HAKDONG_H는 기준 키(칸). 화면에는 SIZE_SCALE × AVATAR_SCALE 배로 그린다. */
-const HAKDONG_IMG = 'items/운교서당학동.png';
-const HAKDONG_H = 84, HAKDONG_W = Math.round(84*259/512); // 그림 비율 259×512
-function avatarSVG(x,y,wearOverride,withId){
+   학동은 그림 일곱(items/hakdong/hakdong-01~07.png, 여백을 잘라 낸 투명 PNG)
+   가운데 하나다. 모두 무료이고, 보따리의 「학동 고르기」에서 언제든 바꾼다.
+   고른 것은 S.hakdong에 적혀 계정에 함께 저장되고, 공개 정원에도 실려
+   이웃이 내 정원을 구경할 때 내 학동으로 보인다.
+   발끝 가운데를 기준점으로 세우고, 키는 모두 HAKDONG_H(칸)로 같게 맞춘다.
+   화면에는 SIZE_SCALE × AVATAR_SCALE 배로 그린다. 걸을 때는 걷는 방향으로
+   좌우를 뒤집고(walkTo) 위아래로 살짝 들썩인다(#hakLegs).
+   새 학동을 더하려면 그림을 폴더에 넣고 HAKDONGS에 한 줄(이름·그림 비율)을 더한다. */
+const HAKDONG_H = 84;
+const HAKDONGS = [   // w/h = 여백을 잘라 낸 그림의 가로/세로
+  { id:'hakdong-01', ratio:363/512 },
+  { id:'hakdong-02', ratio:236/512 },
+  { id:'hakdong-03', ratio:259/512 },
+  { id:'hakdong-04', ratio:210/512 },
+  { id:'hakdong-05', ratio:281/512 },
+  { id:'hakdong-06', ratio:358/512 },
+  { id:'hakdong-07', ratio:235/512 }
+];
+const HAKDONG_DEFAULT = 'hakdong-03';
+function hakdongOf(id){ return HAKDONGS.find(k=>k.id===id) || HAKDONGS.find(k=>k.id===HAKDONG_DEFAULT); }
+function hakdongSrc(id){ return `items/hakdong/${hakdongOf(id).id}.png`; }
+/* look: 그릴 학동(없으면 내가 고른 학동). 이웃 학동은 그 이웃의 것을 넘긴다 */
+function avatarSVG(x,y,look,withId){
   if(withId===undefined) withId=true; // 정원에 잠깐 세워두는 이웃 학동은 false로 불러, hakdong과 자리표가 겹치지 않게 한다
+  const k=hakdongOf(look || S.hakdong), src=hakdongSrc(k.id);
+  const w=Math.round(HAKDONG_H*k.ratio);
   return `<g${withId?' id="hakdong"':''} transform="translate(${x},${y}) scale(${SIZE_SCALE*AVATAR_SCALE})">
     <ellipse cx="0" cy="1" rx="17" ry="4.5" fill="rgba(61,58,54,.16)"/>
     <g${withId?' id="hakLegs"':''}>
-      <image href="${HAKDONG_IMG}" xlink:href="${HAKDONG_IMG}" x="${-HAKDONG_W/2}" y="${-HAKDONG_H}" width="${HAKDONG_W}" height="${HAKDONG_H}" preserveAspectRatio="xMidYMax meet"/>
+      <image href="${src}" xlink:href="${src}" x="${-w/2}" y="${-HAKDONG_H}" width="${w}" height="${HAKDONG_H}" preserveAspectRatio="xMidYMax meet"/>
     </g>
   </g>`;
 }
@@ -1379,19 +1401,19 @@ function signboard(x,y,w,label){
    fetchNeighbors()가 돌려주는 모양만 그대로 유지하면 손댈 일이 없다.
    ------------------------------------------------------- */
 const NEIGHBORS = [
-  { id:'dallae',  name:'달래', rankIdx:1, chars:82,  season:'spring',
+  { id:'dallae', hakdong:'hakdong-02',  name:'달래', rankIdx:1, chars:82,  season:'spring',
     wear:{ top:'jg_baek',   bottom:'ch_bunhong', outer:null,      shoes:'sh_jip'   },
     placed:['mhs_07','mhs_09','mhs_10','mhs_11','spr_08','seed_gu'],
     spot:{ seed_gu:[255,585] }, growth:{ seed_gu:3 } },
-  { id:'doryeon', name:'도련', rankIdx:2, chars:210, season:'summer',
+  { id:'doryeon', hakdong:'hakdong-04', name:'도련', rankIdx:2, chars:210, season:'summer',
     wear:{ top:'jg_yeondu', bottom:'ba_jaet',    outer:null,      shoes:'sh_namak' },
     placed:['sum_06','sum_01','sum_02','sum_04','sum_07','sap_mh'],
     spot:{ sap_mh:[110,575] }, growth:{ sap_mh:3 } },
-  { id:'dume',    name:'두메', rankIdx:3, chars:420, season:'autumn',
+  { id:'dume', hakdong:'hakdong-06',    name:'두메', rankIdx:3, chars:420, season:'autumn',
     wear:{ top:'jg_dahong', bottom:'ba_huin',    outer:'du_huin', shoes:'sh_gomu'  },
     placed:['aut_06','aut_01','aut_02','aut_03','aut_04','aut_05','aut_07','seed_md'],
     spot:{ seed_md:[255,585] }, growth:{ seed_md:6 } },
-  { id:'haneui',  name:'하늬', rankIdx:4, chars:680, season:'winter',
+  { id:'haneui', hakdong:'hakdong-07',  name:'하늬', rankIdx:4, chars:680, season:'winter',
     wear:{ top:'jg_jaju',   bottom:'ch_namsaek', outer:'du_ok',   shoes:'sh_jang'  },
     placed:['win_06','win_01','win_02','win_03','win_04','win_05','win_07','mhs_22','mhs_23','mhs_12','mhs_20','sap_gam'],
     spot:{ sap_gam:[110,578] }, growth:{ sap_gam:9 } }
@@ -1429,12 +1451,12 @@ function sanitizeGarden(d){
   const pick=(m, f)=>{ const out={}; placed.forEach(iid=>{ const v=f(m && m[iid]); if(v!=null) out[iid]=v; }); return out; };
   const spot = pick(d.spot, v=>Array.isArray(v)&&v.length===2&&v.every(Number.isFinite) ? [int(v[0],0,400),int(v[1],0,600)] : null);
   const growth = pick(d.growth, v=>Number.isFinite(v) ? int(v,0,1000) : null);
-  const wear = {};
-  WEAR_SLOTS.forEach(([slot])=>{ const id=d.wear && d.wear[slot]; wear[slot] = (typeof id==='string' && WEAR[slot] && WEAR[slot][id]) ? id : null; });
+  // 이웃이 고른 학동(wear.hakdong). 모르는 이름이면 기본 학동
+  const hakdong = hakdongOf(d.wear && d.wear.hakdong).id;
   const nick = typeof d.nick==='string' ? d.nick.trim().slice(0,8) : '';
   if(!nick) return null;
   return { id:d.id, name:nick, rankIdx:int(d.rankIdx,0,RANKS.length-1), chars:int(d.chars,0,1000),
-           placed, spot, growth, wear, updatedAtMs:int(d.updatedAtMs,0,1e15), real:true };
+           placed, spot, growth, hakdong, updatedAtMs:int(d.updatedAtMs,0,1e15), real:true };
 }
 
 async function openNeighborList(){
@@ -1866,7 +1888,7 @@ function drawGarden(){
   const p = posFor('garden');
   const pool = mid.map(o=>({y:spotOf(o.iid)[1], html:place(o)}))
     .concat([{y:p.y, html:avatarSVG(p.x,p.y)}])
-    .concat(visiting ? [{y:545, html:avatarSVG(200,545,visiting.wear,false)}] : [])
+    .concat(visiting ? [{y:545, html:avatarSVG(200,545,visiting.hakdong,false)}] : [])
     .sort((a,b)=>a.y-b.y);
   scene.innerHTML = village()
     + ground.map(place).join('')
@@ -2055,10 +2077,22 @@ function seoanSVG(cx, y){
     <rect x="${w-26}" y="35" width="15" height="5" rx="1.5" fill="#7A5F45" stroke="#3D3A36" stroke-width="2.2"/>
   </g>`;
 }
+/* 서안에 앉은 학동 — 앉은 그림이 따로 없어, 선 그림을 서안 뒤에 두고
+   SEAT_HIDE_Y 아래를 잘라 낸다. 잘린 선은 서안 앞판 뒤에 숨어, 앉아서 책을
+   보는 것처럼 보인다. SEAT_HEAD_Y는 머리 꼭대기 자리(펼친 책 위로 어깨와
+   깃이 보이는 높이). 앉은 그림이 생기면 이 함수만 바꾸면 된다. */
+const SEAT_X = 200, SEAT_HEAD_Y = 266, SEAT_HIDE_Y = 366;
+function seatedAvatarSVG(){
+  const tall = HAKDONG_H*SIZE_SCALE*AVATAR_SCALE;        // 화면에서의 키
+  const feetY = SEAT_HEAD_Y + tall;                      // 선 그림이라면 발이 올 자리
+  return `<defs><clipPath id="seatClip"><rect x="0" y="0" width="400" height="${SEAT_HIDE_Y}"/></clipPath></defs>
+    <g clip-path="url(#seatClip)">${avatarSVG(SEAT_X, feetY)}</g>`;
+}
 function drawInside(){
   const p = S.pos.inside;
   scene.innerHTML = `
     <image href="bg/bg-seodanginside.png" xlink:href="bg/bg-seodanginside.png" x="0" y="0" width="400" height="600" preserveAspectRatio="xMidYMid slice"/>
+    ${seated ? seatedAvatarSVG() : ''}
     <g class="tapzone" data-act="open-scrolls" data-ax="200" data-ay="405" role="button" aria-label="서안의 책 펼치기">
       <rect x="130" y="305" width="140" height="95" fill="transparent"/>
       ${seoanSVG(200,348)}
@@ -2071,7 +2105,7 @@ function drawInside(){
       <g stroke="#8A9E90" stroke-width="2"><path d="M322 530 H382M322 556 H382M352 506 V580"/></g>
       ${signboard(302,468,84,'마당으로')}
     </g>
-    ${avatarSVG(p.x,p.y)}`;
+    ${seated ? '' : avatarSVG(p.x,p.y)}`;
 }
 
 /* ── 장면 4 · 저잣거리 ──────────────────── */
@@ -2138,9 +2172,10 @@ function drawSarangbang(){
 }
 function drawMarket(){
   const p = S.pos.market;
+  // 의전(옷 가게)은 닫았다 — 장터는 정원 물건에 집중한다. 학동은 보따리에서 고른다.
+  // [쓰지 않음 — 부위별 조합 때 다시] ${marketZone([0,160,155,180],'shop-clothes',75,420,'의전으로','14벌',true)}
   scene.innerHTML = `
     <image href="bg/bg-marketstreet.png" xlink:href="bg/bg-marketstreet.png" x="0" y="0" width="400" height="600" preserveAspectRatio="xMidYMid slice"/>
-    ${marketZone([0,160,155,180],  'shop-clothes',75, 420,'의전으로',   '14벌',  true)}
     ${marketZone([160,145,140,195],'shop-flower', 225,420,'화수전으로', '씨앗·묘목', true)}
     ${marketZone([300,160,100,180],'shop-stone',  350,420,'목석방으로', `${Object.keys(ITEMS).filter(id=>!ITEMS[id].grow && !ITEMS[id].quest).length}종`, true)}
     <g class="tapzone" data-act="go-garden" data-ax="344" data-ay="556" role="button" aria-label="나의 정원으로">
@@ -2158,6 +2193,7 @@ const DRAW = { garden:drawGarden, seodang:drawSeodang, inside:drawInside, market
 const FLOOR = { garden:[200,560,50,350], seodang:[330,580,40,360], inside:[320,580,40,360], market:[370,580,50,350], sarangbang:[330,580,40,360] };
 const NAVKEY = { garden:'garden', seodang:'seodang', inside:'seodang', market:'market', sarangbang:'sarangbang' };
 let where='garden', walking=false, placingId=null;
+let seated=false; // 글방 서안에 앉아 있는가(두루마리를 펼칠 때 앉고, 다른 데로 걸어가면 일어난다)
 let visiting=null, visitPos={x:200,y:470}; // 이웃의 정원을 구경하는 중이면 그 이웃 자료, 아니면 null
 
 function drawScene(){
@@ -2272,7 +2308,7 @@ document.getElementById('bgmBtn').addEventListener('click', ()=>{
   toast(S.bgmOn ? '배경음악을 켰습니다' : '배경음악을 껐습니다');
 });
 function goScene(name){
-  visiting=null;
+  visiting=null; seated=false;
   where=name; placingId=null; watering=false;
   document.getElementById('placeBar').classList.remove('on');
   overlay.classList.remove('on');
@@ -2303,13 +2339,16 @@ function doAct(act){
   }
   if(act==='go-market')     return goScene('market');
   if(act==='go-garden')     return goScene('garden');
-  if(act==='open-scrolls')    return openScrolls();
+  if(act==='open-scrolls'){
+    if(where==='inside' && !seated){ seated=true; drawScene(); return setTimeout(openScrolls, 450); }
+    return openScrolls();
+  }
   if(act==='study-cheonja')   return openGujeolList();
   if(act==='study-jok')       return openJok();
   if(act==='study-myeongsim') return toast('명심보감은 곧 문을 엽니다');
   if(act.startsWith('story:')) return openStory(act.slice(6));
   if(act==='shop-flower')  return openGrowShop();
-  if(act==='shop-clothes') return openClothes();
+  // [쓰지 않음 — 부위별 조합 때 다시] if(act==='shop-clothes') return openClothes();
   if(act==='shop-stone')   return openShop();
   if(act==='sr-quotes')  return toast('곧 열립니다');
   if(act==='sr-notices') return toast('곧 열립니다');
@@ -2369,6 +2408,7 @@ scene.addEventListener('pointercancel', ()=>{
 });
 
 function walkTo(x,y,done){
+  if(seated){ seated=false; drawScene(); } // 일어나서 걷는다
   const g=document.getElementById('hakdong'); if(!g){ done&&done(); return; }
   const p=posFor(where), sx=p.x, sy=p.y;
   const dx=x-sx, dist=Math.hypot(dx,y-sy);
@@ -4401,7 +4441,8 @@ function buy(id){
   toast(`${it.name} — 정원보따리에 넣었습니다 (${S.owned[id]}개)`);
 }
 
-/* ── 옷 미리보기 ────────────────────────── */
+/* [쓰지 않음 — 부위별 조합 학동으로 갈 때 다시 쓴다] 옷 미리보기·의전·옷 사기·입기
+// ── 옷 미리보기 ──
 function wearThumb(slot, g){
   if(slot==='top') return `<svg class="thumb" viewBox="0 0 60 60">
     <path d="M14 40 q0 -18 16 -18 q16 0 16 18 q-16 8 -32 0 Z" fill="${g.c}" stroke="#3D3A36" stroke-width="2"/>
@@ -4429,7 +4470,7 @@ function wearCell(slot, id, mode){
     <div class="cost">${foot}</div></button>`;
 }
 
-/* ── 의전 ───────────────────────────────── */
+// ── 의전 ──
 function openClothes(){
   openSheetRaw('운교장터 · 의전');
   const n=WEAR_SLOTS.reduce((a,[s])=>a+Object.keys(WEAR[s]).length,0);
@@ -4459,6 +4500,7 @@ function equip(id){
   save(); renderBag();
   toast(S.wear[g.slot]===id ? `${g.name}를 입었습니다` : `${g.name}를 벗었습니다`);
 }
+*/
 
 /* ── 전 충전(자리만 준비) ───────────────────
    지금은 결제를 만들지 않는다. 나중에 실제 구매를 붙일 자리만
@@ -4477,6 +4519,11 @@ function openTopUp(){
 }
 
 /* ── 보따리 ─────────────────────────────── */
+function chooseHakdong(id){
+  if(id===S.hakdong) return toast('지금 이 학동입니다');
+  S.hakdong=hakdongOf(id).id; save(); renderBag(); drawScene();
+  toast('학동을 바꾸었습니다');
+}
 let bagTab='garden';
 function openBag(){
   openSheetRaw('보따리');
@@ -4486,9 +4533,17 @@ function renderBag(){
   const ownedIds=Object.keys(S.owned).filter(id=>ownedCount(id)>0);
   const tabs=`<div class="tabs">
     <button data-bag="garden" class="${bagTab==='garden'?'on':''}">정원보따리 ${ownedIds.length}</button>
-    <button data-bag="hakdong" class="${bagTab==='hakdong'?'on':''}">학동보따리 ${S.closet.length}</button></div>`;
+    <button data-bag="hakdong" class="${bagTab==='hakdong'?'on':''}">학동 고르기</button></div>`;
 
   if(bagTab==='hakdong'){
+    // 학동 고르기 — 일곱 모두 무료. 누르면 곧장 바뀌고 계정에 저장된다
+    sheetBody.innerHTML = tabs + `
+      <p class="note" style="margin:0 2px 10px">누르면 그 학동으로 바뀝니다. 언제든 다시 바꿀 수 있습니다.</p>
+      <div class="grid">${HAKDONGS.map((k,i)=>`
+        <button class="cell ${k.id===S.hakdong?'placed':''}" data-hak="${k.id}">
+          <img class="thumb" src="${hakdongSrc(k.id)}" alt="학동 ${i+1}" style="object-fit:contain;object-position:bottom">
+          <div class="cost">${k.id===S.hakdong?'지금 학동':'고르기'}</div></button>`).join('')}</div>`;
+    /* [쓰지 않음 — 부위별 조합 때 다시] 예전 학동보따리(가진 옷 입기)
     const body = S.closet.length
       ? WEAR_SLOTS.map(([s,label])=>{
           const ids=Object.keys(WEAR[s]).filter(id=>S.closet.includes(id));
@@ -4499,6 +4554,7 @@ function renderBag(){
       : `<p class="note">아직 가진 옷이 없습니다. 저잣거리 의전에서 골라보세요.</p>`;
     sheetBody.innerHTML = tabs + body +
       `<p class="note">학동이 입을 것들입니다. 두루마기는 다시 누르면 벗습니다.</p>`;
+    */
   } else {
     let body='';
     if(!ownedIds.length){
@@ -4519,8 +4575,8 @@ function renderBag(){
 
   sheetBody.querySelectorAll('.tabs button').forEach(b=>
     b.addEventListener('click',()=>{ bagTab=b.dataset.bag; renderBag(); sheetBody.scrollTop=0; }));
-  sheetBody.querySelectorAll('.cell[data-w]').forEach(c=>
-    c.addEventListener('click',()=>equip(c.dataset.w)));
+  sheetBody.querySelectorAll('.cell[data-hak]').forEach(c=>
+    c.addEventListener('click',()=>chooseHakdong(c.dataset.hak)));
   sheetBody.querySelectorAll('.cell[data-id]').forEach(c=>{
     c.addEventListener('click',()=>{
       const id=c.dataset.id;
@@ -4916,7 +4972,8 @@ function gardenSnapshot(){
     if(Array.isArray(S.spot[iid])) spot[iid]=S.spot[iid];
     if(S.growth[iid]) growth[iid]=S.growth[iid];
   });
-  const wear={}; WEAR_SLOTS.forEach(([slot])=>{ wear[slot]=S.wear[slot]||null; });
+  // wear 칸에는 옷 대신 고른 학동을 싣는다(게시된 보안 규칙이 wear를 맵으로 요구한다)
+  const wear={ hakdong:S.hakdong };
   // likes는 없앤 「좋구나」 칸이다. 지금 게시된 보안 규칙이 이 칸을 요구해서 빈 칸으로 보낸다
   // (규칙에서 likes를 빼고 다시 게시할 때 여기서도 뺀다).
   return { nick:S.nick, rankIdx:curRankIdx(), chars:metCount(), placed, spot, growth, likes:{}, wear };
