@@ -963,7 +963,20 @@ const THEMES = {
     // 기와 대문: 기와담·돌담에 이어 붙는다. 양옆 풀꽃은 빼고 돌기둥 바깥끼리 붙는다
     { file:'gate-02.png',   id:'giwa-gate',    name:'기와 대문',  amt:15, rar:'SR', h:120, tile:['giwadam','doldam'], edge:[0.151,0.847], at:[200,560] },
     { file:'lantern.png', id:'lantern', name:'석등', amt:12, rar:'R', h:72, at:[320,570] },
-    { file:'jangdok.png', id:'jangdok', name:'장독', amt:8,  rar:'N', h:62,  at:[250,592] }
+    { file:'jangdok.png', id:'jangdok', name:'장독', amt:8,  rar:'N', h:62,  at:[250,592] },
+    // 철쭉: 다 자란 떨기로 판다(씨앗 아님)
+    { file:'chuljjuk-01.png', name:'철쭉 1', amt:8,  rar:'N', h:62, at:[60,575] },
+    { file:'chuljjuk-02.png', name:'철쭉 2', amt:8,  rar:'N', h:54, at:[370,590] },
+    { file:'chuljjuk-03.png', name:'철쭉 3', amt:10, rar:'R', h:80, at:[30,520] },
+    // 디딤돌·잔디: 땅에 깔리는 것(ground). w는 맨 앞에 놓았을 때의 화면 폭
+    { file:'didimdol-01.png', name:'디딤돌 1', amt:5, rar:'N', w:44, ground:true, at:[170,585] },
+    { file:'didimdol-02.png', name:'디딤돌 2', amt:5, rar:'N', w:40, ground:true, at:[215,596] },
+    { file:'didimdol-03.png', name:'디딤돌 3', amt:5, rar:'N', w:44, ground:true, at:[260,590] },
+    { file:'didimdol-04.png', name:'디딤돌 4', amt:5, rar:'N', w:46, ground:true, at:[305,598] },
+    { file:'jandi-01.png', name:'잔디 1', amt:6, rar:'N', w:100, ground:true, at:[100,560] },
+    { file:'jandi-02.png', name:'잔디 2', amt:6, rar:'N', w:95,  ground:true, at:[300,560] },
+    { file:'jandi-03.png', name:'잔디 3', amt:6, rar:'N', w:110, ground:true, at:[200,540] },
+    { file:'jandi-04.png', name:'잔디 4', amt:6, rar:'N', w:110, ground:true, at:[330,530] }
   ]},
   youngsanhong: { name:'영산홍정원', dir:'items/youngsanhongGarden', items:[
     { file:'moran-01.png', name:'분홍 모란',   amt:8,  rar:'N',  h:58,  at:[262,556] },
@@ -972,7 +985,7 @@ const THEMES = {
     { file:'pine.png',     name:'소나무',      amt:20, rar:'SR', h:165, at:[92,512] },
     { file:'pond.png',     name:'연못',        amt:15, rar:'R',  w:180, ground:true, at:[200,598] },
     { file:'youngsanhong/youngsanhong-01.png', id:'azalea', name:'영산홍씨', amt:6, rar:'R', h:22, at:[372,592],
-      grow:{ dir:'youngsanhong', file:'youngsanhong-{nn}.png', count:7, kind:'화초', height:[22,84], bonus:3,
+      grow:{ dir:'youngsanhong', file:'youngsanhong-{nn}.png', count:7, kind:'화초', height:[22,63], bonus:3, // 다 핀 키 84→63(3/4), 사이 단계는 이 곡선대로 함께 줄어든다
              names:['씨앗 심은 흙','새싹','어린 떨기','잎 무성한 떨기','꽃봉오리 맺은 떨기','꽃 핀 떨기','꽃 만발한 떨기'] } }
   ]}
 };
