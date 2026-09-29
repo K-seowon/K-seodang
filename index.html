@@ -939,6 +939,8 @@ const ITEMS = {
             같은 무리의 그림은 같은 비율로 그려 키(h)를 그림 높이에 맞춰 적는다
      foot   발치(기준점·그림자 자리)를 손으로 정할 때 [가운데, 폭] (그림 폭에 대한 비율).
             비스듬히 그려 한쪽 기둥만 더 내려온 문처럼, 저절로 잰 발치가 한쪽으로 쏠릴 때 쓴다
+     squash 폭은 그대로 두고 키만 줄이는 비율(예: 0.8이면 키 80%). 옆으로 퍼져 보이게 할 때.
+            0.7보다 작게 하면 꽃잎이 납작하게 찌그러져 보이기 시작한다
      onWater 연못 위에 얹는 것(물고기 등). 땅에 깔리는 것들 가운데 늘 맨 위에 그린다(ground와 함께)
      edge   이어 붙일 때 맞닿는 양쪽 끝 [왼쪽, 오른쪽] (잘라 낸 그림 폭에 대한 비율, 없으면 [0,1]).
             담 옆으로 풀꽃이 비어져 나온 그림은 담 몸통이 끝나는 곳을 적는다
@@ -965,10 +967,10 @@ const THEMES = {
     { file:'gate-02.png',   id:'giwa-gate',    name:'기와 대문',  amt:15, rar:'SR', h:120, tile:['giwadam','doldam'], edge:[0.151,0.847], at:[200,560] },
     { file:'lantern.png', id:'lantern', name:'석등', amt:12, rar:'R', h:72, at:[320,570] },
     { file:'jangdok.png', id:'jangdok', name:'장독', amt:8,  rar:'N', h:62,  at:[250,592] },
-    // 철쭉: 다 자란 떨기로 판다(씨앗 아님)
-    { file:'chuljjuk-01.png', name:'철쭉 1', amt:8,  rar:'N', h:62, at:[60,575] },
-    { file:'chuljjuk-02.png', name:'철쭉 2', amt:8,  rar:'N', h:54, at:[370,590] },
-    { file:'chuljjuk-03.png', name:'철쭉 3', amt:10, rar:'R', h:80, at:[30,520] },
+    // 철쭉: 다 자란 떨기로 판다(씨앗 아님). squash로 폭은 두고 키만 줄여 옆으로 퍼져 보이게
+    { file:'chuljjuk-01.png', name:'철쭉 1', amt:8,  rar:'N', h:62, squash:0.8, at:[60,575] },
+    { file:'chuljjuk-02.png', name:'철쭉 2', amt:8,  rar:'N', h:54, squash:0.8, at:[370,590] },
+    { file:'chuljjuk-03.png', name:'철쭉 3', amt:10, rar:'R', h:80, squash:0.8, at:[30,520] },
     // 디딤돌·잔디: 땅에 깔리는 것(ground). w는 맨 앞에 놓았을 때의 화면 폭
     { file:'didimdol-01.png', name:'디딤돌 1', amt:5, rar:'N', w:44, ground:true, at:[170,585] },
     { file:'didimdol-02.png', name:'디딤돌 2', amt:5, rar:'N', w:40, ground:true, at:[215,596] },
@@ -1005,6 +1007,7 @@ Object.entries(THEMES).forEach(([key, th])=>{
       tile: t.tile ? [].concat(t.tile===true ? themeItemId(key, t) : t.tile) : false, edge:t.edge||[0,1],
       ...(t.grow ? { grow: t.grow.kind==='나무' ? 'sapling' : 'seed' } : {}),
       art:{ src:`${th.dir}/${t.file}`, h:t.h, w:t.w, shadow:!t.ground, ready:false,
+            squash: t.squash || 1,
             footFix: t.foot ? { cx:t.foot[0], w:t.foot[1] } : null,
             dirs:(t.dirs||[]).map(f=>({ src:`${th.dir}/${f}`, ready:false })) }
     };
@@ -1026,7 +1029,8 @@ function ensureThemeArt(key){
       const { it, v }=jobs[i], a=it.art;
       if(!r){ if(v!==a) v.missing=true; return; } // 방향 그림 파일이 없으면 그 방향은 없는 것으로
       v.url=r.url; v.ready=true; v.foot=(v===a && a.footFix) || r.foot;
-      v.box = a.w ? [a.w, Math.round(a.w/r.aspect)] : [Math.round(a.h*r.aspect), a.h];
+      // 폭은 그림 비율대로, 키는 squash만큼 줄인다(squash가 1이면 그림 비율 그대로)
+      v.box = a.w ? [a.w, Math.round(a.w/r.aspect*a.squash)] : [Math.round(a.h*r.aspect), Math.round(a.h*a.squash)];
       if(v===a) it.box=v.box;
     });
     themeArtState[key] = jobs.every(j=>j.v.ready || j.v.missing) ? 'ready' : undefined; // 못 받은 것은 다음에 다시
@@ -1059,7 +1063,8 @@ function itemMedia(it, k){
     ensureThemeArt(it.theme);
     const a=it.art, v=viewOf(it, k) || a, [w,h] = v===a ? it.box : v.box;
     const shadow = a.shadow ? plantShadow(w,h,v.foot) : '';
-    return shadow + (v.ready ? `<image href="${v.url}" xlink:href="${v.url}" x="0" y="0" width="${w}" height="${h}" preserveAspectRatio="xMidYMax meet"/>` : '');
+    const fit = a.squash!==1 ? 'none' : 'xMidYMax meet'; // 키를 줄인 것은 칸에 맞춰 늘여 그린다
+    return shadow + (v.ready ? `<image href="${v.url}" xlink:href="${v.url}" x="0" y="0" width="${w}" height="${h}" preserveAspectRatio="${fit}"/>` : '');
   }
   if(!it.src) return '';
   const [w,h]=it.box;
