@@ -383,7 +383,7 @@ button.cell{cursor:pointer}
       <span id="waterTxt">물주기</span>
     </button>
     <div id="placeBar"><span id="placeMsg"></span><button id="placeCancel">그만두기</button></div>
-    <div id="selBar"><span id="selName"></span><button id="selFlip">좌우 뒤집기</button><button id="selBack">보따리로</button><button id="selClose" aria-label="고르기 그만두기">✕</button></div>
+    <div id="selBar"><span id="selName"></span><button id="selFlip">뒤집기</button><button id="selDir" hidden>방향 바꾸기</button><button id="selBack">보따리로</button><button id="selClose" aria-label="고르기 그만두기">✕</button></div>
     <div id="visitBar"><span id="visitName"></span><span id="visitWater"></span><button id="visitBackBtn">내 정원으로</button></div>
   </div>
 
@@ -884,7 +884,14 @@ const ITEMS = {
      w      폭(화면 그대로)                     — 땅에 깔리는 물건(ground:true)과 함께
      at     가게 머리 그림 속 자리 [x, 바닥 y]
      id     식별자 뒤쪽을 파일 이름 대신 따로 정할 때(예: id:'doldam' → any-doldam)
-     tile   여러 개를 옆으로 이어 붙이는 물건(돌담 등). 가까이 놓으면 옆에 착 붙는다
+     tile   여러 개를 옆으로 이어 붙이는 물건(돌담 등). 가까이 놓으면 옆에 착 붙는다.
+            무리 이름을 적으면(tile:'doldam') 같은 무리끼리(긴 담·짧은 담) 서로 이어 붙는다.
+            같은 무리의 그림은 같은 비율로 그려 키(h)를 그림 높이에 맞춰 적는다
+     edge   이어 붙일 때 맞닿는 양쪽 끝 [왼쪽, 오른쪽] (잘라 낸 그림 폭에 대한 비율, 없으면 [0,1]).
+            담 옆으로 풀꽃이 비어져 나온 그림은 담 몸통이 끝나는 곳을 적는다
+     dirs   다른 방향에서 본 그림 파일들(예: 비스듬히 안쪽으로 뻗은 돌담). 폴더에 그 파일이
+            있으면 정원에서 물건을 골랐을 때 「방향 바꾸기」 단추가 생겨 차례로 바뀐다.
+            파일이 아직 없으면 단추도 없다. 키(h)는 기본 그림과 같게 맞춘다
      grow   심어서 물을 주면 자라는 것. { dir(테마 폴더 안 단계 그림 폴더), file, count,
             kind('화초'|'나무'), height:[첫 단계 키, 마지막 키], bonus, names } — 나무 단계
             그림(TREE_ART)과 같은 방식으로 자란다. 가게에서는 씨앗(첫 단계)만 팔고, 심은 뒤에는
@@ -893,7 +900,12 @@ const ITEMS = {
    따로 옮길 수 있다(묶음 판매 없음). any는 어느 테마와도 상관없는 공용 물건이다. */
 const THEMES = {
   any: { name:'사철 두는 것', dir:'items/anygarden', items:[
-    { file:'doldam1.png', id:'doldam',  name:'돌담', amt:5,  rar:'N', h:48,  tile:true, at:[140,560] },
+    // 담은 긴 것과 반 길이인 것을 섞어 이어 붙인다(tile 무리가 같으면 서로 붙는다)
+    { file:'doldam-02.png', id:'doldam',      name:'긴 돌담',    amt:8,  rar:'N', h:48,  tile:'doldam', at:[110,600] },
+    { file:'doldam-01.png', id:'doldam-half', name:'짧은 돌담',  amt:5,  rar:'N', h:48,  tile:'doldam', at:[40,540] },
+    // 기와담: 두 그림의 담 높이가 같도록 키를 그림 높이에 맞췄다. 양옆 풀꽃은 빼고 기와 끝끼리 붙는다
+    { file:'dam-01.png',    id:'giwadam',      name:'긴 기와담',   amt:15, rar:'R', h:104, tile:'giwadam', edge:[0.115,0.926], at:[150,505] },
+    { file:'dam-02.png',    id:'giwadam-half', name:'짧은 기와담', amt:10, rar:'R', h:84,  tile:'giwadam', edge:[0.035,0.963], at:[330,505] },
     { file:'lantern.png', id:'lantern', name:'석등', amt:12, rar:'R', h:110, at:[320,570] },
     { file:'jangdok.png', id:'jangdok', name:'장독', amt:8,  rar:'N', h:62,  at:[250,592] }
   ]},
@@ -914,9 +926,11 @@ Object.entries(THEMES).forEach(([key, th])=>{
     const box = t.w ? [t.w, Math.round(t.w*0.75)] : [t.h, t.h]; // 그림을 불러오면 비율대로 고친다
     ITEMS[themeItemId(key, t)] = {
       name:t.name, slot:t.ground?'ground':'mid', rar:t.rar||'N', cur:'coin', amt:t.amt,
-      box, at:t.at||[200,580], anchor:'bc', theme:key, tile:!!t.tile,
+      box, at:t.at||[200,580], anchor:'bc', theme:key,
+      tile: t.tile ? (t.tile===true ? themeItemId(key, t) : t.tile) : false, edge:t.edge||[0,1],
       ...(t.grow ? { grow: t.grow.kind==='나무' ? 'sapling' : 'seed' } : {}),
-      art:{ src:`${th.dir}/${t.file}`, h:t.h, w:t.w, shadow:!t.ground, ready:false }
+      art:{ src:`${th.dir}/${t.file}`, h:t.h, w:t.w, shadow:!t.ground, ready:false,
+            dirs:(t.dirs||[]).map(f=>({ src:`${th.dir}/${f}`, ready:false })) }
     };
   });
 });
@@ -925,14 +939,21 @@ const themeArtState = {};
 function ensureThemeArt(key){
   if(themeArtState[key]) return;
   themeArtState[key]='loading';
-  const ids=Object.keys(ITEMS).filter(id=>ITEMS[id].theme===key && ITEMS[id].art && !ITEMS[id].art.ready);
-  Promise.all(ids.map(id=>prepareTreeImage(ITEMS[id].art.src))).then(results=>{
+  // 기본 그림과 방향 그림(dirs)을 함께 불러온다
+  const jobs=[];
+  Object.keys(ITEMS).forEach(id=>{
+    const it=ITEMS[id]; if(it.theme!==key || !it.art) return;
+    [it.art, ...it.art.dirs].forEach(v=>{ if(!v.ready && !v.missing) jobs.push({ it, v }); });
+  });
+  Promise.all(jobs.map(j=>prepareTreeImage(j.v.src))).then(results=>{
     results.forEach((r,i)=>{
-      const it=ITEMS[ids[i]], a=it.art; if(!r) return;
-      a.url=r.url; a.ready=true; a.foot=r.foot;
-      it.box = a.w ? [a.w, Math.round(a.w/r.aspect)] : [Math.round(a.h*r.aspect), a.h];
+      const { it, v }=jobs[i], a=it.art;
+      if(!r){ if(v!==a) v.missing=true; return; } // 방향 그림 파일이 없으면 그 방향은 없는 것으로
+      v.url=r.url; v.ready=true; v.foot=r.foot;
+      v.box = a.w ? [a.w, Math.round(a.w/r.aspect)] : [Math.round(a.h*r.aspect), a.h];
+      if(v===a) it.box=v.box;
     });
-    themeArtState[key] = ids.every(id=>ITEMS[id].art.ready) ? 'ready' : undefined; // 못 받은 것은 다음에 다시
+    themeArtState[key] = jobs.every(j=>j.v.ready || j.v.missing) ? 'ready' : undefined; // 못 받은 것은 다음에 다시
     drawScene();
     if(overlay.classList.contains('on')){
       if(sheetTitle.textContent.includes('목석방')) renderShop();
@@ -952,12 +973,17 @@ const GROW_SVG = `<svg class="pip" viewBox="0 0 24 24" aria-hidden="true"><path 
 /* 그림 파일 둘레에 빈 여백이 많으면 crop:[x,y,너비,높이](원본 픽셀)와
    imgSize:[원본 너비,원본 높이]를 적는다. 그러면 그 부분만 box에 꽉 차게,
    아래쪽 가운데를 맞춰(바닥에 서도록) 그린다. */
-function itemMedia(it){
+/* 방향 그림: k는 0이 기본 그림, 1부터는 art.dirs의 차례. 그 그림이 없으면 null(→ 기본 그림) */
+function viewOf(it, k){
+  const v = k && it.art ? it.art.dirs[k-1] : null;
+  return v && v.ready ? v : null;
+}
+function itemMedia(it, k){
   if(it.art){
     ensureThemeArt(it.theme);
-    const [w,h]=it.box, a=it.art;
-    const shadow = a.shadow ? plantShadow(w,h,a.foot) : '';
-    return shadow + (a.ready ? `<image href="${a.url}" xlink:href="${a.url}" x="0" y="0" width="${w}" height="${h}" preserveAspectRatio="xMidYMax meet"/>` : '');
+    const a=it.art, v=viewOf(it, k) || a, [w,h] = v===a ? it.box : v.box;
+    const shadow = a.shadow ? plantShadow(w,h,v.foot) : '';
+    return shadow + (v.ready ? `<image href="${v.url}" xlink:href="${v.url}" x="0" y="0" width="${w}" height="${h}" preserveAspectRatio="xMidYMax meet"/>` : '');
   }
   if(!it.src) return '';
   const [w,h]=it.box;
@@ -1034,6 +1060,7 @@ const REMOVED_ITEM_REFUND = {"mhs_04": 3.0, "mhs_12": 3.0, "mhs_23": 8.0, "mhs_2
 if(!S.pos.inside) S.pos.inside={x:200,y:520};
 if(!S.pos.sarangbang) S.pos.sarangbang={x:200,y:500};
 if(!S.flip) S.flip={}; // 좌우로 뒤집어 놓은 물건 { iid:true }
+if(!S.dir) S.dir={};   // 방향 그림을 바꿔 놓은 물건 { iid:차례 }
 if(!S.hakdong) S.hakdong='hakdong-03'; // 고른 학동 그림(계정에 함께 저장된다). 처음에는 지금까지의 학동
 if(!S.prog) S.prog={ gu:0, stage:0, ci:0, done:[], char:{} };
 if(S.prog.ci===undefined) S.prog.ci=0;
@@ -1254,8 +1281,11 @@ function sanitizeGarden(d){
   const placed = (Array.isArray(d.placed)?d.placed:[])
     .filter(iid=>typeof iid==='string' && IID_RE.test(iid) && ITEMS[typeOf(iid)]).slice(0,200);
   const pick=(m, f)=>{ const out={}; placed.forEach(iid=>{ const v=f(m && m[iid]); if(v!=null) out[iid]=v; }); return out; };
-  const spot = pick(d.spot, v=>Array.isArray(v)&&(v.length===2||v.length===3)&&v.every(Number.isFinite)
-    ? (v[2]===1 ? [int(v[0],0,400),int(v[1],0,600),1] : [int(v[0],0,400),int(v[1],0,600)]) : null);
+  const spot = pick(d.spot, v=>{
+    if(!Array.isArray(v) || v.length<2 || v.length>4 || !v.every(Number.isFinite)) return null;
+    const out=[int(v[0],0,400), int(v[1],0,600)], f=v[2]===1?1:0, k=int(v[3]||0,0,8);
+    return k ? out.concat([f,k]) : f ? out.concat([1]) : out; // 셋째 칸 뒤집기, 넷째 칸 방향
+  });
   const growth = pick(d.growth, v=>Number.isFinite(v) ? int(v,0,1000) : null);
   // 이웃이 고른 학동(wear.hakdong). 모르는 이름이면 기본 학동
   const hakdong = hakdongOf(d.wear && d.wear.hakdong).id;
@@ -1621,11 +1651,21 @@ function footX(it, w, foot){
 function isFlipped(iid){
   return visiting ? !!((visiting.spot||{})[iid]||[])[2] : !!S.flip[iid];
 }
+/* 놓은 방향(방향 그림 차례). 내 정원은 S.dir, 이웃 정원은 spot의 넷째 칸 */
+function dirOf(iid){
+  return (visiting ? ((visiting.spot||{})[iid]||[])[3] : S.dir[iid]) | 0;
+}
+/* 놓인 물건 하나의 지금 모습: 칸 크기·발치·그림 */
+function placedLook(iid){
+  const it=ITEMS[typeOf(iid)];
+  if(it.grow){ const gv=growVisual(iid); return { box:gv.box, foot:gv.foot, svg:gv.svg }; }
+  const k=dirOf(iid), v=viewOf(it, k);
+  return { box: v ? v.box : it.box, foot: v ? v.foot : null, svg:itemMedia(it, k) };
+}
 function placedTransform(iid){
   const it=ITEMS[typeOf(iid)], [sx,sy]=spotOf(iid);
-  const gv = it.grow ? growVisual(iid) : null;
-  const [w,h] = gv ? gv.box : it.box;
-  const ax = it.anchor==='bc' ? footX(it, w, gv && gv.foot) : 0;
+  const look=placedLook(iid), [w,h]=look.box;
+  const ax = it.anchor==='bc' ? footX(it, w, look.foot) : 0;
   const s = it.slot==='ground' ? 1 : SIZE_SCALE, fx = isFlipped(iid) ? -1 : 1;
   // 발치를 축으로 뒤집으므로 뒤집어도 서 있는 자리는 그대로다
   return `translate(${sx},${sy}) scale(${s*fx},${s}) translate(${-ax},${-h})`;
@@ -1635,9 +1675,7 @@ function selFrameSVG(w,h){
   return `<rect class="selframe" x="-4" y="-4" width="${w+8}" height="${h+8}" rx="8"/>`;
 }
 function place(o){
-  const gv = o.it.grow ? growVisual(o.iid) : null;
-  const media = gv ? gv.svg : itemMedia(o.it);
-  const [w,h] = gv ? gv.box : o.it.box;
+  const look=placedLook(o.iid), media=look.svg, [w,h]=look.box;
   const sel = (!visiting && o.iid===selIid) ? selFrameSVG(w,h) : '';
   if(o.iid===waterFX){
     return `<g data-iid="${o.iid}" data-id="${o.id}" transform="${placedTransform(o.iid)}">
@@ -2170,18 +2208,27 @@ function syncSelBar(){
     const it=ITEMS[typeOf(selIid)];
     document.getElementById('selName').textContent = it.grow ? `${it.name} · ${growVisual(selIid).name}` : it.name;
     document.getElementById('selBack').textContent = confirmBack===selIid ? '한 번 더 누르면 거둡니다' : '보따리로';
+    document.getElementById('selDir').hidden = !(it.art && it.art.dirs.some(v=>v.ready)); // 방향 그림이 있을 때만
   }
   if(confirmBack && confirmBack!==selIid) confirmBack=null;
 }
 /* 놓인 물건 하나를 보따리로 돌려보낸다(자리·뒤집기·자란 기록도 함께 지운다) */
 function returnToBag(iid){
   S.placed=S.placed.filter(x=>x!==iid);
-  delete S.spot[iid]; delete S.flip[iid]; delete S.growth[iid];
+  delete S.spot[iid]; delete S.flip[iid]; delete S.dir[iid]; delete S.growth[iid];
   save();
 }
 document.getElementById('selFlip').addEventListener('click', ()=>{
   if(!selIid) return;
   if(S.flip[selIid]) delete S.flip[selIid]; else S.flip[selIid]=true;
+  save(); drawScene();
+});
+document.getElementById('selDir').addEventListener('click', ()=>{
+  if(!selIid) return;
+  const it=ITEMS[typeOf(selIid)], n=1+it.art.dirs.length;
+  let k=dirOf(selIid);
+  do { k=(k+1)%n; } while(k && !viewOf(it, k)); // 없는 방향 그림은 건너뛴다
+  if(k) S.dir[selIid]=k; else delete S.dir[selIid];
   save(); drawScene();
 });
 document.getElementById('selBack').addEventListener('click', ()=>{
@@ -2374,24 +2421,34 @@ function startPlacing(id){
   document.getElementById('placeMsg').textContent=`${it.name} — 놓을 자리를 누르세요`;
   document.getElementById('placeBar').classList.add('on');
 }
-/* 이어 붙이는 물건(tile) — 같은 물건이 같은 줄(높이 차 TILE_SNAP_Y 안)에 있고
-   그 옆자리(폭만큼 떨어진 곳)에 가까우면, 그 옆에 딱 붙는 자리로 옮긴다.
+/* 이어 붙이는 물건(tile) — 같은 무리(tile 이름이 같은 것: 긴 돌담과 짧은 돌담처럼)가
+   같은 줄(높이 차 TILE_SNAP_Y 안)에 있고 그 끝 가까이 놓으면, 끝과 끝이 맞닿는 자리로
+   옮긴다. 끝은 그림의 edge(담 몸통이 끝나는 곳, 양옆으로 비어져 나온 풀꽃은 빼고)로 잰다.
    이음매가 벌어지지 않게 TILE_OVERLAP만큼 살짝 겹친다. */
 const TILE_SNAP_Y = 18, TILE_SNAP_X = 0.4, TILE_OVERLAP = 0.02;
+/* 이어 붙이는 물건의 왼쪽 끝·오른쪽 끝(기준점에서 떨어진 화면 거리)과 길이. 뒤집으면 좌우가 바뀐다 */
+function tileEnds(iid){
+  const it=ITEMS[typeOf(iid)], w=it.box[0]*(it.slot==='ground'?1:SIZE_SCALE);
+  const cx=footX(it, 1), L=(it.edge[0]-cx)*w, R=(it.edge[1]-cx)*w;
+  return isFlipped(iid) ? [-R, -L, R-L] : [L, R, R-L];
+}
 function snapTile(iid, x, y){
   const it=ITEMS[typeOf(iid)];
-  if(!it || !it.tile) return [x,y];
+  if(!it || !it.tile || dirOf(iid)) return [x,y]; // 옆으로 이어 붙이기는 기본 방향 그림끼리만
   if(it.art && !it.art.ready){ ensureThemeArt(it.theme); return [x,y]; } // 그림을 불러오기 전에는 폭을 몰라 붙이지 않는다
-  const wScene = it.box[0]*(it.slot==='ground'?1:SIZE_SCALE), step = wScene*(1-TILE_OVERLAP);
+  const [L,R,len]=tileEnds(iid);
   let best=null;
   S.placed.forEach(other=>{
-    if(other===iid || typeOf(other)!==typeOf(iid)) return;
+    const o=ITEMS[typeOf(other)];
+    if(other===iid || !o || o.tile!==it.tile || dirOf(other) || (o.art && !o.art.ready)) return;
     const [ox,oy]=spotOf(other);
     if(Math.abs(y-oy)>TILE_SNAP_Y) return;
-    [-1,1].forEach(side=>{
-      const tx=ox+side*step, d=Math.abs(x-tx);
+    const [oL,oR,olen]=tileEnds(other), lap=Math.min(len,olen)*TILE_OVERLAP;
+    // 저쪽 오른쪽에 붙이기(내 왼쪽 끝 = 저쪽 오른쪽 끝), 저쪽 왼쪽에 붙이기(내 오른쪽 끝 = 저쪽 왼쪽 끝)
+    [ox+oR-L-lap, ox+oL-R+lap].forEach(tx=>{
+      const d=Math.abs(x-tx);
       if(tx<16 || tx>384) return; // 정원 밖으로는 붙이지 않는다
-      if(d<wScene*TILE_SNAP_X && (!best || d<best.d)) best={d, x:tx, y:oy};
+      if(d<len*TILE_SNAP_X && (!best || d<best.d)) best={d, x:tx, y:oy};
     });
   });
   return best ? [Math.round(best.x), best.y] : [x,y];
@@ -4659,8 +4716,12 @@ function gardenSnapshot(){
   const placed = S.placed.filter(iid=>IID_RE.test(iid)).slice(0,200);
   const spot={}, growth={};
   placed.forEach(iid=>{
-    // 좌우로 뒤집은 것은 셋째 칸에 1을 붙여 싣는다(보안 규칙이 칸 수를 따지지 않는다)
-    if(Array.isArray(S.spot[iid])) spot[iid] = S.flip[iid] ? [S.spot[iid][0], S.spot[iid][1], 1] : S.spot[iid];
+    // 좌우로 뒤집은 것은 셋째 칸에 1, 방향을 바꾼 것은 넷째 칸에 차례를 붙여 싣는다
+    // (보안 규칙이 칸 수를 따지지 않는다)
+    if(Array.isArray(S.spot[iid])){
+      const [x,y]=S.spot[iid], f=S.flip[iid]?1:0, k=S.dir[iid]|0;
+      spot[iid] = k ? [x,y,f,k] : f ? [x,y,1] : [x,y];
+    }
     if(S.growth[iid]) growth[iid]=S.growth[iid];
   });
   // wear 칸에는 옷 대신 고른 학동을 싣는다(게시된 보안 규칙이 wear를 맵으로 요구한다)
