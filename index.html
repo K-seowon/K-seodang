@@ -112,6 +112,15 @@ body{font-family:'Gaegu',system-ui,sans-serif;color:var(--ink);-webkit-font-smoo
   background:var(--hanji);border-top:3px solid var(--ink);padding:8px 12px;
   font-size:17px;align-items:center;gap:10px}
 #placeBar.on{display:flex}
+.selframe{fill:rgba(255,250,235,.28);stroke:#C0392B;stroke-width:2.5;stroke-dasharray:7 5;vector-effect:non-scaling-stroke;pointer-events:none}
+#selBar{position:absolute;left:0;right:0;bottom:0;z-index:27;display:none;
+  background:var(--hanji);border-top:3px solid var(--ink);padding:8px 10px;
+  font-size:16px;align-items:center;gap:8px}
+#selBar.on{display:flex}
+#selBar #selName{flex:1;min-width:0;font-weight:700;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+#selBar button{border:2.5px solid var(--ink);border-radius:12px;background:var(--hanji-2);
+  font-family:inherit;font-size:16px;padding:5px 10px;cursor:pointer;white-space:nowrap}
+#selBar #selClose{padding:5px 9px}
 #placeBar button{margin-left:auto;border:2.5px solid var(--ink);border-radius:12px;background:var(--hanji-2);
   font-family:inherit;font-size:17px;padding:5px 14px;cursor:pointer}
 
@@ -374,6 +383,7 @@ button.cell{cursor:pointer}
       <span id="waterTxt">물주기</span>
     </button>
     <div id="placeBar"><span id="placeMsg"></span><button id="placeCancel">그만두기</button></div>
+    <div id="selBar"><span id="selName"></span><button id="selFlip">좌우 뒤집기</button><button id="selBack">보따리로</button><button id="selClose" aria-label="고르기 그만두기">✕</button></div>
     <div id="visitBar"><span id="visitName"></span><span id="visitWater"></span><button id="visitBackBtn">내 정원으로</button></div>
   </div>
 
@@ -919,13 +929,14 @@ function ensureThemeArt(key){
   Promise.all(ids.map(id=>prepareTreeImage(ITEMS[id].art.src))).then(results=>{
     results.forEach((r,i)=>{
       const it=ITEMS[ids[i]], a=it.art; if(!r) return;
-      a.url=r.url; a.ready=true;
+      a.url=r.url; a.ready=true; a.foot=r.foot;
       it.box = a.w ? [a.w, Math.round(a.w/r.aspect)] : [Math.round(a.h*r.aspect), a.h];
     });
     themeArtState[key] = ids.every(id=>ITEMS[id].art.ready) ? 'ready' : undefined; // 못 받은 것은 다음에 다시
     drawScene();
     if(overlay.classList.contains('on')){
       if(sheetTitle.textContent.includes('목석방')) renderShop();
+      else if(sheetTitle.textContent.includes('화수전')) renderGrowShop();
       else if(sheetTitle.textContent==='보따리') renderBag();
     }
   });
@@ -945,7 +956,7 @@ function itemMedia(it){
   if(it.art){
     ensureThemeArt(it.theme);
     const [w,h]=it.box, a=it.art;
-    const shadow = a.shadow ? plantShadow(w,h) : '';
+    const shadow = a.shadow ? plantShadow(w,h,a.foot) : '';
     return shadow + (a.ready ? `<image href="${a.url}" xlink:href="${a.url}" x="0" y="0" width="${w}" height="${h}" preserveAspectRatio="xMidYMax meet"/>` : '');
   }
   if(!it.src) return '';
@@ -1022,6 +1033,7 @@ const REMOVED_ITEM_REFUND = {"mhs_04": 3.0, "mhs_12": 3.0, "mhs_23": 8.0, "mhs_2
 }
 if(!S.pos.inside) S.pos.inside={x:200,y:520};
 if(!S.pos.sarangbang) S.pos.sarangbang={x:200,y:500};
+if(!S.flip) S.flip={}; // 좌우로 뒤집어 놓은 물건 { iid:true }
 if(!S.hakdong) S.hakdong='hakdong-03'; // 고른 학동 그림(계정에 함께 저장된다). 처음에는 지금까지의 학동
 if(!S.prog) S.prog={ gu:0, stage:0, ci:0, done:[], char:{} };
 if(S.prog.ci===undefined) S.prog.ci=0;
@@ -1242,7 +1254,8 @@ function sanitizeGarden(d){
   const placed = (Array.isArray(d.placed)?d.placed:[])
     .filter(iid=>typeof iid==='string' && IID_RE.test(iid) && ITEMS[typeOf(iid)]).slice(0,200);
   const pick=(m, f)=>{ const out={}; placed.forEach(iid=>{ const v=f(m && m[iid]); if(v!=null) out[iid]=v; }); return out; };
-  const spot = pick(d.spot, v=>Array.isArray(v)&&v.length===2&&v.every(Number.isFinite) ? [int(v[0],0,400),int(v[1],0,600)] : null);
+  const spot = pick(d.spot, v=>Array.isArray(v)&&(v.length===2||v.length===3)&&v.every(Number.isFinite)
+    ? (v[2]===1 ? [int(v[0],0,400),int(v[1],0,600),1] : [int(v[0],0,400),int(v[1],0,600)]) : null);
   const growth = pick(d.growth, v=>Number.isFinite(v) ? int(v,0,1000) : null);
   // 이웃이 고른 학동(wear.hakdong). 모르는 이름이면 기본 학동
   const hakdong = hakdongOf(d.wear && d.wear.hakdong).id;
@@ -1307,8 +1320,13 @@ function shade(hex, amt){
   const r=clamp((n>>16&255)+amt), g=clamp((n>>8&255)+amt), b=clamp((n&255)+amt);
   return '#'+(0x1000000+(r<<16)+(g<<8)+b).toString(16).slice(1);
 }
-function plantShadow(w,h){
-  return `<ellipse cx="${w/2}" cy="${h}" rx="${(w*0.32).toFixed(1)}" ry="${Math.max(3,h*0.045).toFixed(1)}" fill="rgba(43,36,28,.28)"/>`;
+/* 발치 그림자. foot(그림이 바닥에 닿는 자리, findFoot)이 있으면 그 밑에 놓고,
+   닿는 폭보다 조금 넓게 깔아 양옆으로 비어져 나오게 한다(그래야 바닥에 서 보인다).
+   가운데는 그림 아래 끝보다 살짝 위 — 밑동이 그림자를 조금 덮는다. */
+function plantShadow(w,h,foot){
+  const f = foot || { cx:0.5, w:0.52 };
+  const rx = Math.max(4, f.w*w*0.62), ry = Math.max(2.5, Math.min(rx*0.24, h*0.08));
+  return `<ellipse cx="${(f.cx*w).toFixed(1)}" cy="${(h-ry*0.35).toFixed(1)}" rx="${rx.toFixed(1)}" ry="${ry.toFixed(1)}" fill="rgba(43,36,28,.28)"/>`;
 }
 
 
@@ -1438,18 +1456,38 @@ function prepareTreeImage(src, altSrc){
       if(x1<0) return resolve({ url:src, aspect:W/H });
       const bw=x1-x0+1, bh=y1-y0+1, out=document.createElement('canvas');
       out.width=bw; out.height=bh; out.getContext('2d').drawImage(cv, x0,y0,bw,bh, 0,0,bw,bh);
-      resolve({ url:out.toDataURL('image/png'), aspect:bw/bh });
+      resolve({ url:out.toDataURL('image/png'), aspect:bw/bh, foot:findFoot(d, W, x0, x1, y0, y1) });
     };
     img.src=src;
   });
+}
+/* 그림이 바닥에 닿는 자리(발치) → { cx:가운데, w:폭 } (그림 폭에 대한 비율).
+   가운데는 맨 아래 띠(FOOT_BAND)에서 진하게 칠해진 곳의 가운데 — 소나무처럼 줄기가
+   한쪽으로 치우친 그림도 줄기 밑에 기준점과 그림자가 온다.
+   폭은 조금 더 높은 띠(FOOT_WIDTH_BAND)에서 가장 넓은 줄 — 석등 받침처럼 비스듬히
+   그려져 맨 아래가 모서리 한 점인 것도 받침 폭만큼 그림자를 깐다. */
+const FOOT_BAND = 0.06, FOOT_WIDTH_BAND = 0.14;
+function findFoot(d, W, x0, x1, y0, y1){
+  const bw=x1-x0+1, bh=y1-y0+1;
+  const band=Math.max(2, Math.round(bh*FOOT_BAND)), wband=Math.max(band, Math.round(bh*FOOT_WIDTH_BAND));
+  let fx0=x1+1, fx1=x0-1, widest=0;
+  for(let y=y1-wband+1; y<=y1; y++){
+    let r0=x1+1, r1=x0-1;
+    for(let x=x0; x<=x1; x++) if(d[(y*W+x)*4+3]>128){ if(x<r0) r0=x; r1=x; }
+    if(r1<r0) continue;
+    widest=Math.max(widest, r1-r0+1);
+    if(y>y1-band){ fx0=Math.min(fx0,r0); fx1=Math.max(fx1,r1); }
+  }
+  if(fx1<fx0) return null;
+  return { cx:((fx0+fx1+1)/2-x0)/bw, w:widest/bw };
 }
 const treeArtState = {}; // key → 'loading' | 'ready'
 function ensureTreeArt(key){
   if(treeArtState[key]) return;
   treeArtState[key]='loading';
   const art=TREE_ART[key], stages=GROW_TYPES[key].stages;
-  Promise.all(stages.map(st=> st.url ? { url:st.url, aspect:st.aspect } : prepareTreeImage(st.src, st.altSrc))).then(results=>{
-    results.forEach((r,i)=>{ if(r){ stages[i].url=r.url; stages[i].aspect=r.aspect; } });
+  Promise.all(stages.map(st=> st.url ? { url:st.url, aspect:st.aspect, foot:st.foot } : prepareTreeImage(st.src, st.altSrc))).then(results=>{
+    results.forEach((r,i)=>{ if(r){ stages[i].url=r.url; stages[i].aspect=r.aspect; stages[i].foot=r.foot; } });
     sizeTreeStages(art, stages);
     stages.forEach(st=>{ st.ready=!!st.url; });
     treeArtState[key]='ready';
@@ -1475,7 +1513,7 @@ Object.entries(TREE_ART).forEach(([key, art])=>{
     aspect:1, w:0, h:0, ready:false,
     draw(){
       ensureTreeArt(key);
-      const shadow=plantShadow(this.w, this.h);
+      const shadow=plantShadow(this.w, this.h, this.foot);
       return this.ready
         ? shadow+`<image href="${this.url}" xlink:href="${this.url}" x="0" y="0" width="${this.w}" height="${this.h}" preserveAspectRatio="xMidYMax meet"/>`
         : shadow;
@@ -1572,24 +1610,40 @@ function gardenGrowth(){ return visiting ? visiting.growth : S.growth; }
 function growStageIdx(iid){ return growStageOf(growKey(ITEMS[typeOf(iid)]), gardenGrowth()[iid]); }
 function growVisual(iid){
   const s = GROW_TYPES[growKey(ITEMS[typeOf(iid)])].stages[growStageIdx(iid)];
-  return { box:[s.w,s.h], svg:s.draw(), name:s.name };
+  return { box:[s.w,s.h], svg:s.draw(), name:s.name, foot:s.foot };
+}
+/* 기준점(spot)의 가로 자리 = 그림이 바닥에 닿는 곳(발치)의 가운데. 발치를 모르면 그림 가운데 */
+function footX(it, w, foot){
+  const f = foot || (it.art && it.art.foot);
+  return f ? f.cx*w : w/2;
+}
+/* 좌우로 뒤집어 놓았는가. 내 정원은 S.flip, 이웃 정원은 spot의 셋째 칸(1이면 뒤집음) */
+function isFlipped(iid){
+  return visiting ? !!((visiting.spot||{})[iid]||[])[2] : !!S.flip[iid];
 }
 function placedTransform(iid){
   const it=ITEMS[typeOf(iid)], [sx,sy]=spotOf(iid);
-  const [w,h] = it.grow ? growVisual(iid).box : it.box;
-  const ax = it.anchor==='bc' ? w/2 : 0;
-  const s = it.slot==='ground' ? 1 : SIZE_SCALE;
-  return `translate(${sx},${sy}) scale(${s}) translate(${-ax},${-h})`;
+  const gv = it.grow ? growVisual(iid) : null;
+  const [w,h] = gv ? gv.box : it.box;
+  const ax = it.anchor==='bc' ? footX(it, w, gv && gv.foot) : 0;
+  const s = it.slot==='ground' ? 1 : SIZE_SCALE, fx = isFlipped(iid) ? -1 : 1;
+  // 발치를 축으로 뒤집으므로 뒤집어도 서 있는 자리는 그대로다
+  return `translate(${sx},${sy}) scale(${s*fx},${s}) translate(${-ax},${-h})`;
+}
+/* 고른 물건 둘레의 점선 틀 */
+function selFrameSVG(w,h){
+  return `<rect class="selframe" x="-4" y="-4" width="${w+8}" height="${h+8}" rx="8"/>`;
 }
 function place(o){
   const gv = o.it.grow ? growVisual(o.iid) : null;
   const media = gv ? gv.svg : itemMedia(o.it);
+  const [w,h] = gv ? gv.box : o.it.box;
+  const sel = (!visiting && o.iid===selIid) ? selFrameSVG(w,h) : '';
   if(o.iid===waterFX){
-    const [w,h] = gv ? gv.box : o.it.box;
     return `<g data-iid="${o.iid}" data-id="${o.id}" transform="${placedTransform(o.iid)}">
       <g class="plant-shake">${media}</g>${waterFxSVG(w,h)}</g>`;
   }
-  return `<g data-iid="${o.iid}" data-id="${o.id}" transform="${placedTransform(o.iid)}">${media}</g>`;
+  return `<g data-iid="${o.iid}" data-id="${o.id}" transform="${placedTransform(o.iid)}">${sel}${media}</g>`;
 }
 /* 물조리개 — 둥근 몸통(놋쇠빛), 위로 굽은 손잡이, 앞으로 길게 뻗은
    주둥이, 끝에 구멍 뚫린 둥근 물뿌리개 머리. 붓는 자세 그대로를
@@ -1863,6 +1917,7 @@ function drawScene(){
   document.getElementById('lockIcon').innerHTML = S.locked
     ? '<rect x="4" y="11" width="16" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/>'
     : '<rect x="4" y="11" width="16" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 7.5-2"/>';
+  syncSelBar();
   const wb=document.getElementById('waterBtn');
   wb.classList.toggle('on', where==='garden');
   wb.classList.toggle('active', watering);
@@ -2013,10 +2068,15 @@ function doAct(act){
 
 /* ── 손가락 처리: 걷기 · 끌기 · 놓기 · 물주기 ───── */
 let ptr=null, drag=null, watering=false, waterFX=null;
+let selIid=null; // 눌러서 고른 정원 물건(점선 틀과 아래 단추 줄이 뜬다)
+let confirmBack=null; // 자라던 것을 거둘 때는 한 번 더 묻는다(자란 것이 처음으로 돌아가므로)
 scene.addEventListener('pointerdown', e=>{
   const item = e.target.closest('[data-iid]');
   const act  = e.target.closest('[data-act]');
   ptr = { x:e.clientX, y:e.clientY, act, item, moved:false };
+  // 물건을 끌려고 했는데 잠김·물주기 때문에 못 옮기면, 끌 때 까닭을 알려 준다
+  if(where==='garden' && !visiting && !placingId && item && !ITEMS[item.dataset.id].fixed)
+    ptr.blocked = S.locked ? 'locked' : watering ? 'water' : null;
   if(where==='garden' && !S.locked && !placingId && !watering && !visiting && item && !ITEMS[item.dataset.id].fixed){
     const p=svgPoint(e), [ix,iy]=spotOf(item.dataset.iid);
     drag = { id:item.dataset.iid, g:item, ox:p.x-ix, oy:p.y-iy };
@@ -2026,7 +2086,11 @@ scene.addEventListener('pointerdown', e=>{
 });
 scene.addEventListener('pointermove', e=>{
   if(!ptr) return;
-  if(!ptr.moved && Math.hypot(e.clientX-ptr.x, e.clientY-ptr.y)>6) ptr.moved=true;
+  if(!ptr.moved && Math.hypot(e.clientX-ptr.x, e.clientY-ptr.y)>6){
+    ptr.moved=true;
+    if(ptr.blocked==='locked') toast('배치가 잠겨 있습니다. 왼쪽 아래 「잠김」을 눌러 풀면 옮길 수 있습니다');
+    if(ptr.blocked==='water')  toast('물 주는 중에는 옮길 수 없습니다. 「물 주는 중」을 눌러 끝내 주세요');
+  }
   if(!drag || !ptr.moved) return;
   const p=svgPoint(e);
   S.spot[drag.id] = [Math.round(clamp(p.x-drag.ox,16,384)), Math.round(clamp(p.y-drag.oy,200,596))];
@@ -2037,10 +2101,13 @@ scene.addEventListener('pointerup', e=>{
   if(!P) return;
   if(D){
     D.g.classList.remove('dragging');
-    if(P.moved){ S.spot[D.id]=snapTile(D.id, ...S.spot[D.id]); save(); drawScene(); }
+    if(P.moved){ S.spot[D.id]=snapTile(D.id, ...S.spot[D.id]); save(); selIid=D.id; }
+    else selIid = selIid===D.id ? null : D.id; // 누르면 고르고, 고른 것을 다시 누르면 놓아 준다
+    drawScene();
     return;
   }
   if(P.moved || walking) return;
+  if(selIid){ selIid=null; drawScene(); return; } // 빈 곳을 누르면 고르기만 그만둔다
   const p=svgPoint(e);
   if(watering && where==='garden'){
     const iid=P.item&&P.item.dataset.iid, it=iid&&ITEMS[typeOf(iid)];
@@ -2093,6 +2160,42 @@ function svgPoint(e){
   return pt.matrixTransform(scene.getScreenCTM().inverse());
 }
 const clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
+
+/* ── 고른 물건: 좌우 뒤집기 · 보따리로 ── */
+function syncSelBar(){
+  const ok = selIid && where==='garden' && !visiting && !S.locked && !placingId && !watering && S.placed.includes(selIid);
+  if(!ok) selIid=null;
+  document.getElementById('selBar').classList.toggle('on', !!selIid);
+  if(selIid){
+    const it=ITEMS[typeOf(selIid)];
+    document.getElementById('selName').textContent = it.grow ? `${it.name} · ${growVisual(selIid).name}` : it.name;
+    document.getElementById('selBack').textContent = confirmBack===selIid ? '한 번 더 누르면 거둡니다' : '보따리로';
+  }
+  if(confirmBack && confirmBack!==selIid) confirmBack=null;
+}
+/* 놓인 물건 하나를 보따리로 돌려보낸다(자리·뒤집기·자란 기록도 함께 지운다) */
+function returnToBag(iid){
+  S.placed=S.placed.filter(x=>x!==iid);
+  delete S.spot[iid]; delete S.flip[iid]; delete S.growth[iid];
+  save();
+}
+document.getElementById('selFlip').addEventListener('click', ()=>{
+  if(!selIid) return;
+  if(S.flip[selIid]) delete S.flip[selIid]; else S.flip[selIid]=true;
+  save(); drawScene();
+});
+document.getElementById('selBack').addEventListener('click', ()=>{
+  if(!selIid) return;
+  const iid=selIid, it=ITEMS[typeOf(iid)];
+  if(it.grow && (S.growth[iid]||0)>0 && confirmBack!==iid){
+    confirmBack=iid; syncSelBar();
+    return toast('거두면 자란 것이 처음(씨앗·묘목)으로 돌아갑니다');
+  }
+  confirmBack=null; selIid=null;
+  returnToBag(iid); drawScene();
+  toast(`${it.name}을(를) 보따리로 거두었습니다`);
+});
+document.getElementById('selClose').addEventListener('click', ()=>{ selIid=null; drawScene(); });
 
 document.getElementById('lockBtn').addEventListener('click', ()=>{
   S.locked=!S.locked; save(); drawScene();
@@ -2261,7 +2364,7 @@ function escHTML(s){
 function startPlacing(id){
   const it=ITEMS[id];
   overlay.classList.remove('on');
-  where='garden'; watering=false; drawScene();
+  where='garden'; watering=false; selIid=null; drawScene();
   if(it.fixed){
     if(it.gkind) S.placed = S.placed.filter(x=>!(ITEMS[typeOf(x)] && ITEMS[typeOf(x)].gkind===it.gkind));
     if(!S.placed.includes(id)) S.placed.push(id);
@@ -3978,7 +4081,7 @@ function runReview(list){
 
 function placeAt(o){
   const it=o.it, [w,h]=it.box; let [x,y]=it.at;
-  if(it.anchor==='bc'){ x-=w/2; y-=h; } else y-=h;
+  if(it.anchor==='bc'){ x-=footX(it, w); y-=h; } else y-=h;
   return `<g transform="translate(${x},${y})">${itemMedia(it)}</g>`;
 }
 /* 가게 머리 그림: 그 테마 물건을 모두 제자리(it.at)에 놓아 본 모습 */
@@ -4054,7 +4157,13 @@ function renderGrowShop(){
     <div class="grid">${SEED_IDS.map(id=>cellHTML(id,'shop')).join('')}</div>` : ''}
     ${SAPLING_IDS.length ? `<p class="note" style="margin:14px 2px 8px;font-weight:700;color:#5C5346">묘목</p>
     <div class="grid">${SAPLING_IDS.map(id=>cellHTML(id,'shop')).join('')}</div>` : ''}
-    ${SEED_IDS.length+SAPLING_IDS.length ? '' : '<p class="note" style="margin:14px 2px">씨앗과 묘목을 새로 들이는 중입니다. 조금만 기다려 주세요.</p>'}
+    ${Object.entries(THEMES).map(([k,t])=>{
+      // 테마에 딸린 씨앗·묘목도 여기서 판다(같은 물건이라 테마 탭에서 사도 같다)
+      const ids=themeItemIds(k).filter(id=>ITEMS[id].grow);
+      return ids.length ? `<p class="note" style="margin:14px 2px 8px;font-weight:700;color:#5C5346">${t.name}</p>
+        <div class="grid">${ids.map(id=>cellHTML(id,'shop')).join('')}</div>` : '';
+    }).join('')}
+    ${SEED_IDS.length+SAPLING_IDS.length+Object.keys(ITEMS).filter(id=>ITEMS[id].grow).length ? '' : '<p class="note" style="margin:14px 2px">씨앗과 묘목을 새로 들이는 중입니다. 조금만 기다려 주세요.</p>'}
     <p class="note">산 것은 정원보따리에 들어갑니다. 정원에 심는 것은 보따리에서 고르세요.</p>
     <p class="note">성장수는 서당에서 글을 익혀야만 모입니다.</p>`;
   bindShopCells();
@@ -4161,8 +4270,7 @@ function renderBag(){
       } else {
         const insts=placedInstances(id), last=insts[insts.length-1];
         if(!last) return;
-        S.placed=S.placed.filter(x=>x!==last); delete S.spot[last];
-        save(); renderBag();
+        returnToBag(last); renderBag();
         toast(`${ITEMS[id].name}을(를) 거두었습니다`);
       }
     });
@@ -4482,16 +4590,22 @@ function renderAccount(){
 }
 /* 시험용 도구 — 이 컴퓨터에서 localhost로 열 때만 계정 창 맨 아래에 보인다 */
 const TEST_GROW_AMOUNT = 100;
+const TEST_COIN_AMOUNT = 100;
 function addTestTools(){
   if(!isLocalTest()) return;
   sheetBody.insertAdjacentHTML('beforeend', `
     <div class="hanja-card" style="text-align:left;margin-top:16px">
       <div class="hint">시험용 도구 (localhost에서만 보입니다)</div>
       <button class="subbtn" id="testGrowBtn" style="margin-top:8px">성장수 ${TEST_GROW_AMOUNT}방울 넣기</button>
+      <button class="subbtn" id="testCoinBtn" style="margin-top:8px">전 ${TEST_COIN_AMOUNT}닢 넣기</button>
     </div>`);
   document.getElementById('testGrowBtn').addEventListener('click', ()=>{
     S.growWater=(S.growWater||0)+TEST_GROW_AMOUNT; save(); syncHUD();
     toast(`성장수 ${TEST_GROW_AMOUNT}방울을 넣었습니다 · 지금 ${S.growWater}방울`);
+  });
+  document.getElementById('testCoinBtn').addEventListener('click', ()=>{
+    S.coin=(S.coin||0)+TEST_COIN_AMOUNT; save(); syncHUD();
+    toast(`전 ${TEST_COIN_AMOUNT}닢을 넣었습니다 · 지금 ${S.coin}전`);
   });
 }
 /* 이 컴퓨터에서 시험하는 중인가 (localhost로 연 경우만). 시험용 단추는 이때만 보인다. */
@@ -4545,7 +4659,8 @@ function gardenSnapshot(){
   const placed = S.placed.filter(iid=>IID_RE.test(iid)).slice(0,200);
   const spot={}, growth={};
   placed.forEach(iid=>{
-    if(Array.isArray(S.spot[iid])) spot[iid]=S.spot[iid];
+    // 좌우로 뒤집은 것은 셋째 칸에 1을 붙여 싣는다(보안 규칙이 칸 수를 따지지 않는다)
+    if(Array.isArray(S.spot[iid])) spot[iid] = S.flip[iid] ? [S.spot[iid][0], S.spot[iid][1], 1] : S.spot[iid];
     if(S.growth[iid]) growth[iid]=S.growth[iid];
   });
   // wear 칸에는 옷 대신 고른 학동을 싣는다(게시된 보안 규칙이 wear를 맵으로 요구한다)
