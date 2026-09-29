@@ -442,7 +442,7 @@ button.cell{cursor:pointer}
    줄거나 커지므로, 여기 숫자만 바꿔서 미세 조정한다. */
 const SIZE_SCALE = 0.7;
 /* 학동(아바타)만 따로 키우는 배율. 정원 물건 크기는 SIZE_SCALE 그대로 두고 학동만 이만큼 더 크게 그린다. */
-const AVATAR_SCALE = 1.3;
+const AVATAR_SCALE = 1.45;
 
 /* ── 정원 크기·원근 — 화면을 보면서 여기 숫자만 바꿔 맞춘다 ──────────
    ITEM_SCALE        정원 물건(꽃·나무·담…)의 기준 크기 배율. 1.5면 예전의 1.5배.
@@ -458,7 +458,10 @@ const DEPTH_FAR_Y = 222, DEPTH_NEAR_Y = 596;
 const SHADOW_ALPHA = 0.36, SHADOW_WIDTH = 0.72, SHADOW_FLAT = 0.28;
 /* 물건을 놓고 학동이 걸어 다닐 수 있는 흙마당. 화면 좌표 [x, y] 꼭짓점을 차례로 이은 테두리.
    배경 그림의 집·담장·다리가 있는 위쪽(y 222보다 위), 왼쪽 아래 우물·울타리,
-   오른쪽 집과 섬돌 앞은 뺐다. 이 밖에 놓으려 하면 가장 가까운 마당 안 자리로 옮긴다. */
+   오른쪽 집과 섬돌 앞은 뺐다. 이 밖에 놓으려 하면 가장 가까운 마당 안 자리로 옮긴다.
+   LIMIT_TO_YARD가 false면 이 테두리를 쓰지 않고 예전처럼 정원 네모 안(가로 16~384,
+   세로 200~596)이면 어디든 놓는다. 지금은 꺼 두었다(true로 바꾸면 다시 켜진다). */
+const LIMIT_TO_YARD = false;
 const GARDEN_AREA = [
   [16,222], [384,222], [384,284], [330,284], [330,560], [384,560], [384,596],
   [16,596], [16,562], [92,562], [92,420], [16,420]
@@ -478,6 +481,7 @@ function inGardenArea(x, y){
 }
 /* 마당 밖이면 테두리 위 가장 가까운 자리로 */
 function clampToArea(x, y){
+  if(!LIMIT_TO_YARD) return [Math.round(Math.max(16, Math.min(384, x))), Math.round(Math.max(200, Math.min(596, y)))];
   if(inGardenArea(x, y)) return [Math.round(x), Math.round(y)];
   let best=null;
   GARDEN_AREA.forEach((a,i)=>{
@@ -958,7 +962,7 @@ const THEMES = {
     { file:'gate-01.png',   id:'gate',         name:'사립문',     amt:12, rar:'R', h:92,  tile:['doldam','giwadam'], foot:[0.5,0.9], at:[240,545] },
     // 기와 대문: 기와담·돌담에 이어 붙는다. 양옆 풀꽃은 빼고 돌기둥 바깥끼리 붙는다
     { file:'gate-02.png',   id:'giwa-gate',    name:'기와 대문',  amt:15, rar:'SR', h:120, tile:['giwadam','doldam'], edge:[0.151,0.847], at:[200,560] },
-    { file:'lantern.png', id:'lantern', name:'석등', amt:12, rar:'R', h:110, at:[320,570] },
+    { file:'lantern.png', id:'lantern', name:'석등', amt:12, rar:'R', h:72, at:[320,570] },
     { file:'jangdok.png', id:'jangdok', name:'장독', amt:8,  rar:'N', h:62,  at:[250,592] }
   ]},
   youngsanhong: { name:'영산홍정원', dir:'items/youngsanhongGarden', items:[
@@ -1115,7 +1119,7 @@ if(!S.pos.inside) S.pos.inside={x:200,y:520};
 if(!S.pos.sarangbang) S.pos.sarangbang={x:200,y:500};
 if(!S.flip) S.flip={}; // 좌우로 뒤집어 놓은 물건 { iid:true }
 if(!S.dir) S.dir={};   // 방향 그림을 바꿔 놓은 물건 { iid:차례 }
-// 흙마당 밖(집·담장·우물 자리)에 놓여 있던 물건과 학동은 마당 안 가까운 곳으로 옮겨 둔다
+// 놓을 수 있는 곳 밖에 있던 물건과 학동은 가까운 안쪽으로 옮겨 둔다(LIMIT_TO_YARD면 흙마당 안으로)
 Object.keys(S.spot).forEach(iid=>{ const v=S.spot[iid]; if(Array.isArray(v)) S.spot[iid]=clampToArea(v[0], v[1]); });
 if(S.pos && S.pos.garden){ const [gx,gy]=clampToArea(S.pos.garden.x, S.pos.garden.y); S.pos.garden={ x:gx, y:Math.min(gy,560) }; }
 if(!S.hakdong) S.hakdong='hakdong-03'; // 고른 학동 그림(계정에 함께 저장된다). 처음에는 지금까지의 학동
@@ -2192,7 +2196,7 @@ scene.addEventListener('pointermove', e=>{
   }
   if(!drag || !ptr.moved) return;
   const p=svgPoint(e);
-  S.spot[drag.id] = clampToArea(p.x-drag.ox, p.y-drag.oy); // 흙마당 밖으로는 못 나간다
+  S.spot[drag.id] = clampToArea(p.x-drag.ox, p.y-drag.oy); // 정원 밖으로는 못 나간다(LIMIT_TO_YARD면 흙마당 밖으로도)
   drag.g.setAttribute('transform', placedTransform(drag.id));
 });
 scene.addEventListener('pointerup', e=>{
@@ -2222,7 +2226,7 @@ scene.addEventListener('pointerup', e=>{
     return walkTo(ax, ay, ()=>setTimeout(()=>doAct(act),180));
   }
   const [y0,y1,x0,x1]=FLOOR[where];
-  if(where==='garden'){ const [wx,wy]=clampToArea(p.x,p.y); return walkTo(wx, Math.min(wy,y1)); } // 정원에서는 흙마당 안으로만
+  if(where==='garden' && LIMIT_TO_YARD){ const [wx,wy]=clampToArea(p.x,p.y); return walkTo(wx, Math.min(wy,y1)); } // 흙마당 제한을 켜면 그 안으로만
   walkTo(clamp(p.x,x0,x1), clamp(p.y,y0,y1));
 });
 scene.addEventListener('pointercancel', ()=>{
