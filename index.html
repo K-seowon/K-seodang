@@ -886,7 +886,10 @@ const ITEMS = {
      id     식별자 뒤쪽을 파일 이름 대신 따로 정할 때(예: id:'doldam' → any-doldam)
      tile   여러 개를 옆으로 이어 붙이는 물건(돌담 등). 가까이 놓으면 옆에 착 붙는다.
             무리 이름을 적으면(tile:'doldam') 같은 무리끼리(긴 담·짧은 담) 서로 이어 붙는다.
+            여러 무리에 붙는 것은 목록으로 적는다(tile:['doldam','giwadam'] — 문 등).
             같은 무리의 그림은 같은 비율로 그려 키(h)를 그림 높이에 맞춰 적는다
+     foot   발치(기준점·그림자 자리)를 손으로 정할 때 [가운데, 폭] (그림 폭에 대한 비율).
+            비스듬히 그려 한쪽 기둥만 더 내려온 문처럼, 저절로 잰 발치가 한쪽으로 쏠릴 때 쓴다
      edge   이어 붙일 때 맞닿는 양쪽 끝 [왼쪽, 오른쪽] (잘라 낸 그림 폭에 대한 비율, 없으면 [0,1]).
             담 옆으로 풀꽃이 비어져 나온 그림은 담 몸통이 끝나는 곳을 적는다
      dirs   다른 방향에서 본 그림 파일들(예: 비스듬히 안쪽으로 뻗은 돌담). 폴더에 그 파일이
@@ -906,6 +909,8 @@ const THEMES = {
     // 기와담: 두 그림의 담 높이가 같도록 키를 그림 높이에 맞췄다. 양옆 풀꽃은 빼고 기와 끝끼리 붙는다
     { file:'dam-01.png',    id:'giwadam',      name:'긴 기와담',   amt:15, rar:'R', h:104, tile:'giwadam', edge:[0.115,0.926], at:[150,505] },
     { file:'dam-02.png',    id:'giwadam-half', name:'짧은 기와담', amt:10, rar:'R', h:84,  tile:'giwadam', edge:[0.035,0.963], at:[330,505] },
+    // 사립문: 돌담·기와담 어느 쪽에도 이어 붙는다. 비스듬히 그려져 오른쪽 기둥이 더 내려와 있어 발치를 손으로 정했다
+    { file:'gate-01.png',   id:'gate',         name:'사립문',     amt:12, rar:'R', h:92,  tile:['doldam','giwadam'], foot:[0.5,0.9], at:[240,545] },
     { file:'lantern.png', id:'lantern', name:'석등', amt:12, rar:'R', h:110, at:[320,570] },
     { file:'jangdok.png', id:'jangdok', name:'장독', amt:8,  rar:'N', h:62,  at:[250,592] }
   ]},
@@ -927,9 +932,11 @@ Object.entries(THEMES).forEach(([key, th])=>{
     ITEMS[themeItemId(key, t)] = {
       name:t.name, slot:t.ground?'ground':'mid', rar:t.rar||'N', cur:'coin', amt:t.amt,
       box, at:t.at||[200,580], anchor:'bc', theme:key,
-      tile: t.tile ? (t.tile===true ? themeItemId(key, t) : t.tile) : false, edge:t.edge||[0,1],
+      // tile은 붙을 수 있는 무리 목록으로 바꿔 둔다(true면 저 혼자 한 무리)
+      tile: t.tile ? [].concat(t.tile===true ? themeItemId(key, t) : t.tile) : false, edge:t.edge||[0,1],
       ...(t.grow ? { grow: t.grow.kind==='나무' ? 'sapling' : 'seed' } : {}),
       art:{ src:`${th.dir}/${t.file}`, h:t.h, w:t.w, shadow:!t.ground, ready:false,
+            footFix: t.foot ? { cx:t.foot[0], w:t.foot[1] } : null,
             dirs:(t.dirs||[]).map(f=>({ src:`${th.dir}/${f}`, ready:false })) }
     };
   });
@@ -949,7 +956,7 @@ function ensureThemeArt(key){
     results.forEach((r,i)=>{
       const { it, v }=jobs[i], a=it.art;
       if(!r){ if(v!==a) v.missing=true; return; } // 방향 그림 파일이 없으면 그 방향은 없는 것으로
-      v.url=r.url; v.ready=true; v.foot=r.foot;
+      v.url=r.url; v.ready=true; v.foot=(v===a && a.footFix) || r.foot;
       v.box = a.w ? [a.w, Math.round(a.w/r.aspect)] : [Math.round(a.h*r.aspect), a.h];
       if(v===a) it.box=v.box;
     });
@@ -2421,7 +2428,7 @@ function startPlacing(id){
   document.getElementById('placeMsg').textContent=`${it.name} — 놓을 자리를 누르세요`;
   document.getElementById('placeBar').classList.add('on');
 }
-/* 이어 붙이는 물건(tile) — 같은 무리(tile 이름이 같은 것: 긴 돌담과 짧은 돌담처럼)가
+/* 이어 붙이는 물건(tile) — 같은 무리(tile 이름이 겹치는 것: 긴 돌담과 짧은 돌담, 돌담과 사립문처럼)가
    같은 줄(높이 차 TILE_SNAP_Y 안)에 있고 그 끝 가까이 놓으면, 끝과 끝이 맞닿는 자리로
    옮긴다. 끝은 그림의 edge(담 몸통이 끝나는 곳, 양옆으로 비어져 나온 풀꽃은 빼고)로 잰다.
    이음매가 벌어지지 않게 TILE_OVERLAP만큼 살짝 겹친다. */
@@ -2440,7 +2447,7 @@ function snapTile(iid, x, y){
   let best=null;
   S.placed.forEach(other=>{
     const o=ITEMS[typeOf(other)];
-    if(other===iid || !o || o.tile!==it.tile || dirOf(other) || (o.art && !o.art.ready)) return;
+    if(other===iid || !o || !o.tile || !o.tile.some(f=>it.tile.includes(f)) || dirOf(other) || (o.art && !o.art.ready)) return;
     const [ox,oy]=spotOf(other);
     if(Math.abs(y-oy)>TILE_SNAP_Y) return;
     const [oL,oR,olen]=tileEnds(other), lap=Math.min(len,olen)*TILE_OVERLAP;
