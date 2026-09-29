@@ -444,6 +444,51 @@ const SIZE_SCALE = 0.7;
 /* 학동(아바타)만 따로 키우는 배율. 정원 물건 크기는 SIZE_SCALE 그대로 두고 학동만 이만큼 더 크게 그린다. */
 const AVATAR_SCALE = 1.3;
 
+/* ── 정원 크기·원근 — 화면을 보면서 여기 숫자만 바꿔 맞춘다 ──────────
+   ITEM_SCALE        정원 물건(꽃·나무·담…)의 기준 크기 배율. 1.5면 예전의 1.5배.
+                     (학동은 AVATAR_SCALE, 연못처럼 땅에 깔리는 것은 이 배율을 받지 않는다)
+   DEPTH_FAR_SCALE   흙마당 맨 뒤(DEPTH_FAR_Y)에 놓았을 때의 크기. 0.6이면 맨 앞의 60%
+   DEPTH_NEAR_SCALE  흙마당 맨 앞(DEPTH_NEAR_Y)에 놓았을 때의 크기. 1이면 기준 크기 그대로
+   DEPTH_FAR_Y · DEPTH_NEAR_Y  맨 뒤·맨 앞의 화면 높이(위 0 ~ 아래 600). 그 사이는 고르게 바뀐다.
+                     물건과 학동 모두 발 딛은 높이(y)로 크기가 정해진다(정원에서만) */
+const ITEM_SCALE = 1.5;
+const DEPTH_FAR_SCALE = 0.6, DEPTH_NEAR_SCALE = 1.0;
+const DEPTH_FAR_Y = 222, DEPTH_NEAR_Y = 596;
+/* 발치 그림자 — SHADOW_ALPHA 진하기(0~1) · SHADOW_WIDTH 폭(발치 폭에 대한 배율) · SHADOW_FLAT 높이(폭에 대한 비율) */
+const SHADOW_ALPHA = 0.36, SHADOW_WIDTH = 0.72, SHADOW_FLAT = 0.28;
+/* 물건을 놓고 학동이 걸어 다닐 수 있는 흙마당. 화면 좌표 [x, y] 꼭짓점을 차례로 이은 테두리.
+   배경 그림의 집·담장·다리가 있는 위쪽(y 222보다 위), 왼쪽 아래 우물·울타리,
+   오른쪽 집과 섬돌 앞은 뺐다. 이 밖에 놓으려 하면 가장 가까운 마당 안 자리로 옮긴다. */
+const GARDEN_AREA = [
+  [16,222], [384,222], [384,284], [330,284], [330,560], [384,560], [384,596],
+  [16,596], [16,562], [92,562], [92,420], [16,420]
+];
+/* 발 딛은 높이 y에서의 원근 배율 */
+function depthScale(y){
+  const t = Math.max(0, Math.min(1, (y-DEPTH_FAR_Y)/(DEPTH_NEAR_Y-DEPTH_FAR_Y)));
+  return DEPTH_FAR_SCALE + (DEPTH_NEAR_SCALE-DEPTH_FAR_SCALE)*t;
+}
+function inGardenArea(x, y){
+  let inside=false;
+  for(let i=0, j=GARDEN_AREA.length-1; i<GARDEN_AREA.length; j=i++){
+    const [xi,yi]=GARDEN_AREA[i], [xj,yj]=GARDEN_AREA[j];
+    if((yi>y)!==(yj>y) && x < (xj-xi)*(y-yi)/(yj-yi)+xi) inside=!inside;
+  }
+  return inside;
+}
+/* 마당 밖이면 테두리 위 가장 가까운 자리로 */
+function clampToArea(x, y){
+  if(inGardenArea(x, y)) return [Math.round(x), Math.round(y)];
+  let best=null;
+  GARDEN_AREA.forEach((a,i)=>{
+    const b=GARDEN_AREA[(i+1)%GARDEN_AREA.length], dx=b[0]-a[0], dy=b[1]-a[1];
+    const t=Math.max(0, Math.min(1, ((x-a[0])*dx+(y-a[1])*dy)/(dx*dx+dy*dy)));
+    const px=a[0]+t*dx, py=a[1]+t*dy, d=(px-x)**2+(py-y)**2;
+    if(!best || d<best[2]) best=[px, py, d];
+  });
+  return [Math.round(best[0]), Math.round(best[1])];
+}
+
 const SAVE_KEY = 'kseodang_v12';
 // 계정 저장 상태 — save()가 앱이 켜지는 도중에도 불리므로 맨 앞에 둔다 (자세한 설명은 「계정에 저장하고 불러오기」)
 const CLOUD_PUSH_DELAY = 30000;
@@ -880,7 +925,7 @@ const ITEMS = {
      - 발치에 타원 그림자를 붙인다(땅에 깔리는 ground 물건은 붙이지 않는다)
    한 줄의 칸
      file   그림 파일 이름      name  가게에 보이는 이름     amt  값(전)     rar  N / R / SR
-     h      기준 키(칸, 화면에는 SIZE_SCALE배)  — 서 있는 물건
+     h      기준 키(칸, 화면에는 SIZE_SCALE × ITEM_SCALE × 원근 배율)  — 서 있는 물건
      w      폭(화면 그대로)                     — 땅에 깔리는 물건(ground:true)과 함께
      at     가게 머리 그림 속 자리 [x, 바닥 y]
      id     식별자 뒤쪽을 파일 이름 대신 따로 정할 때(예: id:'doldam' → any-doldam)
@@ -911,6 +956,8 @@ const THEMES = {
     { file:'dam-02.png',    id:'giwadam-half', name:'짧은 기와담', amt:10, rar:'R', h:84,  tile:'giwadam', edge:[0.035,0.963], at:[330,505] },
     // 사립문: 돌담·기와담 어느 쪽에도 이어 붙는다. 비스듬히 그려져 오른쪽 기둥이 더 내려와 있어 발치를 손으로 정했다
     { file:'gate-01.png',   id:'gate',         name:'사립문',     amt:12, rar:'R', h:92,  tile:['doldam','giwadam'], foot:[0.5,0.9], at:[240,545] },
+    // 기와 대문: 기와담·돌담에 이어 붙는다. 양옆 풀꽃은 빼고 돌기둥 바깥끼리 붙는다
+    { file:'gate-02.png',   id:'giwa-gate',    name:'기와 대문',  amt:15, rar:'SR', h:120, tile:['giwadam','doldam'], edge:[0.151,0.847], at:[200,560] },
     { file:'lantern.png', id:'lantern', name:'석등', amt:12, rar:'R', h:110, at:[320,570] },
     { file:'jangdok.png', id:'jangdok', name:'장독', amt:8,  rar:'N', h:62,  at:[250,592] }
   ]},
@@ -1068,6 +1115,9 @@ if(!S.pos.inside) S.pos.inside={x:200,y:520};
 if(!S.pos.sarangbang) S.pos.sarangbang={x:200,y:500};
 if(!S.flip) S.flip={}; // 좌우로 뒤집어 놓은 물건 { iid:true }
 if(!S.dir) S.dir={};   // 방향 그림을 바꿔 놓은 물건 { iid:차례 }
+// 흙마당 밖(집·담장·우물 자리)에 놓여 있던 물건과 학동은 마당 안 가까운 곳으로 옮겨 둔다
+Object.keys(S.spot).forEach(iid=>{ const v=S.spot[iid]; if(Array.isArray(v)) S.spot[iid]=clampToArea(v[0], v[1]); });
+if(S.pos && S.pos.garden){ const [gx,gy]=clampToArea(S.pos.garden.x, S.pos.garden.y); S.pos.garden={ x:gx, y:Math.min(gy,560) }; }
 if(!S.hakdong) S.hakdong='hakdong-03'; // 고른 학동 그림(계정에 함께 저장된다). 처음에는 지금까지의 학동
 if(!S.prog) S.prog={ gu:0, stage:0, ci:0, done:[], char:{} };
 if(S.prog.ci===undefined) S.prog.ci=0;
@@ -1223,7 +1273,8 @@ function avatarSVG(x,y,look,withId){
   if(withId===undefined) withId=true; // 정원에 잠깐 세워두는 이웃 학동은 false로 불러, hakdong과 자리표가 겹치지 않게 한다
   const k=hakdongOf(look || S.hakdong), src=hakdongSrc(k.id);
   const w=Math.round(HAKDONG_H*k.ratio);
-  return `<g${withId?' id="hakdong"':''} transform="translate(${x},${y}) scale(${SIZE_SCALE*AVATAR_SCALE})">
+  const d = where==='garden' ? depthScale(y) : 1; // 정원에서는 물건과 같은 원근을 따른다
+  return `<g${withId?' id="hakdong"':''} transform="translate(${x},${y}) scale(${SIZE_SCALE*AVATAR_SCALE*d})">
     <ellipse cx="0" cy="1" rx="17" ry="4.5" fill="rgba(61,58,54,.16)"/>
     <g${withId?' id="hakLegs"':''}>
       <image href="${src}" xlink:href="${src}" x="${-w/2}" y="${-HAKDONG_H}" width="${w}" height="${HAKDONG_H}" preserveAspectRatio="xMidYMax meet"/>
@@ -1362,8 +1413,8 @@ function shade(hex, amt){
    가운데는 그림 아래 끝보다 살짝 위 — 밑동이 그림자를 조금 덮는다. */
 function plantShadow(w,h,foot){
   const f = foot || { cx:0.5, w:0.52 };
-  const rx = Math.max(4, f.w*w*0.62), ry = Math.max(2.5, Math.min(rx*0.24, h*0.08));
-  return `<ellipse cx="${(f.cx*w).toFixed(1)}" cy="${(h-ry*0.35).toFixed(1)}" rx="${rx.toFixed(1)}" ry="${ry.toFixed(1)}" fill="rgba(43,36,28,.28)"/>`;
+  const rx = Math.max(4, f.w*w*SHADOW_WIDTH), ry = Math.max(2.5, Math.min(rx*SHADOW_FLAT, h*0.1));
+  return `<ellipse cx="${(f.cx*w).toFixed(1)}" cy="${(h-ry*0.35).toFixed(1)}" rx="${rx.toFixed(1)}" ry="${ry.toFixed(1)}" fill="rgba(43,36,28,${SHADOW_ALPHA})"/>`;
 }
 
 
@@ -1389,7 +1440,7 @@ const GROW_TYPES = {}; // 모든 단계 표는 아래 TREE_ART(그림 파일)에
      - 단계가 오를수록 커지게 칸 크기를 정한다. 키는 TREE_HEIGHT_FROM에서
        TREE_HEIGHT_TO까지 자라며(TREE_SIZE_CURVE로 앞쪽 단계가 빨리 자라게),
        앞 단계보다 적어도 TREE_MIN_STEP배 커진다. 가로는 그림 비율대로.
-       앞뒤 위치와 상관없이 늘 이 기준 크기로 그린다
+       정원에 놓으면 다른 물건처럼 ITEM_SCALE과 원근 배율(depthScale)을 더 받는다
      - 발치에 타원 그림자를 붙인다
    file 안의 {nn}은 01, 02 …, {n}은 1, 2 … 로 바뀐다(파일 이름이 다른 모양이어도 한 번 더 찾아본다).
    names  단계 이름(없으면 TREE_DEFAULT_NAMES)
@@ -1635,9 +1686,12 @@ function spotOf(iid){
   return store[iid] || ITEMS[typeOf(iid)].at;
 }
 function posFor(w){ return (visiting && w==='garden') ? visitPos : S.pos[w]; }
-/* 물건은 바닥 기준점(spot)을 고정한 채 그 자리에서 SIZE_SCALE만큼
-   커지거나 작아진다. ground(깔개·길)만은 화면을 꽉 채워야 하므로
-   배율에서 뺀다. */
+/* 물건은 바닥 기준점(spot)을 고정한 채 그 자리에서 SIZE_SCALE × ITEM_SCALE만큼
+   커지고, 놓인 높이에 따라 원근 배율(depthScale)을 더 받는다. 땅에 깔리는 것(ground,
+   연못 등)은 폭을 화면 그대로 정했으므로 원근 배율만 받는다. */
+function itemScale(it, y){
+  return (it.slot==='ground' ? 1 : SIZE_SCALE*ITEM_SCALE) * depthScale(y);
+}
 /* 씨앗·묘목은 물을 줄수록 자라서 그림과 크기가 바뀐다. 아직 국화
    (씨앗 대표)와 매화나무(묘목 대표)만 제 그림이 있어서, 나머지
    다섯 씨앗은 국화 단계를, 나머지 밤/감나무 묘목은 매화나무 단계를
@@ -1673,7 +1727,7 @@ function placedTransform(iid){
   const it=ITEMS[typeOf(iid)], [sx,sy]=spotOf(iid);
   const look=placedLook(iid), [w,h]=look.box;
   const ax = it.anchor==='bc' ? footX(it, w, look.foot) : 0;
-  const s = it.slot==='ground' ? 1 : SIZE_SCALE, fx = isFlipped(iid) ? -1 : 1;
+  const s = itemScale(it, sy), fx = isFlipped(iid) ? -1 : 1;
   // 발치를 축으로 뒤집으므로 뒤집어도 서 있는 자리는 그대로다
   return `translate(${sx},${sy}) scale(${s*fx},${s}) translate(${-ax},${-h})`;
 }
@@ -2138,7 +2192,7 @@ scene.addEventListener('pointermove', e=>{
   }
   if(!drag || !ptr.moved) return;
   const p=svgPoint(e);
-  S.spot[drag.id] = [Math.round(clamp(p.x-drag.ox,16,384)), Math.round(clamp(p.y-drag.oy,200,596))];
+  S.spot[drag.id] = clampToArea(p.x-drag.ox, p.y-drag.oy); // 흙마당 밖으로는 못 나간다
   drag.g.setAttribute('transform', placedTransform(drag.id));
 });
 scene.addEventListener('pointerup', e=>{
@@ -2168,6 +2222,7 @@ scene.addEventListener('pointerup', e=>{
     return walkTo(ax, ay, ()=>setTimeout(()=>doAct(act),180));
   }
   const [y0,y1,x0,x1]=FLOOR[where];
+  if(where==='garden'){ const [wx,wy]=clampToArea(p.x,p.y); return walkTo(wx, Math.min(wy,y1)); } // 정원에서는 흙마당 안으로만
   walkTo(clamp(p.x,x0,x1), clamp(p.y,y0,y1));
 });
 scene.addEventListener('pointercancel', ()=>{
@@ -2186,7 +2241,7 @@ function walkTo(x,y,done){
   const t0=performance.now();
   const tick=(t)=>{
     const k=Math.min(1,(t-t0)/dur);
-    const as=SIZE_SCALE*AVATAR_SCALE;
+    const as=SIZE_SCALE*AVATAR_SCALE*(where==='garden' ? depthScale(sy+(y-sy)*k) : 1);
     g.setAttribute('transform',`translate(${sx+(x-sx)*k},${sy+(y-sy)*k}) scale(${as*flip},${as})`);
     if(legs) legs.setAttribute('transform',`translate(0,${Math.abs(Math.sin((t-t0)/90))*-2.2})`);
     if(k<1) requestAnimationFrame(tick);
@@ -2434,8 +2489,8 @@ function startPlacing(id){
    이음매가 벌어지지 않게 TILE_OVERLAP만큼 살짝 겹친다. */
 const TILE_SNAP_Y = 18, TILE_SNAP_X = 0.4, TILE_OVERLAP = 0.02;
 /* 이어 붙이는 물건의 왼쪽 끝·오른쪽 끝(기준점에서 떨어진 화면 거리)과 길이. 뒤집으면 좌우가 바뀐다 */
-function tileEnds(iid){
-  const it=ITEMS[typeOf(iid)], w=it.box[0]*(it.slot==='ground'?1:SIZE_SCALE);
+function tileEnds(iid, y){
+  const it=ITEMS[typeOf(iid)], w=it.box[0]*itemScale(it, y===undefined ? spotOf(iid)[1] : y);
   const cx=footX(it, 1), L=(it.edge[0]-cx)*w, R=(it.edge[1]-cx)*w;
   return isFlipped(iid) ? [-R, -L, R-L] : [L, R, R-L];
 }
@@ -2443,13 +2498,13 @@ function snapTile(iid, x, y){
   const it=ITEMS[typeOf(iid)];
   if(!it || !it.tile || dirOf(iid)) return [x,y]; // 옆으로 이어 붙이기는 기본 방향 그림끼리만
   if(it.art && !it.art.ready){ ensureThemeArt(it.theme); return [x,y]; } // 그림을 불러오기 전에는 폭을 몰라 붙이지 않는다
-  const [L,R,len]=tileEnds(iid);
   let best=null;
   S.placed.forEach(other=>{
     const o=ITEMS[typeOf(other)];
     if(other===iid || !o || !o.tile || !o.tile.some(f=>it.tile.includes(f)) || dirOf(other) || (o.art && !o.art.ready)) return;
     const [ox,oy]=spotOf(other);
     if(Math.abs(y-oy)>TILE_SNAP_Y) return;
+    const [L,R,len]=tileEnds(iid, oy); // 붙을 줄의 높이에서 잰 내 크기
     const [oL,oR,olen]=tileEnds(other), lap=Math.min(len,olen)*TILE_OVERLAP;
     // 저쪽 오른쪽에 붙이기(내 왼쪽 끝 = 저쪽 오른쪽 끝), 저쪽 왼쪽에 붙이기(내 오른쪽 끝 = 저쪽 왼쪽 끝)
     [ox+oR-L-lap, ox+oL-R+lap].forEach(tx=>{
@@ -2464,7 +2519,7 @@ function dropItem(x,y){
   const id=placingId; if(!id) return;
   const [y0,y1,x0,x1]=FLOOR.garden;
   const iid=newIid(id);
-  S.spot[iid]=snapTile(iid, Math.round(clamp(x,x0,x1)), Math.round(clamp(y,y0,y1)));
+  S.spot[iid]=snapTile(iid, ...clampToArea(x, y));
   S.placed.push(iid);
   placingId=null; document.getElementById('placeBar').classList.remove('on');
   save(); drawScene(); toast(`${ITEMS[id].name}을(를) 놓았습니다`);
