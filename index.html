@@ -939,6 +939,7 @@ const ITEMS = {
             같은 무리의 그림은 같은 비율로 그려 키(h)를 그림 높이에 맞춰 적는다
      foot   발치(기준점·그림자 자리)를 손으로 정할 때 [가운데, 폭] (그림 폭에 대한 비율).
             비스듬히 그려 한쪽 기둥만 더 내려온 문처럼, 저절로 잰 발치가 한쪽으로 쏠릴 때 쓴다
+     onWater 연못 위에 얹는 것(물고기 등). 땅에 깔리는 것들 가운데 늘 맨 위에 그린다(ground와 함께)
      edge   이어 붙일 때 맞닿는 양쪽 끝 [왼쪽, 오른쪽] (잘라 낸 그림 폭에 대한 비율, 없으면 [0,1]).
             담 옆으로 풀꽃이 비어져 나온 그림은 담 몸통이 끝나는 곳을 적는다
      dirs   다른 방향에서 본 그림 파일들(예: 비스듬히 안쪽으로 뻗은 돌담). 폴더에 그 파일이
@@ -976,7 +977,10 @@ const THEMES = {
     { file:'jandi-01.png', name:'잔디 1', amt:6, rar:'N', w:100, ground:true, at:[100,560] },
     { file:'jandi-02.png', name:'잔디 2', amt:6, rar:'N', w:95,  ground:true, at:[300,560] },
     { file:'jandi-03.png', name:'잔디 3', amt:6, rar:'N', w:110, ground:true, at:[200,540] },
-    { file:'jandi-04.png', name:'잔디 4', amt:6, rar:'N', w:110, ground:true, at:[330,530] }
+    { file:'jandi-04.png', name:'잔디 4', amt:6, rar:'N', w:110, ground:true, at:[330,530] },
+    { file:'pond-02.png', name:'돌 연못', amt:15, rar:'R', w:170, ground:true, at:[200,600] },
+    // 비단잉어: 위에서 본 그림. 연못 위에 놓으면 연못보다 위에 그려진다
+    { file:'fish-01.png', name:'비단잉어', amt:10, rar:'R', w:60, ground:true, onWater:true, at:[200,570] }
   ]},
   youngsanhong: { name:'영산홍정원', dir:'items/youngsanhongGarden', items:[
     { file:'moran-01.png', name:'분홍 모란',   amt:8,  rar:'N',  h:58,  at:[262,556] },
@@ -997,6 +1001,7 @@ Object.entries(THEMES).forEach(([key, th])=>{
       name:t.name, slot:t.ground?'ground':'mid', rar:t.rar||'N', cur:'coin', amt:t.amt,
       box, at:t.at||[200,580], anchor:'bc', theme:key,
       // tile은 붙을 수 있는 무리 목록으로 바꿔 둔다(true면 저 혼자 한 무리)
+      onWater: !!t.onWater,
       tile: t.tile ? [].concat(t.tile===true ? themeItemId(key, t) : t.tile) : false, edge:t.edge||[0,1],
       ...(t.grow ? { grow: t.grow.kind==='나무' ? 'sapling' : 'seed' } : {}),
       art:{ src:`${th.dir}/${t.file}`, h:t.h, w:t.w, shadow:!t.ground, ready:false,
@@ -1682,7 +1687,7 @@ function drawGarden(){
   const src = visiting ? visiting.placed : S.placed;
   const list = src.map(iid=>({iid,id:typeOf(iid),it:ITEMS[typeOf(iid)]})).filter(o=>o.it);
   const ground = list.filter(o=>o.it.slot==='ground')
-    .sort((a,b)=>(a.it.gkind==='cover'?0:1)-(b.it.gkind==='cover'?0:1));
+    .sort((a,b)=>groundLayer(a.it)-groundLayer(b.it));
   const mid    = list.filter(o=>o.it.slot==='mid'||o.it.slot==='front');
   const air    = list.filter(o=>o.it.slot==='air');
   const p = posFor('garden');
@@ -1706,6 +1711,8 @@ function posFor(w){ return (visiting && w==='garden') ? visitPos : S.pos[w]; }
 /* 물건은 바닥 기준점(spot)을 고정한 채 그 자리에서 SIZE_SCALE × ITEM_SCALE만큼
    커지고, 놓인 높이에 따라 원근 배율(depthScale)을 더 받는다. 땅에 깔리는 것(ground,
    연못 등)은 폭을 화면 그대로 정했으므로 원근 배율만 받는다. */
+/* 땅에 깔리는 것끼리의 겹치는 차례: 깔개(cover) → 보통(연못·잔디·디딤돌) → 물 위(onWater, 물고기) */
+function groundLayer(it){ return it.gkind==='cover' ? 0 : it.onWater ? 2 : 1; }
 function itemScale(it, y){
   return (it.slot==='ground' ? 1 : SIZE_SCALE*ITEM_SCALE) * depthScale(y);
 }
@@ -4225,7 +4232,7 @@ function themeItemIds(key){ return Object.keys(ITEMS).filter(id=>ITEMS[id].theme
 function packPreview(key){
   const list=themeItemIds(key).map(id=>({id,it:ITEMS[id]}));
   const ground=list.filter(o=>o.it.slot==='ground')
-    .sort((a,b)=>(a.it.gkind==='cover'?0:1)-(b.it.gkind==='cover'?0:1));
+    .sort((a,b)=>groundLayer(a.it)-groundLayer(b.it));
   const body=list.filter(o=>o.it.slot==='mid'||o.it.slot==='front')
     .sort((a,b)=>a.it.at[1]-b.it.at[1]);
   const airHtml=list.filter(o=>o.it.slot==='air').map(placeAt).join('');
