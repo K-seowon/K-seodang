@@ -985,7 +985,18 @@ const THEMES = {
     { file:'fish-01.png', name:'비단잉어', amt:10, rar:'R', w:60, ground:true, onWater:true, at:[200,570] },
     // 정자: 학동 키의 두 배쯤. 01은 단청 칠한 육각 정자, 02는 나무 빛깔 네모 정자
     { file:'jungja-01.png', name:'육각 정자', amt:20, rar:'SR', h:160, at:[250,520] },
-    { file:'jungja-02.png', name:'네모 정자', amt:15, rar:'SR', h:150, at:[120,520] }
+    { file:'jungja-02.png', name:'네모 정자', amt:15, rar:'SR', h:150, at:[120,520] },
+    // 강아지: 학동 키의 2/3쯤. 01은 흰 진돗개, 02는 털 긴 삽살개
+    { file:'dog-01.png', name:'진돗개', amt:12, rar:'R', h:54, at:[300,585] },
+    { file:'dog-02.png', name:'삽살개', amt:12, rar:'R', h:56, at:[140,590] },
+    // 연꽃: 01은 줄기 세워 핀 떨기. 02~04는 물에 뜬 연꽃·연잎이라 비단잉어처럼 연못 위에 그린다
+    { file:'younflower-01.png', name:'연꽃 떨기', amt:12, rar:'R', h:70, at:[60,560] },
+    { file:'younflower-02.png', name:'물 위 연꽃', amt:8, rar:'R', w:80, ground:true, onWater:true, at:[180,595] },
+    { file:'younflower-03.png', name:'연잎',       amt:5, rar:'N', w:80, ground:true, onWater:true, at:[230,600] },
+    { file:'younflower-04.png', name:'연잎과 연꽃', amt:8, rar:'R', w:85, ground:true, onWater:true, at:[160,605] },
+    // 벚나무: 소나무만 한 큰 나무. 01은 옆으로 넓게 퍼진 나무라 키를 낮췄고, 02는 위로 솟은 나무
+    { file:'cherrytree-01.png', name:'퍼진 벚나무', amt:20, rar:'SR', h:130, at:[330,520] },
+    { file:'cherrytree-02.png', name:'벚나무',      amt:20, rar:'SR', h:165, at:[80,515] }
   ]},
   youngsanhong: { name:'영산홍정원', dir:'items/youngsanhongGarden', items:[
     { file:'moran-01.png', name:'분홍 모란',   amt:8,  rar:'N',  h:58,  at:[262,556] },
@@ -993,6 +1004,9 @@ const THEMES = {
     { file:'moran-03.png', name:'연노랑 모란', amt:10, rar:'R',  h:58,  at:[70,586] },
     { file:'pine.png',     name:'소나무',      amt:20, rar:'SR', h:165, at:[92,512] },
     { file:'pond.png',     name:'연못',        amt:15, rar:'R',  w:180, ground:true, at:[200,598] },
+    // 라일락: 다 자란 떨기로 판다. 01은 가늘게 솟은 떨기, 02는 둥글게 퍼진 떨기
+    { file:'lilac-01.png', name:'가는 라일락', amt:12, rar:'R', h:110, at:[30,530] },
+    { file:'lilac-02.png', name:'둥근 라일락', amt:15, rar:'R', h:100, at:[360,535] },
     { file:'youngsanhong/youngsanhong-01.png', id:'azalea', name:'영산홍씨', amt:6, rar:'R', h:22, at:[372,592],
       grow:{ dir:'youngsanhong', file:'youngsanhong-{nn}.png', count:7, kind:'화초', height:[22,63], bonus:3, // 다 핀 키 84→63(3/4), 사이 단계는 이 곡선대로 함께 줄어든다
              names:['씨앗 심은 흙','새싹','어린 떨기','잎 무성한 떨기','꽃봉오리 맺은 떨기','꽃 핀 떨기','꽃 만발한 떨기'] } }
