@@ -994,11 +994,10 @@ const THEMES = {
     { file:'younflower-02.png', name:'물 위 연꽃', amt:8, rar:'R', w:40, ground:true, onWater:true, at:[180,595] },
     { file:'younflower-03.png', name:'연잎',       amt:5, rar:'N', w:40, ground:true, onWater:true, at:[230,600] },
     { file:'younflower-04.png', name:'연잎과 연꽃', amt:8, rar:'R', w:43, ground:true, onWater:true, at:[160,605] },
-    // 벚나무: 소나무만 한 큰 나무. 01은 옆으로 넓게 퍼진 나무라 키를 낮췄고, 02는 위로 솟은 나무
-    { file:'cherrytree-01.png', name:'퍼진 벚나무', amt:20, rar:'SR', h:130, at:[330,520] },
-    { file:'cherrytree-02.png', name:'벚나무',      amt:20, rar:'SR', h:165, at:[80,515] },
     // 그네: 기와지붕 얹은 나무 그네. 학동 키의 1.5배쯤(기와 대문과 비슷)
-    { file:'geune-01.png', name:'그네', amt:15, rar:'SR', h:120, at:[220,530] }
+    { file:'geune-01.png', name:'그네', amt:15, rar:'SR', h:120, at:[220,530] },
+    // 옹기: 크고 작은 독 일곱이 모인 한 무더기. 장독(키 31)보다 조금 크게
+    { file:'onggi-01.png', name:'옹기 무더기', amt:12, rar:'R', h:42, at:[300,595] }
   ]},
   youngsanhong: { name:'영산홍정원', dir:'items/youngsanhongGarden', items:[
     { file:'moran-01.png', name:'분홍 모란',   amt:8,  rar:'N',  h:58,  at:[262,556] },
@@ -1009,9 +1008,31 @@ const THEMES = {
     // 라일락: 다 자란 떨기로 판다. 01은 가늘게 솟은 떨기, 02는 둥글게 퍼진 떨기
     { file:'lilac-01.png', name:'가는 라일락', amt:12, rar:'R', h:110, at:[30,530] },
     { file:'lilac-02.png', name:'둥근 라일락', amt:15, rar:'R', h:100, at:[360,535] },
+    // 철쭉: 사철 두는 철쭉 1~3과 같은 방식(다 자란 떨기, squash로 옆으로 퍼져 보이게)
+    { file:'chuljjuk-04.png', name:'철쭉 4', amt:10, rar:'R', h:76, squash:0.8, at:[150,575] },
+    { file:'chuljjuk-05.png', name:'철쭉 5', amt:12, rar:'R', h:84, squash:0.8, at:[220,560] },
     { file:'youngsanhong/youngsanhong-01.png', id:'azalea', name:'영산홍씨', amt:6, rar:'R', h:22, at:[372,592],
       grow:{ dir:'youngsanhong', file:'youngsanhong-{nn}.png', count:7, kind:'화초', height:[22,63], bonus:3, // 다 핀 키 84→63(3/4), 사이 단계는 이 곡선대로 함께 줄어든다
              names:['씨앗 심은 흙','새싹','어린 떨기','잎 무성한 떨기','꽃봉오리 맺은 떨기','꽃 핀 떨기','꽃 만발한 떨기'] } }
+  ]},
+  cherrytree: { name:'벚꽃정원', dir:'items/cherrytreeGarden', items:[
+    // 벚나무: 소나무만 한 큰 나무. 옆으로 넓게 퍼진 01·06은 키를 낮췄고, 가늘게 솟은 03은 값을 조금 낮췄다
+    { file:'cherrytree-01.png', name:'퍼진 벚나무',   amt:20, rar:'SR', h:130, at:[330,520] },
+    { file:'cherrytree-02.png', name:'벚나무',        amt:20, rar:'SR', h:165, at:[80,515] },
+    { file:'cherrytree-03.png', name:'가는 벚나무',   amt:18, rar:'SR', h:155, at:[200,505] },
+    { file:'cherrytree-04.png', name:'쌍줄기 벚나무', amt:20, rar:'SR', h:160, at:[140,510] },
+    { file:'cherrytree-05.png', name:'기운 벚나무',   amt:20, rar:'SR', h:160, at:[270,510] },
+    { file:'cherrytree-06.png', name:'너른 벚나무',   amt:20, rar:'SR', h:140, at:[40,525] },
+    { file:'cherrytree-07.png', name:'굽은 벚나무',   amt:20, rar:'SR', h:160, at:[370,515] },
+    // 개나리: 다 자란 떨기. 02는 낮게 옆으로 퍼진 떨기
+    { file:'forsythia-01.png', name:'개나리 1', amt:8,  rar:'N', h:66, at:[60,580] },
+    { file:'forsythia-02.png', name:'개나리 2', amt:8,  rar:'N', h:44, at:[200,600] },
+    { file:'forsythia-03.png', name:'개나리 3', amt:10, rar:'R', h:80, at:[300,575] },
+    { file:'forsythia-04.png', name:'개나리 4', amt:10, rar:'R', h:76, at:[370,590] },
+    // 진달래: 다 자란 떨기. 03은 가지가 성기게 뻗은 떨기
+    { file:'jindallae-01.png', name:'진달래 1', amt:10, rar:'R', h:80, at:[120,585] },
+    { file:'jindallae-02.png', name:'진달래 2', amt:10, rar:'R', h:70, at:[250,590] },
+    { file:'jindallae-03.png', name:'진달래 3', amt:10, rar:'R', h:62, at:[160,600] }
   ]}
 };
 function themeItemId(key, t){ return `${key}-${t.id || t.file.replace(/\.[^.]+$/,'')}`; }
@@ -1144,7 +1165,7 @@ delete S.likes;                  // 「좋구나」 표시는 없앴다(예전 �
 if(!S.visitLog) S.visitLog=[];   // 내 정원에 다녀간 이웃 기록
 // 앱에서 없앤 정원 물건을 저장 자료에서 뺀다. 전으로 산 것은 산 값을 돌려준다(REMOVED_ITEM_REFUND).
 // 앱을 켤 때마다 살피므로, 물건을 없앨 때 이 표에 값만 더하면 된다.
-const REMOVED_ITEM_REFUND = {"mhs_04": 3.0, "mhs_12": 3.0, "mhs_23": 8.0, "mhs_24": 20.0, "mhs_07": 24.0, "mhs_08": 11.0, "mhs_09": 10.0, "mhs_22": 23.0, "mhs_21": 21.0, "mhs_10": 4.0, "mhs_11": 4.0, "mhs_15": 10.0, "mhs_13": 9.0, "mhs_20": 5.0, "mhs_17": 8.0, "spr_08": 28.0, "sum_06": 4.0, "sum_01": 12.0, "sum_02": 5.0, "sum_03": 29.0, "sum_04": 5.0, "sum_05": 30.0, "sum_07": 9.0, "aut_06": 4.0, "aut_01": 25.0, "aut_03": 3.0, "aut_04": 5.0, "aut_05": 12.0, "aut_07": 14.0, "win_06": 4.0, "win_01": 26.0, "win_02": 13.0, "win_04": 3.0, "win_05": 5.0, "win_07": 15.0, "seed_pr": 0.333, "seed_bs": 0.333, "seed_np": 0.333, "seed_gu": 0.333, "seed_md": 0.333, "seed_mr": 0.667, "sap_mh": 4.0, "mhs_16": 3, "aut_02": 13, "win_03": 11, "seed_ysh": 0.667, "sap_gam": 3, "sap_bam": 2, "sap_baerong": 4};
+const REMOVED_ITEM_REFUND = {"mhs_04": 3.0, "mhs_12": 3.0, "mhs_23": 8.0, "mhs_24": 20.0, "mhs_07": 24.0, "mhs_08": 11.0, "mhs_09": 10.0, "mhs_22": 23.0, "mhs_21": 21.0, "mhs_10": 4.0, "mhs_11": 4.0, "mhs_15": 10.0, "mhs_13": 9.0, "mhs_20": 5.0, "mhs_17": 8.0, "spr_08": 28.0, "sum_06": 4.0, "sum_01": 12.0, "sum_02": 5.0, "sum_03": 29.0, "sum_04": 5.0, "sum_05": 30.0, "sum_07": 9.0, "aut_06": 4.0, "aut_01": 25.0, "aut_03": 3.0, "aut_04": 5.0, "aut_05": 12.0, "aut_07": 14.0, "win_06": 4.0, "win_01": 26.0, "win_02": 13.0, "win_04": 3.0, "win_05": 5.0, "win_07": 15.0, "seed_pr": 0.333, "seed_bs": 0.333, "seed_np": 0.333, "seed_gu": 0.333, "seed_md": 0.333, "seed_mr": 0.667, "sap_mh": 4.0, "mhs_16": 3, "aut_02": 13, "win_03": 11, "seed_ysh": 0.667, "sap_gam": 3, "sap_bam": 2, "sap_baerong": 4, "any-cherrytree-01": 20, "any-cherrytree-02": 20};
 {
   const gone = id => !ITEMS[id];
   let back = 0;
