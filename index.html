@@ -997,7 +997,12 @@ const THEMES = {
     // 그네: 기와지붕 얹은 나무 그네. 학동 키의 1.5배쯤(기와 대문과 비슷)
     { file:'geune-01.png', name:'그네', amt:15, rar:'SR', h:120, at:[220,530] },
     // 옹기: 크고 작은 독 일곱이 모인 한 무더기. 장독(키 44)보다 조금 크게
-    { file:'onggi-01.png', name:'옹기 무더기', amt:12, rar:'R', h:60, at:[300,595] }
+    { file:'onggi-01.png', name:'옹기 무더기', amt:12, rar:'R', h:60, at:[300,595] },
+    // 싸리문·정낭: 사립문처럼 돌담·기와담 어느 쪽에도 이어 붙는다
+    { file:'gate-03.png', id:'ssari-gate',   name:'싸리문', amt:12, rar:'R', h:80, tile:['doldam','giwadam'], at:[160,550] },
+    { file:'gate-04.png', id:'jeongnang',    name:'정낭',   amt:12, rar:'R', h:76, tile:['doldam','giwadam'], at:[320,550] },
+    // 마루: 다리 달린 나무 평상. 학동이 올라앉을 만한 크기
+    { file:'maru-01.png', id:'maru',         name:'마루',   amt:12, rar:'R', h:56, at:[200,585] }
   ]},
   youngsanhong: { name:'영산홍정원', dir:'items/youngsanhongGarden', items:[
     { file:'moran-01.png', name:'분홍 모란',   amt:8,  rar:'N',  h:58,  at:[262,556] },
