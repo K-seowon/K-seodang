@@ -994,8 +994,12 @@ const THEMES = {
     { file:'younflower-02.png', name:'물 위 연꽃', amt:8, rar:'R', w:40, ground:true, onWater:true, at:[180,595] },
     { file:'younflower-03.png', name:'연잎',       amt:5, rar:'N', w:40, ground:true, onWater:true, at:[230,600] },
     { file:'younflower-04.png', name:'연잎과 연꽃', amt:8, rar:'R', w:43, ground:true, onWater:true, at:[160,605] },
-    // 그네: 기와지붕 얹은 나무 그네. 학동 키의 1.5배쯤(기와 대문과 비슷)
-    { file:'geune-01.png', name:'그네', amt:15, rar:'SR', h:120, at:[220,530] },
+    // 그네: 01은 통나무 그네, 02는 기와지붕 얹은 나무 그네(학동 키의 1.5배쯤, 기와 대문과 비슷).
+    // 02는 geune-01에서 이름만 바뀐 그림이라, 이미 산 것이 이어지도록 식별자는 예전대로 둔다
+    { file:'swing-01.png', name:'통나무 그네', amt:10, rar:'R', h:105, at:[300,535] },
+    { file:'swing-02.png', id:'geune-01', name:'기와 그네', amt:15, rar:'SR', h:120, at:[220,530] },
+    // 나무 벤치: 학동이 앉을 만한 높이
+    { file:'bench-01.png', name:'나무 벤치', amt:8, rar:'N', h:42, at:[130,590] },
     // 옹기: 크고 작은 독 일곱이 모인 한 무더기. 장독(키 44)보다 조금 크게
     { file:'onggi-01.png', name:'옹기 무더기', amt:12, rar:'R', h:60, at:[300,595] },
     // 싸리문·정낭: 사립문처럼 돌담·기와담 어느 쪽에도 이어 붙는다
