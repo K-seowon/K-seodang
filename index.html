@@ -264,6 +264,38 @@ body{font-family:'Gaegu',system-ui,sans-serif;color:var(--ink);-webkit-font-smoo
   border:2px solid var(--ink);background:var(--hanji)}
 .badge2.now{background:#fff}
 .badge2.done{background:#8AB566;color:#fff}
+/* 한문 고전 이야기 보기 — 휴대폰에서 원문이 잘 읽히도록 한자는 크게,
+   줄 간격은 넉넉하게. Gaegu에는 한자가 없어 한자 자리는 명조 글꼴로 쓴다. */
+.cl-title,.cl-meta,.cl-orig,.cl-phrase{font-family:'Noto Serif KR','Noto Serif CJK KR','Source Han Serif K',Batang,'AppleMyungjo',serif}
+.cl-head{text-align:center;padding:4px 0 2px}
+.cl-title{font-size:36px;font-weight:700;letter-spacing:.08em;line-height:1.3}
+.cl-ko{font-size:20px;margin-top:4px}
+.cl-meta{font-size:14px;color:#7A6E5E;margin-top:6px;line-height:1.6}
+.cl-tags{display:flex;gap:6px;justify-content:center;flex-wrap:wrap;margin-top:8px}
+.cl-tag{display:inline-block;font-size:12px;font-weight:700;padding:2px 8px;border-radius:9px;
+  border:2px solid var(--ink);background:var(--hanji);vertical-align:middle}
+.cl-tag.draft{border-color:#B9A88E;color:#8A7D6B;background:transparent;font-weight:400}
+.cl-tag.reward{background:#DCEAC8}
+.cl-tag.shop{background:#fff}
+.cl-h{font-size:20px;margin:24px 2px 10px;padding-bottom:4px;border-bottom:2.5px solid var(--ink)}
+.cl-orig{font-size:25px;line-height:2.1;letter-spacing:.05em;background:var(--hanji-2);
+  border:2.5px solid var(--ink);border-radius:14px;padding:12px 14px}
+.cl-tr{font-size:18px;line-height:1.85}
+.cl-orig p,.cl-tr p{margin:0 0 .9em}
+.cl-orig p:last-child,.cl-tr p:last-child{margin-bottom:0}
+.cl-list{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:8px}
+.cl-list li{border:2px solid var(--ink);border-radius:12px;background:var(--hanji-2);padding:10px 12px}
+.cl-list li.recite{background:var(--maehwa)}
+.cl-list b{font-size:18px}
+.cl-phrase{font-size:23px;line-height:1.75;margin-top:2px}
+.cl-phrase.small{font-size:19px;color:#5C5346}
+.cl-note{font-size:16px;line-height:1.65;color:#5C5346;margin-top:4px}
+.cl-read{font-size:17px;color:#7A4E2E;margin-top:2px}
+.cl-mean{font-size:17px;line-height:1.6;margin-top:2px}
+.cl-item{display:flex;gap:10px;align-items:center}
+.cl-thumb{width:64px;height:64px;flex:none;object-fit:contain;background:#FBF0E6;border-radius:9px;border:2px solid var(--ink)}
+.cl-thumb.none{display:flex;align-items:center;justify-content:center;font-size:12px;color:#8A7D6B;border-style:dashed}
+.cl-quiz .choices{margin-top:8px}
 .bhword{text-decoration:underline;text-decoration-style:dotted;text-underline-offset:3px;
   text-decoration-color:var(--maehwa-d);cursor:pointer;color:var(--maehwa-d);font-weight:700}
 
@@ -896,8 +928,7 @@ function jokProgress(prog, jokId) {
 
 
 const BOOKS = {
-  cheonja:  { name:'천자문',   ready:true  },
-  myeongsim:{ name:'명심보감', ready:false }
+  cheonja:  { name:'천자문',   ready:true  }
 };
 
 /* ── 아이템 ─────────────────────────────
@@ -1066,6 +1097,44 @@ const THEMES = {
     { file:'jindallae-02.png', plant:'진달래', name:'진달래 2', amt:10, rar:'R', h:70, at:[250,590] },
     { file:'jindallae-03.png', plant:'진달래', name:'진달래 3', amt:10, rar:'R', h:62, at:[160,600] }
   ]},
+  treeflower: { name:'나무와 꽃', dir:'items/treeflower', items:[
+    // 동백나무: 붉은 꽃 달린 떨기나무. 학동보다 조금 크고, 03·05는 옆으로 퍼져 키를 낮췄다
+    { file:'camellia-01.png', plant:'동백나무', name:'동백나무',       amt:15, rar:'R', h:110, at:[80,540] },
+    { file:'camellia-02.png', plant:'동백나무', name:'가지 뻗은 동백', amt:15, rar:'R', h:110, at:[320,540] },
+    { file:'camellia-03.png', plant:'동백나무', name:'둥근 동백',      amt:15, rar:'R', h:95,  at:[200,545] },
+    { file:'camellia-04.png', plant:'동백나무', name:'가는 동백',      amt:12, rar:'R', h:115, at:[40,535] },
+    { file:'camellia-05.png', plant:'동백나무', name:'너른 동백',      amt:18, rar:'SR', h:105, at:[370,540] },
+    // 은행나무: 노랗게 물든 큰 나무. 02는 가늘게 솟은 어린 은행나무
+    { file:'ginkgo-01.png', plant:'은행나무', name:'은행나무',      amt:20, rar:'SR', h:150, at:[100,515] },
+    { file:'ginkgo-02.png', plant:'은행나무', name:'가는 은행나무', amt:15, rar:'R',  h:130, at:[300,520] },
+    // 소나무: 영산홍정원 소나무와 같은 묶음으로 보인다
+    { file:'pinetree-02.png', plant:'소나무', name:'굽은 소나무', amt:20, rar:'SR', h:150, at:[60,515] },
+    { file:'pinetree-03.png', plant:'소나무', name:'늘어진 소나무', amt:20, rar:'SR', h:145, at:[340,515] },
+    // 버드나무: 가지가 늘어진 큰 나무
+    { file:'willow-01.png', plant:'버드나무', name:'버드나무',     amt:20, rar:'SR', h:150, at:[120,515] },
+    { file:'willow-02.png', plant:'버드나무', name:'굽은 버드나무', amt:20, rar:'SR', h:145, at:[280,515] },
+    // 꽃: 다 자란 떨기로 판다
+    { file:'chorong-01.png', plant:'초롱꽃', name:'초롱꽃', amt:8, rar:'N', h:52, at:[90,590] },
+    { file:'cosmos-01.png', plant:'코스모스', name:'코스모스 1', amt:6, rar:'N', h:72, at:[40,575] },
+    { file:'cosmos-02.png', plant:'코스모스', name:'코스모스 2', amt:6, rar:'N', h:58, at:[360,585] },
+    { file:'daffodil-01.png', plant:'수선화', name:'수선화 1', amt:6, rar:'N', h:50, at:[140,595] },
+    { file:'daffodil-02.png', plant:'수선화', name:'수선화 2', amt:6, rar:'N', h:52, at:[250,595] },
+    { file:'daffodil-03.png', plant:'수선화', name:'수선화 3', amt:6, rar:'N', h:48, at:[190,600] },
+    { file:'daffodil-04.png', plant:'수선화', name:'수선화 4', amt:5, rar:'N', h:38, at:[300,600] },
+    { file:'littlepinky-01.png', plant:'분홍 나리', name:'분홍 나리', amt:8, rar:'R', h:50, at:[60,595] },
+    { file:'merrygold-01.png', plant:'메리골드', name:'메리골드 1', amt:6, rar:'N', h:52, at:[110,590] },
+    { file:'merrygold-02.png', plant:'메리골드', name:'메리골드 2', amt:6, rar:'N', h:40, at:[330,600] },
+    { file:'mum-01.png', plant:'국화', name:'노란 국화',      amt:6, rar:'N', h:50, at:[70,590] },
+    { file:'mum-02.png', plant:'국화', name:'소국',           amt:6, rar:'N', h:48, at:[160,595] },
+    { file:'mum-03.png', plant:'국화', name:'흰 들국화',      amt:6, rar:'N', h:52, at:[230,590] },
+    { file:'mum-04.png', plant:'국화', name:'겹 노란 국화',   amt:8, rar:'R', h:54, at:[300,590] },
+    { file:'mum-05.png', plant:'국화', name:'키 큰 흰 국화',  amt:6, rar:'N', h:56, at:[360,585] },
+    { file:'mum-06.png', plant:'국화', name:'낮은 흰 국화',   amt:5, rar:'N', h:40, at:[20,600] },
+    { file:'sunflower-01.png', plant:'해바라기', name:'가는 해바라기', amt:8,  rar:'N', h:105, at:[30,560] },
+    { file:'sunflower-02.png', plant:'해바라기', name:'해바라기',     amt:10, rar:'R', h:95,  at:[200,565] },
+    { file:'sunflower-03.png', plant:'해바라기', name:'쌍 해바라기',  amt:10, rar:'R', h:100, at:[380,560] },
+    { file:'thistle-01.png', plant:'엉겅퀴', name:'엉겅퀴', amt:6, rar:'N', h:60, at:[260,590] }
+  ]},
   // 묘목으로 사서 물을 주면 10단계로 자라는 나무. 단계 그림은 items/<나무>/ 폴더에 그대로 있다.
   // 가게에는 첫 단계(묘목) 그림이 보이고, 다 자라면 처음보다 1.2배 큰 나무가 된다
   sapling: { name:'묘목', dir:'items', items:[
@@ -1122,6 +1191,8 @@ function ensureThemeArt(key){
     });
     themeArtState[key] = jobs.every(j=>j.v.ready || j.v.missing) ? 'ready' : undefined; // 못 받은 것은 다음에 다시
     drawScene();
+    // 한문 고전 화면의 아이템 그림도 손질한 그림으로 바꾼다
+    document.querySelectorAll('img.cl-thumb[data-id]').forEach(el=>{ const a=ITEMS[el.dataset.id].art; if(a.url) el.src=a.url; });
     if(overlay.classList.contains('on')){
       if(sheetTitle.textContent.includes('목석방')) renderShop();
       else if(sheetTitle.textContent.includes('화수전')) renderGrowShop();
@@ -1195,6 +1266,7 @@ if(Array.isArray(S.owned)){
   S.owned=counts;
 }
 if(!S.owned) S.owned={};
+if(!S.classicDone) S.classicDone={}; // 퀴즈를 다 풀고 정원 아이템을 받은 한문 고전
 if(!S.placed) S.placed=[];
 if(!S.seq) S.seq=0;
 if(S.growWater===undefined) S.growWater=0;
@@ -1276,6 +1348,24 @@ Object.values(STORIES).forEach(st=>{
   if(!p.done) p.done=[];
   if(!p.read) p.read={};
 });
+/* ── 한문 고전 이야기 ─────────────────────
+   stories-draft.md에서 옮긴 자료. 화면은 이 배열만 읽어서 그린다.
+   branch hanmun/hangeul · category short/long/old/modern
+   level은 문서에 적힌 것만 넣었다(짧은 이야기는 문서에 없어 null).
+   gardenItems.type  reward(학습 보상) / shop(장터)
+   draft:true는 원문을 아직 판본과 대조하지 않았다는 표시다. */
+const CLASSICS = [
+  {"id": "shoujudaitu", "branch": "hanmun", "category": "short", "order": 1, "title": "守株待兔", "titleKo": "그루터기를 지키며 토끼를 기다리다", "source": "『韓非子』 「五蠹」", "level": null, "original": "宋人有耕者，田中有株，兔走觸株，折頸而死。因釋其耒而守株，冀復得兔。兔不可復得，而身為宋國笑。", "translation": "송나라 사람 중에 밭가는 이가 있었다. 밭 가운데 그루터기가 있었는데, 토끼가 달리다 그루터기에 부딪혀 목이 부러져 죽었다. 그러자 그는 쟁기를 놓고 그루터기를 지키며 다시 토끼를 얻기를 바랐다. 토끼는 다시 얻을 수 없었고, 그는 송나라의 웃음거리가 되었다.", "keyPhrases": [{"phrase": "宋人有耕者", "reading": "송인유경자", "meaning": "송나라 사람 중에 밭 가는 이가 있었다.", "note": "有 + 명사구: '~이 있다'. 者는 '~하는 사람'. 宋人은 범위(송나라 사람 중에).", "isRecitation": false}, {"phrase": "兔(주어) 走(달리다) 觸(부딪히다) 株(목적어)", "reading": "토 주 촉 주", "meaning": "토끼가 달리다가 그루터기에 부딪혔다.", "note": "동사 둘이 잇따라 나오는 연동 구조.", "isRecitation": false}, {"phrase": "因釋其耒而守株", "reading": "인석기뢰이수주", "meaning": "그리하여 쟁기를 놓고 그루터기를 지켰다.", "note": "因 '그리하여', 釋 '놓다', 其耒 '그의 쟁기', 而는 두 동작을 잇는 순접.", "isRecitation": false}, {"phrase": "而身為宋國笑", "reading": "이신위송국소", "meaning": "그리고 자신은 송나라의 웃음거리가 되었다.", "note": "為A笑 'A의 웃음거리가 되다'(피동).", "isRecitation": false}, {"phrase": "兔不可復得，而身為宋國笑。", "reading": "토불가부득, 이신위송국소.", "meaning": "토끼는 다시 얻을 수 없었고, 그는 송나라의 웃음거리가 되었다.", "note": "", "isRecitation": true}], "quiz": [{"q": "「因釋其耒而守株」에서 釋의 뜻은?", "opts": ["놓다", "풀이하다", "잡다", "고치다"], "answer": "놓다", "note": "釋은 여기서 '손에서 놓다'. 쟁기(耒)를 놓은 것이다."}, {"q": "「而身為宋國笑」의 뜻으로 알맞은 것은?", "opts": ["송나라의 웃음거리가 되었다", "송나라를 위해 웃었다", "송나라 사람을 비웃었다", "송나라에서 웃음을 배웠다"], "answer": "송나라의 웃음거리가 되었다", "note": "為A笑는 'A의 웃음거리가 되다'라는 피동 표현이다."}, {"q": "성어 守株待兔가 뜻하는 것은?", "opts": ["지난 요행을 다시 바라며 융통성 없이 기다림", "부지런히 밭을 갈아 큰 수확을 얻음", "토끼처럼 재빠르게 움직임", "그루터기를 뽑아 밭을 넓힘"], "answer": "지난 요행을 다시 바라며 융통성 없이 기다림", "note": "한 번 얻은 요행에 매달려 일을 내버려 둔 어리석음을 꼬집는다."}], "gardenItems": [{"name": "그루터기", "basis": "田中有株", "type": "reward"}, {"name": "토끼", "basis": "兔走觸株", "type": "reward"}, {"name": "밭두렁과 고랑", "basis": "宋人有耕者", "type": "shop"}, {"name": "내려놓은 쟁기", "basis": "釋其耒", "type": "shop"}], "sampleGarden": {"name": "기다리는 밭", "description": "고랑이 난 밭 한가운데 그루터기 하나, 밭두렁에 쟁기가 비스듬히 놓여 있다. 토끼는 그루터기가 아닌 밭 끝 풀섶에 둔다. 기다린다고 오지 않는다는 이야기의 아이러니를 배치로 보여준다."}, "draft": true},
+  {"id": "saiwengzhima", "branch": "hanmun", "category": "short", "order": 2, "title": "塞翁之馬", "titleKo": "변방 늙은이의 말", "source": "『淮南子』 「人間訓」", "level": null, "original": "近塞上之人有善術者，馬無故亡而入胡。人皆弔之，其父曰：「此何遽不為福乎？」居數月，其馬將胡駿馬而歸。人皆賀之，其父曰：「此何遽不能為禍乎？」家富良馬，其子好騎，墮而折其髀。人皆弔之，其父曰：「此何遽不為福乎？」居一年，胡人大入塞，丁壯者引弦而戰，近塞之人，死者十九。此獨以跛之故，父子相保。", "translation": "변방 가까이 사는 사람 중에 점술에 능한 이가 있었다. 그의 말이 까닭 없이 달아나 오랑캐 땅으로 들어가자 사람들이 모두 위로했다. 노인은 \"이것이 어찌 복이 되지 않겠는가?\" 하였다. 몇 달 뒤 그 말이 오랑캐의 준마를 데리고 돌아오자 모두 축하했는데, 노인은 \"이것이 어찌 화가 될 수 없겠는가?\" 하였다. 집에 좋은 말이 많아지자 아들이 말타기를 즐기다 떨어져 넓적다리가 부러졌다. 모두 위로하자 노인은 또 \"어찌 복이 되지 않겠는가?\" 하였다. 일 년 뒤 오랑캐가 크게 쳐들어와 장정들은 활을 당겨 싸웠고, 변방 사람 열에 아홉이 죽었다. 이 집만은 절름발이였던 까닭에 아비와 아들이 모두 목숨을 보전했다.", "keyPhrases": [{"phrase": "近塞上之人有善術者", "reading": "근새상지인유선술자", "meaning": "변방 가까이 사는 사람 중에 점술에 능한 이가 있었다.", "note": "之는 관형격 '~의'. 近塞上은 '변방에 가까이 사는'.", "isRecitation": false}, {"phrase": "人皆弔之", "reading": "인개조지", "meaning": "사람들이 모두 그를 위로했다.", "note": "弔 '위로하다', 之는 대명사 '그(노인)'. 같은 틀로 人皆賀之.", "isRecitation": false}, {"phrase": "此何遽不為福乎", "reading": "차하거불위복호", "meaning": "이것이 어찌 복이 되지 않겠는가?", "note": "何遽…乎 '어찌 꼭 ~이겠는가'(반어).", "isRecitation": false}, {"phrase": "其馬將胡駿馬而歸", "reading": "기마장호준마이귀", "meaning": "그 말이 오랑캐의 준마를 데리고 돌아왔다.", "note": "將은 '데리다, 거느리다'. '장차'가 아니다.", "isRecitation": false}, {"phrase": "此獨以跛之故", "reading": "차독이파지고", "meaning": "이 집만은 절름발이였던 까닭으로", "note": "以A之故 'A한 까닭으로'.", "isRecitation": false}, {"phrase": "此何遽不為福乎？", "reading": "차하거불위복호?", "meaning": "이것이 어찌 복이 되지 않겠는가?", "note": "", "isRecitation": true}], "quiz": [{"q": "「其馬將胡駿馬而歸」에서 將의 뜻은?", "opts": ["데리다", "장차", "장수", "문득"], "answer": "데리다", "note": "將은 여기서 '거느리다, 데리다'. '장차'로 읽지 않는다."}, {"q": "「此何遽不為福乎」는 어떤 뜻을 담은 말인가?", "opts": ["이 일이 도리어 복이 될 수도 있다", "반드시 화가 닥칠 것이다", "복을 빌어야 한다", "달아난 말을 찾아야 한다"], "answer": "이 일이 도리어 복이 될 수도 있다", "note": "何遽…乎는 '어찌 꼭 ~이겠는가'라는 반어다."}, {"q": "노인의 아들이 싸움터에서 살아남은 까닭은?", "opts": ["다리를 다쳐 절름발이였기 때문", "말을 잘 탔기 때문", "오랑캐 땅에 숨었기 때문", "점을 쳐서 미리 피했기 때문"], "answer": "다리를 다쳐 절름발이였기 때문", "note": "此獨以跛之故，父子相保 — 절름발이였던 까닭으로 부자가 함께 목숨을 보전했다."}], "gardenItems": [{"name": "노인의 말", "basis": "馬無故亡而入胡", "type": "reward"}, {"name": "오랑캐의 준마", "basis": "將胡駿馬而歸", "type": "reward"}, {"name": "변방 성체(塞)", "basis": "近塞上之人", "type": "shop", "item": "any-doldam"}, {"name": "마구간", "basis": "家富良馬", "type": "shop"}], "sampleGarden": {"name": "변방의 마구간", "description": "정원 안쪽 끝에 낮은 토성과 성문을 두어 변방의 먼 깊이를 만든다. 앞쪽 마구간에는 노인의 말과 오랑캐 준마가 나란히 있다. 능선과 들판 사이 길이 돌아가는 구도로, '돌고 도는' 화복을 표현한다."}, "draft": true},
+  {"id": "mengmusanqian", "branch": "hanmun", "category": "short", "order": 3, "title": "孟母三遷", "titleKo": "맹자 어머니가 세 번 이사하다", "source": "『列女傳』 「母儀傳」", "level": null, "original": "鄒孟軻之母也，號孟母。其舍近墓，孟子之少也，嬉遊為墓間之事，踴躍築埋。孟母曰：「此非吾所以居處子也。」乃去，舍市傍。其嬉戲為賈人衒賣之事。孟母又曰：「此非吾所以居處子也。」復徙舍學宮之傍。其嬉遊乃設俎豆，揖讓進退。孟母曰：「真可以居吾子矣。」遂居之。", "translation": "추나라 맹가의 어머니를 맹모라 불렀다. 집이 무덤 가까이 있었는데, 어린 맹자가 무덤 사이의 일을 흉내 내며 뛰고 달리고 땅을 다지고 묻는 놀이를 했다. 맹모는 \"여기는 내가 아들을 살게 할 곳이 아니다\" 하고 시장 곁으로 옮겼다. 그러자 장사꾼이 물건 자랑하며 파는 놀이를 했다. 맹모는 또 같은 말을 하고 학궁 곁으로 옮겼다. 그러자 제기를 차려 놓고 절하고 사양하고 나아가고 물러나는 놀이를 했다. 맹모는 \"정말 내 아들을 살게 할 만하다\" 하고 마침내 그곳에 살았다.", "keyPhrases": [{"phrase": "其舍近墓", "reading": "기사근묘", "meaning": "그 집이 무덤 가까이 있었다.", "note": "舍 '집'(명사), 近 '가깝다'(서술어).", "isRecitation": false}, {"phrase": "乃去，舍市傍", "reading": "내거, 사시방", "meaning": "이에 떠나 시장 곁에 집을 정해 살았다.", "note": "여기서 舍는 '집을 정해 살다'(동사). 같은 글자의 품사 전성을 비교하기 좋다.", "isRecitation": false}, {"phrase": "此非吾所以居處子也", "reading": "차비오소이거처자야", "meaning": "여기는 내가 아들을 살게 할 곳이 아니다.", "note": "非…也 '~이 아니다', 所以+동사 '~하는 곳(방법)', 居處子 '아들을 머물게 하다'(사동).", "isRecitation": false}, {"phrase": "嬉遊為墓間之事", "reading": "희유위묘간지사", "meaning": "놀이로 무덤 사이의 일을 흉내 냈다.", "note": "為 '~을 하다'. '위하여'·'되다'와 구별.", "isRecitation": false}, {"phrase": "真可以居吾子矣", "reading": "진가이거오자의", "meaning": "정말 내 아들을 살게 할 만하다.", "note": "可以 '~할 만하다', 矣는 단정·완료의 어기.", "isRecitation": false}, {"phrase": "此非吾所以居處子也。", "reading": "차비오소이거처자야.", "meaning": "여기는 내가 아들을 살게 할 곳이 아니다.", "note": "", "isRecitation": true}], "quiz": [{"q": "「乃去，舍市傍」에서 舍의 쓰임은?", "opts": ["집을 정해 살다(동사)", "집(명사)", "버리다", "쉬다"], "answer": "집을 정해 살다(동사)", "note": "앞의 其舍近墓에서는 '집'(명사), 여기서는 '집을 정해 살다'(동사)다."}, {"q": "맹자 어머니가 마지막으로 자리 잡은 곳은?", "opts": ["학궁 곁", "시장 곁", "무덤 곁", "강가"], "answer": "학궁 곁", "note": "復徙舍學宮之傍 — 다시 학궁 곁으로 옮겨 마침내 그곳에 살았다."}, {"q": "「此非吾所以居處子也」에서 非…也의 뜻은?", "opts": ["~이 아니다", "~이다", "~하지 마라", "~하겠는가"], "answer": "~이 아니다", "note": "非…也는 부정 판단 '~이 아니다'."}], "gardenItems": [{"name": "학궁 대문", "basis": "復徙舍學宮之傍", "type": "reward", "item": "any-giwa-gate"}, {"name": "제기(俎豆) 한 벌", "basis": "設俎豆", "type": "reward"}, {"name": "장터 좌판", "basis": "舍市傍", "type": "shop"}, {"name": "초가 살림집", "basis": "其舍", "type": "shop"}], "sampleGarden": {"name": "학궁 곁 살림집", "description": "안쪽에 학궁 대문을 두고, 마당에는 제기를 가지런히 펼친 놀이 자리를 둔다. 장터 좌판은 마당 바깥 길가에 작게 놓아, 세 번의 이사 중 마지막 자리에 정착했음을 보여준다. 무덤은 정원 아이템으로 부적절해 넣지 않았다. 운교서당 자체와 이어지는 이야기라 짧은 이야기의 앞쪽에 두기 좋다."}, "draft": true},
+  {"id": "zengzishazhi", "branch": "hanmun", "category": "short", "order": 4, "title": "曾子殺彘", "titleKo": "증자가 돼지를 잡다", "source": "『韓非子』 「外儲說 左上」", "level": null, "original": "曾子之妻之市，其子隨之而泣。其母曰：「女還，顧反為女殺彘。」妻適市來，曾子欲捕彘殺之。妻止之曰：「特與嬰兒戲耳。」曾子曰：「嬰兒非與戲也。嬰兒非有知也，待父母而學者也，聽父母之教。今子欺之，是教子欺也。母欺子，子而不信其母，非所以成教也。」遂烹彘也。", "translation": "증자의 아내가 시장에 가는데 아들이 따라오며 울었다. 어머니가 \"너는 돌아가거라. 내가 돌아오면 너를 위해 돼지를 잡아 주마\" 하였다. 아내가 시장에서 돌아오자 증자가 돼지를 잡아 죽이려 했다. 아내가 막으며 \"아이와 농담한 것뿐입니다\" 하자, 증자는 \"아이와는 농담하는 것이 아니오. 아이는 아는 것이 없어 부모에게 의지해 배우고 부모의 가르침을 듣습니다. 지금 당신이 아이를 속이면 이는 아이에게 속이는 것을 가르치는 것이오. 어미가 자식을 속이고 자식이 어미를 믿지 않게 되면 가르침을 이루는 방법이 아니오\" 하고 마침내 돼지를 삶았다.", "keyPhrases": [{"phrase": "曾子之妻之市", "reading": "증자지처지시", "meaning": "증자의 아내가 시장에 갔다.", "note": "앞의 之는 관형격 '~의', 뒤의 之는 동사 '가다'. 한 구에서 之의 두 용법을 대비하는 대표 예문이다.", "isRecitation": false}, {"phrase": "女還，顧反為女殺彘", "reading": "여환, 고반위여살체", "meaning": "너는 돌아가거라. 내가 돌아오면 너를 위해 돼지를 잡아 주마.", "note": "女는 汝(너)와 통용, 反은 返(돌아오다), 為女는 '너를 위하여'.", "isRecitation": false}, {"phrase": "特與嬰兒戲耳", "reading": "특여영아희이", "meaning": "단지 아이와 농담했을 뿐입니다.", "note": "特…耳 '단지 ~일 뿐'. 與는 '~와 더불어'.", "isRecitation": false}, {"phrase": "今子欺之，是教子欺也", "reading": "금자기지, 시교자기야", "meaning": "지금 당신이 아이를 속이면, 이는 아이에게 속이기를 가르치는 것이오.", "note": "是는 지시대명사 '이것은'. '옳다'가 아니다.", "isRecitation": false}, {"phrase": "子而不信其母", "reading": "자이불신기모", "meaning": "자식이 만약 그 어미를 믿지 않으면", "note": "주어 뒤의 而는 가정 '~가 만약 ~하면'.", "isRecitation": false}, {"phrase": "今子欺之，是教子欺也。", "reading": "금자기지, 시교자기야.", "meaning": "지금 당신이 아이를 속이면, 이는 아이에게 속이기를 가르치는 것이오.", "note": "", "isRecitation": true}], "quiz": [{"q": "「曾子之妻之市」에서 뒤의 之의 뜻은?", "opts": ["가다", "~의", "그것", "~에게"], "answer": "가다", "note": "앞의 之는 '~의', 뒤의 之는 동사 '가다'다."}, {"q": "「特與嬰兒戲耳」에서 特…耳의 뜻은?", "opts": ["단지 ~일 뿐", "특별히 ~하다", "반드시 ~하다", "어찌 ~하랴"], "answer": "단지 ~일 뿐", "note": "特…耳는 '단지 ~일 뿐'이라는 한정 표현이다."}, {"q": "증자가 돼지를 잡은 까닭은?", "opts": ["아이와 한 약속을 지켜 속이지 않으려고", "손님을 대접하려고", "시장에 내다 팔려고", "돼지가 병들어서"], "answer": "아이와 한 약속을 지켜 속이지 않으려고", "note": "今子欺之，是教子欺也 — 아이를 속이면 속이는 법을 가르치게 된다고 했다."}], "gardenItems": [{"name": "돼지", "basis": "曾子欲捕彘", "type": "reward"}, {"name": "돼지우리", "basis": "曾子欲捕彘", "type": "reward"}, {"name": "부넉 가마솥", "basis": "遂烹彘也", "type": "shop"}, {"name": "시장 가는 사립문", "basis": "之市", "type": "shop", "item": "any-gate"}], "sampleGarden": {"name": "약속을 지킨 집", "description": "마당 한쪽에 돼지우리를 두고, 부넉 가마솥에서 김이 오른다. 사립문 밖으로 장터까지 이어지는 길을 낸다. 정원에는 살아 있는 돼지를 두고, 학습 화면에서 '약속을 지킨다'는 주제를 설명한다."}, "draft": true},
+  {"id": "yubangxiangzheng", "branch": "hanmun", "category": "short", "order": 5, "title": "鷸蚌相爭", "titleKo": "도요새와 조개가 다투다", "source": "『戰國策』 「燕策」 (학습 범위 발췌)", "level": null, "original": "趙且伐燕，蘇代為燕謂惠王曰：「今者臣來，過易水，蚌方出曝，而鷸啄其肉，蚌合而拑其喙。鷸曰：『今日不雨，明日不雨，即有死蚌。』蚌亦謂鷸曰：『今日不出，明日不出，即有死鷸。』兩者不肯相舍，漁者得而并禽之。」", "translation": "조나라가 연나라를 치려 하자, 소대가 연나라를 위해 조의 혜왕에게 말했다. \"오늘 제가 오다가 역수를 지나는데, 조개가 막 나와 볕을 쬐고 있었고 도요새가 그 살을 쪼았습니다. 조개가 껍데기를 닫아 도요새의 부리를 물었습니다. 도요새가 '오늘도 비가 오지 않고 내일도 비가 오지 않으면 곧 죽은 조개가 있게 될 것이다' 하자, 조개도 '오늘도 못 나가고 내일도 못 나가면 곧 죽은 도요새가 있게 될 것이다' 하였습니다. 둘이 서로 놓아주려 하지 않자 어부가 와서 둘을 함께 잡아갔습니다.\" 이어지는 말에서 소대는, 조와 연이 오래 대치하면 강한 진나라가 어부가 될 것이라고 매듭는다.", "keyPhrases": [{"phrase": "趙且伐燕", "reading": "조차벌연", "meaning": "조나라가 장차 연나라를 치려 했다.", "note": "且 '장차 ~하려 하다'. '또'가 아니다.", "isRecitation": false}, {"phrase": "蚌方出曝", "reading": "방방출폭", "meaning": "조개가 막 나와 볕을 쬐고 있었다.", "note": "方 '막, 바야흐로'.", "isRecitation": false}, {"phrase": "今日不雨，明日不雨，即有死蚌", "reading": "금일불우, 명일불우, 즉유사방", "meaning": "오늘 비가 오지 않고 내일 비가 오지 않으면, 곧 죽은 조개가 있을 것이다.", "note": "雨는 동사 '비가 내리다'(품사 전성), 即은 '곧'. 도요새와 조개의 말이 완전한 대구를 이룬다.", "isRecitation": false}, {"phrase": "兩者不肯相舍", "reading": "양자불긍상사", "meaning": "둘이 서로 놓아주려 하지 않았다.", "note": "不肯 '~하려 하지 않다', 相舍 '서로 놓아주다'.", "isRecitation": false}, {"phrase": "漁者得而并禽之", "reading": "어자득이병금지", "meaning": "어부가 와서 둘을 함께 사로잡았다.", "note": "禽은 擒(사로잡다)과 통용, 并은 '함께'.", "isRecitation": false}, {"phrase": "兩者不肯相舍，漁者得而并禽之。", "reading": "양자불긍상사, 어자득이병금지.", "meaning": "둘이 서로 놓아주려 하지 않자, 어부가 와서 둘을 함께 사로잡았다.", "note": "", "isRecitation": true}], "quiz": [{"q": "「趙且伐燕」에서 且의 뜻은?", "opts": ["장차 ~하려 하다", "또", "그리고", "잠시"], "answer": "장차 ~하려 하다", "note": "且는 여기서 '장차 ~하려 하다'."}, {"q": "「今日不雨」에서 雨의 쓰임은?", "opts": ["비가 내리다(동사)", "비(명사)", "비처럼 많다", "비를 그치다"], "answer": "비가 내리다(동사)", "note": "명사 雨가 동사 '비가 내리다'로 쓰였다(품사 전성)."}, {"q": "이 이야기에서 나온 성어 漁父之利의 뜻은?", "opts": ["둘이 다투는 사이 엉뚱한 이가 이익을 봄", "어부가 부지런히 일해 부자가 됨", "물가에 사는 이의 지혜", "서로 도와 함께 이익을 얻음"], "answer": "둘이 다투는 사이 엉뚱한 이가 이익을 봄", "note": "兩者不肯相舍，漁者得而并禽之 — 도요새와 조개가 다투다 어부에게 함께 잡혔다."}], "gardenItems": [{"name": "도요새", "basis": "鷸啄其肉", "type": "reward"}, {"name": "큰 조개", "basis": "蚌方出曝", "type": "reward"}, {"name": "모래톱과 갈대", "basis": "過易水", "type": "shop"}, {"name": "어부의 배와 그물", "basis": "漁者得而并禽之", "type": "shop"}], "sampleGarden": {"name": "역수 모래톱", "description": "기존 구름다리 아래 개울을 넓혀 모래톱을 만들고, 그 위에 도요새와 조개가 맞물린 장면을 둔다. 갈대 뒤에 그물 실은 배가 반쯤 보이게 해서, 어부지리가 이미 다가오고 있다는 긴장을 만든다."}, "draft": true},
+  {"id": "wangziyouaizhu", "branch": "hanmun", "category": "short", "order": 6, "title": "王子猷愛竹", "titleKo": "하루도 이 분 없이는", "source": "『世說新語』 「任誕」", "level": null, "original": "王子猷嘗暫寄人空宅住，便令種竹。或問：「暫住何煩爾？」王嘯詠良久，直指竹曰：「何可一日無此君？」", "translation": "왕자유가 일찍이 남의 빈 집에 잠시 머물게 되자 곧 대나무를 심게 했다. 어떤 이가 \"잠시 사실 텐데 어찌 이렇게까지 번거롭게 하십니까?\" 하고 물었다. 왕자유는 한참 휘파람 불며 시를 읊조리다가, 대나무를 곧장 가리키며 \"어찌 하루라도 이 분이 없을 수 있겠는가?\" 하였다.", "keyPhrases": [{"phrase": "王子猷嘗暫寄人空宅住", "reading": "왕자유상잠기인공택주", "meaning": "왕자유가 일찍이 잠시 남의 빈 집에 머물렀다.", "note": "嘗 '일찍이', 暫 '잠시', 寄A住 'A에 붙어 살다'.", "isRecitation": false}, {"phrase": "便令種竹", "reading": "변령종죽", "meaning": "곧 대나무를 심게 했다.", "note": "令은 사역 '~하게 하다'. 시키는 대상(사람)이 생략되었다.", "isRecitation": false}, {"phrase": "暫住何煩爾", "reading": "잠주하번이", "meaning": "잠시 머무는데 어찌 이렇게까지 번거롭게 하는가?", "note": "何 '어찌', 煩 '번거롭게 하다', 爾는 '이와 같이'(如此).", "isRecitation": false}, {"phrase": "何可一日無此君", "reading": "하가일일무차군", "meaning": "어찌 하루라도 이 분이 없을 수 있겠는가?", "note": "何可 '어찌 ~할 수 있겠는가'(반어). 此君은 대나무를 사람처럼 높인 말로, 후대에 대나무의 별칭이 되었다.", "isRecitation": false}, {"phrase": "何可一日無此君？", "reading": "하가일일무차군?", "meaning": "어찌 하루라도 이 분이 없을 수 있겠는가?", "note": "", "isRecitation": true}], "quiz": [{"q": "「便令種竹」에서 令의 뜻은?", "opts": ["~하게 하다(사역)", "명령서", "좋다", "우두머리"], "answer": "~하게 하다(사역)", "note": "令은 사역 '~하게 하다'. 심는 사람은 생략되었다."}, {"q": "「何可一日無此君」에서 此君이 가리키는 것은?", "opts": ["대나무", "집주인", "왕자유", "임금"], "answer": "대나무", "note": "대나무를 사람처럼 높여 '이 분'이라 불렀다."}, {"q": "「暫住何煩爾」에서 爾의 뜻은?", "opts": ["이와 같이", "너", "가까이", "그뿐"], "answer": "이와 같이", "note": "爾는 여기서 如此 '이와 같이'의 뜻이다."}], "gardenItems": [{"name": "갓 심은 대나무 한 무더기", "basis": "便令種竹", "type": "reward"}, {"name": "빈 초당", "basis": "寄人空宅住", "type": "shop"}, {"name": "툇마루와 방석", "basis": "嘯詠良久", "type": "shop", "item": "any-maru"}], "sampleGarden": {"name": "잠시 머무는 집", "description": "세간이 거의 없는 빈 초당 앞에 갓 심은 대나무 한 무더기만 있다. 비어 있는 집과 공들여 심은 대나무의 대비가 요점이다. 이 대나무는 긴 이야기 養竹記로 이어지는 복선이다. 養竹記를 끝내면 이 대나무가 대숲으로 자라게 할 수 있다."}, "draft": true},
+  {"id": "ailianshuo", "branch": "hanmun", "category": "long", "order": 1, "title": "愛蓮說", "titleKo": "연꽃을 사랑하는 글", "author": "周敦頤", "source": "周敦頤 「愛蓮說」 (전문)", "level": "상급", "original": "水陸草木之花，可愛者甚蕃。晉陶淵明獨愛菊。自李唐來，世人甚愛牡丹。予獨愛蓮之出淤泥而不染，濯清漣而不妖，中通外直，不蔓不枝，香遠益清，亭亭淨植，可遠觀而不可褻玩焉。予謂菊，花之隱逸者也；牡丹，花之富貴者也；蓮，花之君子者也。噫！菊之愛，陶後鮮有聞；蓮之愛，同予者何人？牡丹之愛，宜乎眾矣。", "translation": "물과 뭍의 풀과 나무의 꽃 가운데 사랑할 만한 것이 매우 많다. 진나라 도연명은 유독 국화를 사랑하였고, 당나라 이래로 세상 사람들은 모란을 무척 사랑한다. 나는 유독 연꽃을 사랑한다. 진흙에서 나왔으나 물들지 않고, 맑은 물결에 씻겨도 요염하지 않으며, 속은 통하고 겉은 곧고, 덩굴도 뻗지 않고 가지도 치지 않으며, 향기는 멀수록 더욱 맑고, 꼿꼿하고 깨끗하게 서 있어, 멀리서 바라볼 수는 있어도 가까이서 함부로 만지작거릴 수는 없기 때문이다. 나는 생각한다. 국화는 꽃 중의 은일자요, 모란은 꽃 중의 부귀한 자요, 연꽃은 꽃 중의 군자다. 아! 국화를 사랑하는 이는 도연명 뒤로 들어본 일이 드물고, 연꽃을 사랑하는 이는 나와 함께할 이가 누구인가. 모란을 사랑하는 이는 마땅히 많을 것이다.", "keyPhrases": [{"phrase": "予獨愛[蓮之出淤泥而不染…]", "reading": "여독애 [연지출어니이불염…]", "meaning": "나는 유독 연꽃이 진흙에서 나왔으나 물들지 않음을 사랑한다.", "note": "愛의 목적어는 뒤의 긴 구절 전체다. 之는 주어(蓮)와 서술어(出) 사이에 들어가 문장을 명사절로 만든다. '연꽃이 ~하는 것을 사랑한다'.", "isRecitation": false}, {"phrase": "中通外直，不蔓不枝", "reading": "중통외직, 불만부지", "meaning": "속은 통하고 겉은 곧으며, 덩굴도 뻗지 않고 가지도 치지 않는다.", "note": "蔓·枝는 명사가 동사로 쓰여 '덩굴을 뻗다', '가지를 치다'가 된다.", "isRecitation": false}, {"phrase": "可遠觀而不可褻玩焉", "reading": "가원관이불가설완언", "meaning": "멀리서 바라볼 수는 있어도 가까이서 함부로 만지작거릴 수는 없다.", "note": "可…而不可… '~할 수는 있으나 ~할 수는 없다', 焉은 단정의 종결사.", "isRecitation": false}, {"phrase": "菊，花之隱逸者也", "reading": "국, 화지은일자야", "meaning": "국화는 꽃 가운데 은일자다.", "note": "A，B之C者也 'A는 B 가운데 C한 것이다'. 세 번 반복되는 판단문이다.", "isRecitation": false}, {"phrase": "菊之愛", "reading": "국지애", "meaning": "국화를 사랑함", "note": "愛菊에서 목적어를 앞으로 낸 구조다. 之는 도치 표지다. '국화의 사랑'이 아니라 '국화를 사랑함'.", "isRecitation": false}, {"phrase": "宜乎眾矣", "reading": "의호중의", "meaning": "마땅히 많을 것이다.", "note": "眾宜矣의 서술어를 앞으로 내어 강조한 도치다.", "isRecitation": false}, {"phrase": "予謂菊，花之隱逸者也；牡丹，花之富貴者也；蓮，花之君子者也。", "reading": "여위국, 화지은일자야; 모란, 화지부귀자야; 연, 화지군자자야.", "meaning": "나는 생각한다. 국화는 꽃 가운데 은일자요, 모란은 꽃 가운데 부귀한 자요, 연꽃은 꽃 가운데 군자다.", "note": "", "isRecitation": true}], "quiz": [{"q": "글쓴이가 '꽃 가운데 군자'라고 한 꽃은?", "opts": ["연꽃", "국화", "모란", "매화"], "answer": "연꽃", "note": "蓮，花之君子者也 — 국화는 은일자, 모란은 부귀한 자, 연꽃은 군자다."}, {"q": "「菊之愛」의 뜻으로 알맞은 것은?", "opts": ["국화를 사랑함", "국화의 사랑", "국화가 사랑함", "국화와 사랑"], "answer": "국화를 사랑함", "note": "愛菊에서 목적어 菊을 앞으로 내고 之로 표시한 도치다."}, {"q": "「不蔓不枝」에서 蔓·枝는 어떻게 풀이하는가?", "opts": ["덩굴을 뻗다 · 가지를 치다", "덩굴 · 가지", "길다 · 짧다", "푸르다 · 곧다"], "answer": "덩굴을 뻗다 · 가지를 치다", "note": "명사 蔓·枝가 동사로 쓰였다."}], "gardenItems": [{"name": "연꽃", "basis": "蓮，花之君子者也", "type": "reward", "item": "any-younflower-01"}, {"name": "연못(진흙 바닥과 맑은 물결)", "basis": "出淤泥而不染，濯清漣而不妖", "type": "reward", "item": "youngsanhong-pond"}, {"name": "국화", "basis": "菊，花之隱逸者也", "type": "reward", "item": "treeflower-mum-01"}, {"name": "모란", "basis": "牡丹，花之富貴者也", "type": "reward", "item": "youngsanhong-moran-01"}, {"name": "연못 건너편 정자", "basis": "可遠觀而不可褻玩焉", "type": "shop", "item": "any-jungja-01"}], "sampleGarden": {"name": "군자의 연못", "description": "정원 한가운데 연못을 두고 연꽃을 꼿꼿하게 세운다. 국화는 울타리 아래 한적한 구석에 조금, 모란은 대문 가까운 자리에 활짝 핀 모습으로 둔다. 정자는 연못 건너편에 떼어 놓는다. 멀리서 바라볼 뿐 만지지 않는다는 구절을 거리로 표현한 것이다. 세 꽃의 위치가 곧 은일·부귀·군자의 대비가 된다."}, "draft": true},
+  {"id": "yangzhuji", "branch": "hanmun", "category": "long", "order": 2, "title": "養竹記", "titleKo": "대나무를 기른 기록", "author": "白居易", "source": "白居易 「養竹記」 (발췌: 첫째 단락과 둘째 단락 일부)", "level": "상급", "original": "竹似賢，何哉？竹本固，固以樹德，君子見其本，則思善建不拔者。竹性直，直以立身，君子見其性，則思中立不倚者。竹心空，空以體道，君子見其心，則思應用虛受者。竹節貞，貞以立志，君子見其節，則思砥礪名行，夷險一致者。夫如是，故君子人多樹之，為庭實焉。\n\n…明日，履及於亭之東南隅，見叢竹於斯，枝葉殄瘁，無聲無色。詢於關氏之老，則曰：「此相國之手植者。自相國捐館，他人假居，繇是筐篚者斬焉，篲帚者刈焉，刑餘之材，長無尋焉，數無百焉。又有凡草木雜生其中，菶茸薈鬱，有無竹之心焉。」居易惜其嘗經長者之手，而見賤俗人之目，翦棄若是，本性猶存。乃芟蘙薈，除糞壤，疏其間，封其下，不終日而畢。於是日出有清陰，風來有清聲，依依然，欣欣然，若有情於感遇也。", "translation": "대나무가 현자를 닮았다 함은 어째서인가? 대나무는 뿌리가 단단하니, 그 단단함으로 덕을 세운다. 군자는 그 뿌리를 보면 굳게 서서 뽑히지 않는 것을 생각한다. 대나무는 성질이 곧으니, 그 곧음으로 몸을 세운다. 군자는 그 성질을 보면 치우치지 않고 바르게 서는 것을 생각한다. 대나무는 속이 비었으니, 그 빔으로 도를 체득한다. 군자는 그 속을 보면 마음을 비워 받아들이는 것을 생각한다. 대나무는 마디가 곧으니, 그 곧음으로 뜻을 세운다. 군자는 그 마디를 보면 이름과 행실을 갈고닦아 평탄할 때나 험할 때나 한결같은 것을 생각한다. 이러하므로 군자들이 대나무를 많이 심어 뜰을 채운다.\n\n이튿날 정자 동남쪽 모퉁이를 걷다가 대나무 덤불을 보았는데, 가지와 잎이 시들어 소리도 빛도 없었다. 관씨 집안 노인에게 물으니 이렇게 답했다. \"상국께서 손수 심으신 것입니다. 상국께서 돌아가신 뒤 남들이 빌려 살면서, 광주리 만드는 이는 베어 가고 빗자루 만드는 이는 잘라 갔습니다. 남은 것은 길이가 한 길이 안 되고 수도 백이 되지 않습니다. 게다가 잡초와 잡목이 그 사이에 뒤섞여 우거져 대나무가 없는 듯합니다.\" 나는 이 대나무가 일찍이 어른의 손을 거쳤는데도 속된 사람들에게 천대받아 이처럼 잘려 버려졌으나 본성만은 여전히 남아 있음을 아까워했다. 이에 우거진 풀을 베고 더러운 흙을 걷어내고, 사이를 성기게 하고 밑동을 북돋우니 하루가 가기 전에 끝났다. 그러자 해가 뜨면 맑은 그늘이 지고 바람이 불면 맑은 소리가 나서, 살갑고도 기쁜 듯 마치 알아준 이에게 정을 느끼는 듯하였다.", "keyPhrases": [{"phrase": "竹本固，固以樹德", "reading": "죽본고, 고이수덕", "meaning": "대나무는 뿌리가 단단하니, 그 단단함으로 덕을 세운다.", "note": "앞의 固는 서술어 '단단하다', 뒤의 固는 주어 '단단함'. 앞 구의 끝을 뒤 구의 머리로 잇는 연쇄 구조다. 以는 '그것으로써', 樹는 동사 '세우다'.", "isRecitation": false}, {"phrase": "君子見其本，則思…者", "reading": "군자견기본, 즉사…자", "meaning": "군자는 그 뿌리를 보면 ~한 것을 생각한다.", "note": "見A則思B者 'A를 보면 B한 것을 생각한다'. 본(本)·성(性)·심(心)·절(節) 네 번 반복되는 병렬이 글 전체의 뼈대다.", "isRecitation": false}, {"phrase": "空以體道", "reading": "공이체도", "meaning": "그 빔으로 도를 체득한다.", "note": "體는 동사 '체득하다'.", "isRecitation": false}, {"phrase": "為庭實焉", "reading": "위정실언", "meaning": "뜰을 채우는 것으로 삼는다.", "note": "為 '~으로 삼다', 庭實 '뜰을 채우는 것'.", "isRecitation": false}, {"phrase": "乃芟蘙薈，除糞壤，疏其間，封其下", "reading": "내삼예회, 제분양, 소기간, 봉기하", "meaning": "이에 우거진 풀을 베고, 더러운 흙을 치우고, 사이를 성기게 하고, 밑동을 북돋웠다.", "note": "동사+목적어 네 묶음의 병렬. 베고, 치우고, 성기게 하고, 북돋운다. 정원 돌보기 동작 그 자체다.", "isRecitation": false}, {"phrase": "竹本固 · 竹性直 · 竹心空 · 竹節貞", "reading": "죽본고 · 죽성직 · 죽심공 · 죽절정", "meaning": "대나무는 뿌리가 단단하고, 성질이 곧고, 속이 비었고, 마디가 곧다.", "note": "네 구절", "isRecitation": true}], "quiz": [{"q": "「竹本固，固以樹德」에서 뒤의 固의 쓰임은?", "opts": ["주어 '단단함'", "서술어 '단단하다'", "부사 '굳이'", "접속 '그러므로'"], "answer": "주어 '단단함'", "note": "앞 구의 끝말 固를 다음 구의 주어로 받아 잇는다."}, {"q": "「空以體道」에서 體의 뜻은?", "opts": ["체득하다", "몸", "모양", "나누다"], "answer": "체득하다", "note": "體는 동사로 '몸소 깨달아 얻다'."}, {"q": "글쓴이가 대나무 덤불을 손질하며 한 일이 아닌 것은?", "opts": ["대나무를 베어 광주리를 만들었다", "우거진 풀을 베었다", "더러운 흙을 걷어냈다", "밑동을 북돋웠다"], "answer": "대나무를 베어 광주리를 만들었다", "note": "乃芟蘙薈，除糞壤，疏其間，封其下 — 대나무를 베어 간 것은 남들이었다."}], "gardenItems": [{"name": "되살아난 대숲", "basis": "日出有清陰，風來有清聲", "type": "reward"}, {"name": "「養竹記」 글씨판", "basis": "본문 끝 '정자 벽에 썼다'는 대목", "type": "reward"}, {"name": "동쪽 정자(東亭)", "basis": "履及於亭之東南隅", "type": "shop", "item": "any-jungja-02"}, {"name": "낮은 돌담", "basis": "庭實", "type": "shop", "item": "any-doldam-half"}], "sampleGarden": {"name": "동정의 대숲", "description": "정원 동남쪽 모퉁이에 대숲을 두고, 그 앞에 정자를 세워 벽에 글씨판을 건다. 학습 전에는 시든 대나무 덤불과 잡초로 시작하고, 네 동작(芟·除·疏·封)을 배울 때마다 한 단계씩 되살아나는 연출을 제안한다. 완료하면 대숲에 그늘이 지고 바람 소리가 나게 한다. 짧은 이야기 王子猷愛竹의 대나무가 이 대숲으로 자라는 연결도 가능하다."}, "draft": true},
+  {"id": "taohuayuanji", "branch": "hanmun", "category": "long", "order": 3, "title": "桃花源記", "titleKo": "복사꽃 피는 물가의 기록", "author": "陶淵明", "source": "陶淵明 「桃花源記」 (전문)", "level": "상급", "original": "晉太元中，武陵人捕魚為業。緣溪行，忘路之遠近。忽逢桃花林，夾岸數百步，中無雜樹，芳草鮮美，落英繽紛。漁人甚異之。復前行，欲窮其林。林盡水源，便得一山，山有小口，彷彿若有光。便捨船，從口入。初極狹，纔通人。復行數十步，豁然開朗。土地平曠，屋舍儼然，有良田美池桑竹之屬。阡陌交通，雞犬相聞。其中往來種作，男女衣著，悉如外人。黃髮垂髫，並怡然自樂。見漁人，乃大驚，問所從來。具答之。便要還家，設酒殺雞作食。村中聞有此人，咸來問訊。自云先世避秦時亂，率妻子邑人來此絕境，不復出焉，遂與外人間隔。問今是何世，乃不知有漢，無論魏晉。此人一一為具言所聞，皆歎惋。餘人各復延至其家，皆出酒食。停數日，辭去。此中人語云：「不足為外人道也。」既出，得其船，便扶向路，處處誌之。及郡下，詣太守，說如此。太守即遣人隨其往，尋向所誌，遂迷，不復得路。南陽劉子驥，高尚士也，聞之，欣然規往，未果，尋病終。後遂無問津者。", "translation": "진나라 태원 연간에 무릉 사람이 고기잡이를 업으로 삼았다. 시냇물을 따라 가다가 길이 얼마나 멀고 가까운지를 잊었다. 문득 복사꽃 숲을 만났는데, 양쪽 기슭을 끼고 수백 보에 걸쳐 다른 나무는 없고 향기로운 풀은 싱그럽고 아름다웠으며 떨어지는 꽃잎이 어지럽게 흩날렸다. 어부는 매우 이상하게 여겨 숲의 끝까지 가 보려 했다. 숲이 끝나는 물의 근원에 산이 하나 있고, 산에 작은 구멍이 있어 마치 빛이 있는 듯했다. 배를 버려두고 구멍으로 들어가니 처음에는 매우 좁아 겨우 사람이 지날 만하더니, 수십 보를 더 가자 탁 트였다. 땅은 평평하고 넓으며 집들은 가지런하고, 기름진 밭과 아름다운 못과 뽕나무·대나무 따위가 있었다. 밭두렁길이 사방으로 통하고 닭 우는 소리와 개 짖는 소리가 서로 들렸다. 그 가운데 오가며 씨 뿌리고 일하는 남녀의 옷차림은 모두 바깥세상 사람 같았다. 노인과 아이들이 모두 기꺼이 스스로 즐거워했다. 어부를 보고는 크게 놀라 어디서 왔느냐 물었고, 어부가 자세히 답하자 집으로 데려가 술을 차리고 닭을 잡아 밥을 지었다. 마을 사람들이 이 사람이 왔다는 말을 듣고 모두 와서 소식을 물었다. 스스로 말하기를, 조상이 진나라 때의 난리를 피해 처자와 마을 사람들을 이끌고 이 외딴 곳에 와서 다시는 나가지 않아 마침내 바깥세상과 단절되었다고 하였다. 지금이 어느 세상이냐고 물으니, 한나라가 있었는지도 모르니 위나라와 진나라는 말할 것도 없었다. 어부가 들은 바를 하나하나 자세히 말해 주자 모두 탄식하며 안타까워했다. 다른 사람들도 각각 자기 집으로 어부를 맞아들여 술과 음식을 내었다. 며칠을 머물다가 작별하고 떠나려 하자, 그곳 사람들이 \"바깥 사람들에게 말할 것이 못 됩니다\" 하였다. 나와서 배를 찾아 전에 왔던 길을 따라 곳곳에 표시를 해 두었다. 고을에 이르러 태수를 찾아가 이 일을 아뢰자, 태수가 곧 사람을 보내 그를 따라가 전에 표시해 둔 곳을 찾게 했으나 끝내 헤매어 다시는 길을 찾지 못했다. 남양의 유자기는 맑고 고상한 선비였는데, 이 이야기를 듣고 기꺼이 가려고 계획했으나 이루지 못하고 얼마 뒤 병으로 죽었다. 그 뒤로는 마침내 나루터를 묻는 이가 없었다.", "keyPhrases": [{"phrase": "武陵人捕魚為業", "reading": "무릉인포어위업", "meaning": "무릉 사람이 고기잡이를 업으로 삼았다.", "note": "A為B 'A를 B로 삼다'. 以가 생략된 以A為B 구조다.", "isRecitation": false}, {"phrase": "漁人甚異之", "reading": "어인심이지", "meaning": "어부가 그것을 매우 이상하게 여겼다.", "note": "異는 '이상하게 여기다'(의동). 欲窮其林의 窮은 '끝까지 가다'.", "isRecitation": false}, {"phrase": "土地平曠，屋舍儼然，有良田美池桑竹之屬。阡陌交通，雞犬相聞", "reading": "토지평광, 옥사엄연, 유양전미지상죽지속. 천맥교통, 계견상문", "meaning": "땅은 평평하고 넓으며 집들은 가지런하고, 기름진 밭과 아름다운 못과 뽕나무·대나무 따위가 있었다. 밭두렁길이 사방으로 통하고 닭 우는 소리와 개 짖는 소리가 서로 들렸다.", "note": "네 글자 대구로 마을을 묘사한다. 이 구절이 곧 샘플 정원의 설계도다.", "isRecitation": false}, {"phrase": "黃髮垂髫", "reading": "황발수초", "meaning": "누런 머리의 노인과 다박머리 아이", "note": "누런 머리(노인)와 다박머리(아이). 모습으로 사람을 가리키는 환유다.", "isRecitation": false}, {"phrase": "便要還家", "reading": "변요환가", "meaning": "곧 그를 맞아 집으로 데려갔다.", "note": "要는 邀(맞아들이다)와 통용.", "isRecitation": false}, {"phrase": "乃不知有漢，無論魏晉", "reading": "내부지유한, 무론위진", "meaning": "한나라가 있었던 것도 몰랐으니, 위나라·진나라는 말할 것도 없었다.", "note": "無論 '말할 것도 없다'. 현대 중국어의 '~을 막론하고'와 다르다.", "isRecitation": false}, {"phrase": "不足為外人道也", "reading": "부족위외인도야", "meaning": "바깥 사람에게 말할 만한 것이 못 됩니다.", "note": "不足 '~할 만하지 못하다', 為는 '~에게', 道는 '말하다'.", "isRecitation": false}, {"phrase": "土地平曠，屋舍儼然，有良田美池桑竹之屬。阡陌交通，雞犬相聞。", "reading": "토지평광, 옥사엄연, 유양전미지상죽지속. 천맥교통, 계견상문.", "meaning": "땅은 평평하고 넓으며 집들은 가지런하고, 기름진 밭과 아름다운 못과 뽕나무·대나무 따위가 있었다. 밭두렁길이 사방으로 통하고 닭 우는 소리와 개 짖는 소리가 서로 들렸다.", "note": "", "isRecitation": true}], "quiz": [{"q": "어부가 복사꽃 숲 끝에서 찾은 것은?", "opts": ["빛이 새는 듯한 산의 작은 구멍", "커다란 성문", "넓은 바다", "높은 정자"], "answer": "빛이 새는 듯한 산의 작은 구멍", "note": "山有小口，彷彿若有光 — 산에 작은 구멍이 있어 빛이 있는 듯했다."}, {"q": "「便要還家」에서 要의 뜻은?", "opts": ["맞아들이다", "요구하다", "중요하다", "반드시"], "answer": "맞아들이다", "note": "要는 邀(맞아들이다)와 통용된다."}, {"q": "「不足為外人道也」에서 道의 뜻은?", "opts": ["말하다", "길", "도리", "이끌다"], "answer": "말하다", "note": "道는 동사 '말하다', 為는 '~에게'."}], "gardenItems": [{"name": "복사나무", "basis": "忽逢桃花林", "type": "reward", "item": "cherrytree-cherrytree-02"}, {"name": "흩날리는 꽃잎(효과)", "basis": "落英繽紛", "type": "reward"}, {"name": "빛이 새는 산의 작은 굴", "basis": "山有小口，彷彿若有光", "type": "reward"}, {"name": "닭과 닭장", "basis": "雞犬相聞, 殺雞作食", "type": "shop"}, {"name": "개", "basis": "雞犬相聞", "type": "shop", "item": "any-dog-01"}, {"name": "기름진 밭과 못", "basis": "良田美池", "type": "shop", "item": "any-pond-02"}, {"name": "뽕나무·대나무", "basis": "桑竹之屬", "type": "shop"}, {"name": "밭두렁길", "basis": "阡陌交通", "type": "shop"}, {"name": "물가에 버려둔 고깃배", "basis": "便捨船", "type": "shop"}], "sampleGarden": {"name": "무릉의 마을", "description": "정원을 앞뒤 두 겹으로 나눈다. 앞쪽은 개울 양연에 복사나무가 줄지어 꽃잎이 흩날리고, 물가에 고깃배가 놓여 있다. 개울이 끝나는 곳의 바위산에 빛이 새는 작은 굴을 둔다. 굴 너머 안쪽에는 밭·못·뽕나무·대나무가 밭두렁길로 이어지고 닭과 개가 마당을 다닌다. 좋은 단서는 지도가 아니라 굴 하나라는 이야기의 구조가 정원의 동선이 된다."}, "draft": true},
+  {"id": "guotuotuozhuan", "branch": "hanmun", "category": "long", "order": 4, "title": "種樹郭橐駝傳", "titleKo": "나무 심는 곽탁타 이야기", "author": "柳宗元", "source": "柳宗元 「種樹郭橐駝傳」 (발췌: 곽탁타의 나무 심기 문답. 뒷부분의 관리 비유는 심화 학습으로 둔다)", "level": "상급", "original": "駝業種樹，凡長安豪富人為觀遊及賣果者，皆爭迎取養。視駝所種樹，或移徙，無不活，且碩茂，蚤實以蕃。他植者雖窺伺傚慕，莫能如也。有問之，對曰：「橐駝非能使木壽且孳也，能順木之天，以致其性焉爾。凡植木之性，其本欲舒，其培欲平，其土欲故，其築欲密。既然已，勿動勿慮，去不復顧。其蒔也若子，其置也若棄，則其天者全而其性得矣。故吾不害其長而已，非有能碩茂之也；不抑耗其實而已，非有能蚤而蕃之也。他植者則不然，根拳而土易，其培之也，若不過焉則不及。苟有能反是者，則又愛之太恩，憂之太勤，旦視而暮撫，已去而復顧，甚者爪其膚以驗其生枯，搖其本以觀其疏密，而木之性日以離矣。雖曰愛之，其實害之；雖曰憂之，其實讎之。故不我若也。吾又何能為哉！」", "translation": "탁타는 나무 심는 일을 업으로 삼았다. 장안의 부호들 가운데 구경하며 노닐 정원을 가꾸는 이나 과일을 파는 이들은 모두 앞다투어 그를 맞아들여 나무를 기르게 했다. 탁타가 심은 나무는 옮겨 심어도 살지 않는 것이 없고, 크고 무성하며 일찍 열매 맺어 많이 열렸다. 다른 사람들은 엿보고 흉내 내어도 따라올 수 없었다. 어떤 이가 그 까닭을 묻자 답했다. \"저는 나무를 오래 살고 불어나게 할 수 있는 것이 아닙니다. 나무의 타고난 바를 따라 그 본성을 다하게 할 뿐입니다. 나무의 본성은 뿌리는 뻗기를, 북돋움은 고르기를, 흙은 원래 흙이기를, 다짐은 촘촘하기를 바랍니다. 이렇게 하고 나면 건드리지도 걱정하지도 않고, 떠나서 다시 돌아보지 않습니다. 심을 때는 자식처럼 정성을 다하고, 심고 나서는 버린 듯이 두면, 타고난 것이 온전하고 본성을 얻게 됩니다. 그러므로 저는 그 자람을 해치지 않을 뿐 크고 무성하게 할 수 있는 것이 아니고, 그 열매를 억누르거나 상하게 하지 않을 뿐 일찍 많이 열리게 할 수 있는 것이 아닙니다. 다른 사람들은 그렇지 않아, 뿌리는 오그라들고 흙은 바뀌며, 북돋울 때도 지나치지 않으면 모자랍니다. 만일 이와 반대로 하는 이가 있더라도, 또 너무 지나치게 아끼고 너무 자주 걱정하여 아침에 들여다보고 저녁에 쓰다듬으며, 떠났다가도 다시 돌아봅니다. 심한 이는 껍질을 긁어 살았는지 죽었는지 살피고 밑동을 흔들어 흙이 성긴지 촘촘한지 봅니다. 그러니 나무의 본성은 날로 멀어집니다. 아낀다고 하지만 실은 해치는 것이고, 걱정한다고 하지만 실은 원수로 대하는 것입니다. 그래서 저만 못한 것이지요. 제가 또 무엇을 할 수 있겠습니까!\"", "keyPhrases": [{"phrase": "能順木之天，以致其性焉爾", "reading": "능순목지천, 이치기성언이", "meaning": "나무의 타고난 바를 따라 그 본성을 다하게 할 뿐입니다.", "note": "天은 '타고난 본성', 以는 '그리하여', 焉爾은 '~일 따름이다'(한정 종결).", "isRecitation": false}, {"phrase": "其本欲舒，其培欲平，其土欲故，其築欲密", "reading": "기본욕서, 기배욕평, 기토욕고, 기축욕밀", "meaning": "뿌리는 뻗기를, 북돋움은 고르기를, 흙은 원래 흙이기를, 다짐은 촘촘하기를 바랍니다.", "note": "其A欲B 네 구의 병렬. 故는 '원래의 것(옛 흙)'이지 '그러므로'가 아니다.", "isRecitation": false}, {"phrase": "其蒔也若子，其置也若棄", "reading": "기시야약자, 기치야약기", "meaning": "심을 때는 자식처럼 하고, 두어 둘 때는 버린 듯이 한다.", "note": "也는 주제를 드러내며 쉬는 어조사. '심을 때는', '두어 둘 때는'.", "isRecitation": false}, {"phrase": "雖曰愛之，其實害之；雖曰憂之，其實讎之", "reading": "수왈애지, 기실해지; 수왈우지, 기실수지", "meaning": "아낀다고 하지만 실은 해치는 것이고, 걱정한다고 하지만 실은 원수로 대하는 것이다.", "note": "雖曰A其實B 'A라고 하지만 실은 B다'의 양보 대구. 讎는 동사 '원수로 대하다'.", "isRecitation": false}, {"phrase": "故不我若也", "reading": "고불아약야", "meaning": "그러므로 나만 못한 것이다.", "note": "부정문에서 대명사 목적어가 동사 앞으로 온 도치(不若我 → 不我若). '나만 못하다'.", "isRecitation": false}, {"phrase": "其本欲舒，其培欲平，其土欲故，其築欲密。", "reading": "기본욕서, 기배욕평, 기토욕고, 기축욕밀.", "meaning": "뿌리는 뻗기를, 북돋움은 고르기를, 흙은 원래 흙이기를, 다짐은 촘촘하기를 바랍니다.", "note": "", "isRecitation": true}], "quiz": [{"q": "「其土欲故」에서 故의 뜻은?", "opts": ["원래의 것(옛 흙)", "그러므로", "까닭", "일부러"], "answer": "원래의 것(옛 흙)", "note": "나무가 원래 있던 흙을 바란다는 뜻이다."}, {"q": "「故不我若也」를 바르게 풀이한 것은?", "opts": ["그러므로 나만 못하다", "그러므로 나와 같다", "그래서 나를 따르지 않는다", "그래서 내가 아니다"], "answer": "그러므로 나만 못하다", "note": "不若我에서 대명사 목적어 我가 동사 앞으로 온 도치다."}, {"q": "곽탁타가 말한 나무 기르는 비결은?", "opts": ["정성껏 심고 그 뒤에는 건드리지 않는다", "아침저녁으로 쓰다듬어 살핀다", "껍질을 긁어 살았는지 본다", "밑동을 흔들어 흙을 살핀다"], "answer": "정성껏 심고 그 뒤에는 건드리지 않는다", "note": "其蒔也若子，其置也若棄 — 나머지는 '다른 사람들'의 잘못으로 든 것이다."}], "gardenItems": [{"name": "열매 맺은 과실나무", "basis": "蚤實以蕃", "type": "reward", "item": "sapling-gam"}, {"name": "옮겨 심어도 산 큰 나무", "basis": "或移徙，無不活，且碩茂", "type": "reward", "item": "treeflower-ginkgo-01"}, {"name": "고르게 북돋운 흙둑", "basis": "其培欲平", "type": "shop"}, {"name": "과일 바구니", "basis": "賣果者", "type": "shop"}], "sampleGarden": {"name": "곽탁타의 과수원", "description": "고르게 북돋운 흙 위에 과실나무를 넓은 간격으로 띄엄띄엄 심는다. 빈틈없이 꽂아 채우지 않은 여백이 이 정원의 핵심이다. 이 글에만 연결할 수 있는 메커니즘도 있다. 이 나무들은 성장수를 자주 주면 오히려 더디 자라고, 적당히 두어야 열매를 맺게 해 글의 교훈을 돌보기 방식으로 체험하게 한다. 곽탁타 본인을 캐릭터로 그릴 때는 굽은 등을 희화화하지 않도록 주의한다."}, "draft": true}
+];
 const P = S.prog;
 const metCount = ()=>Object.keys(P.char).length;
 
@@ -1292,8 +1382,7 @@ const RANKS = [
   {name:'초록', min:40, color:'#2A6B33', bonus:30},
   {name:'열매', min:60, color:'#C0392B', bonus:50}
 ];
-/* 배움 점수: 콘텐츠 하나를 끝까지 마쳐야만 오른다.
-   명심보감은 아직 열리지 않았으니 지금은 0점만 더한다(열리면 15점). */
+/* 배움 점수: 콘텐츠 하나를 끝까지 마쳐야만 오른다. */
 function learnScore(){
   let s = 0;
   if(P.gu>=GUJEOL.length) s += 10;      // 천자문 125마디 완주
@@ -1932,39 +2021,170 @@ function drawSeodang(){
 }
 
 /* ── 장면 3 · 서당 안 ───────────────────── */
-/* 두루마리를 갈래로 묶어 자료로 관리한다. 두루마리가 늘어나도 방 안에
-   책상을 새로 그려 넣지 않고, 이 목록에 한 줄만 더하면 된다.
+/* 두루마리는 갈래 → 분류 → 이야기 순으로 들어간다. 갈래와 분류는 이 표에
+   있고, 이야기는 CLASSICS(한문 고전)와 STORIES(옛이야기)에서 가져온다.
+   분류에 이야기가 하나도 없으면 "준비 중"으로 잠근다.
    「글자 익힘책」은 천자문 진도가 쌓이면 다시 열 것이라 목록에서만
-   빼 두었다. 관련 코드(openJok 등)는 그대로 남아 있다. */
-const SCROLL_CATALOG = [
-  { cat:'한문 고전', items:[
-    { act:'study-cheonja',   title:'천자문',   ready:true,  sub:()=>`${P.gu} / 125마디`, current:()=>P.gu<GUJEOL.length },
-    { act:'study-myeongsim', title:'명심보감', ready:false, sub:()=>'곧 문을 엽니다' }
+   빼 두었다. 관련 코드(openJok 등)는 그대로 남아 있다.
+   천자문도 메뉴에서만 숨겼다. 코드·자료·진도 기록은 그대로이고,
+   SHOW_CHEONJAMUN을 true로 바꾸면 한문 고전 안에 다시 보인다. */
+const SHOW_CHEONJAMUN = false;
+const SEODANG_MENU = [
+  { branch:'hanmun', title:'한문 고전', cats:[
+    { cat:'short', title:'짧은 이야기' },
+    { cat:'long',  title:'긴 이야기' }
   ]},
-  { cat:'옛이야기', items: Object.entries(STORIES).map(([id, st])=>(
-    { act:`story:${id}`, title:st.title, ready:true, sub:()=>`${storyProg(st).done.length} / ${st.sections.length}대목` }
-  ))}
+  { branch:'hangeul', title:'한글 고전', cats:[
+    { cat:'old',    title:'옛이야기' },
+    { cat:'modern', title:'요즘 이야기' }
+  ]}
 ];
+const CHEONJA_ITEM = { act:'study-cheonja', title:'천자문', ready:true, sub:()=>`${P.gu} / 125마디`, current:()=>P.gu<GUJEOL.length };
+function catItems(cat){
+  const items = CLASSICS.filter(x=>x.category===cat).sort((a,b)=>a.order-b.order).map(x=>(
+    { act:`classic:${x.id}`, title:x.title, ready:true, sub:()=>x.titleKo }
+  ));
+  if(cat==='old') Object.entries(STORIES).forEach(([id, st])=>items.push(
+    { act:`story:${id}`, title:st.title, ready:true, sub:()=>`${storyProg(st).done.length} / ${st.sections.length}대목` }
+  ));
+  return items;
+}
 function scrollRowHTML(it){
   const badge = !it.ready ? LOCK_SVG
     : (it.current && it.current()) ? '<span class="badge2 now">지금</span>'
-    : '<span class="badge2 done">읽기</span>';
+    : `<span class="badge2 done">${it.badge||'읽기'}</span>`;
   return `<button class="gurow ${it.ready?'done':'locked'}" data-act="${it.act}">
     <span class="gutext"><b>${it.title}</b><br><small>${it.sub()}</small></span>
     ${badge}</button>`;
 }
-function renderScrollList(){
-  sheetBody.innerHTML = SCROLL_CATALOG.map(g=>`
-    <div class="gugroup">
-      <div class="grouptitle" style="margin:4px 2px 8px;font-size:15px;font-weight:700;color:#7A6E5E">${g.cat}</div>
-      <div class="gulist">${g.items.map(scrollRowHTML).join('')}</div>
-    </div>`).join('');
+/* 두루마리 화면 한 칸을 그린다. back이 있으면 맨 아래에 뒤로 단추를 둔다. */
+function renderMenu(title, items, back){
+  sheetTitle.textContent = title;
+  sheetBody.innerHTML = `<div class="gulist">${items.map(scrollRowHTML).join('')}</div>`
+    + (back ? `<button class="subbtn" id="menuBack">← ${back.label}</button>` : '');
+  sheetBody.scrollTop = 0;
   sheetBody.querySelectorAll('.gurow[data-act]').forEach(el=>
     el.addEventListener('click', ()=>{
-      const it = SCROLL_CATALOG.flatMap(g=>g.items).find(x=>x.act===el.dataset.act);
-      if(!it.ready) return toast('곧 열립니다');
+      const it = items.find(x=>x.act===el.dataset.act);
+      if(!it.ready) return toast('준비 중입니다');
       doAct(it.act);
     }));
+  if(back) document.getElementById('menuBack').addEventListener('click', back.go);
+}
+function renderScrollList(){
+  renderMenu('두루마리', SEODANG_MENU.map(b=>(
+    { act:`branch:${b.branch}`, title:b.title, ready:true, badge:'열기', sub:()=>b.cats.map(c=>c.title).join(' · ') }
+  )));
+}
+function renderBranch(branch){
+  const b = SEODANG_MENU.find(x=>x.branch===branch);
+  const items = b.cats.map(c=>{
+    const n = catItems(c.cat).length;
+    return { act:`cat:${c.cat}`, title:c.title, ready:n>0, badge:'열기', sub:()=>n ? `${n}편` : '준비 중' };
+  });
+  if(branch==='hanmun' && SHOW_CHEONJAMUN) items.push(CHEONJA_ITEM);
+  renderMenu(b.title, items, { label:'두 갈래로', go:renderScrollList });
+}
+function renderCategory(cat){
+  const b = SEODANG_MENU.find(x=>x.cats.some(c=>c.cat===cat));
+  renderMenu(b.cats.find(c=>c.cat===cat).title, catItems(cat),
+    { label:`${b.title}으로`, go:()=>renderBranch(b.branch) });
+}
+/* 한문 고전 이야기 보기 — 원문, 핵심 구문 연습(독음·의미), 전체 번역, 배송 관문,
+   퀴즈, 정원 아이템, 샘플 정원을 차례로 보여준다.
+   정원 아이템의 item은 장터에 이미 있는 물건(ITEMS)이다. 맞는 그림이 없으면 비워 둔다.
+   퀴즈를 다 맞히면 학습 보상(reward) 가운데 그림이 있는 것을 한 번만 받는다.
+   장터(shop) 아이템은 장터에서 산다. */
+function renderClassic(id){
+  const x = CLASSICS.find(s=>s.id===id);
+  const paras = t => t.split('\n\n').map(p=>`<p>${p}</p>`).join('');
+  const catTitle = SEODANG_MENU.flatMap(b=>b.cats).find(c=>c.cat===x.category).title;
+  const phraseHTML = k=>`
+        <div class="cl-phrase">${k.phrase}</div>
+        <div class="cl-read">${k.reading}</div>
+        <div class="cl-mean">${k.meaning}</div>
+        ${k.note ? `<div class="cl-note">${k.note}</div>` : ''}`;
+  const recite = x.keyPhrases.filter(k=>k.isRecitation);
+  const prizes = x.gardenItems.filter(g=>g.type==='reward' && g.item);
+  const itemHTML = g=>{
+    const it = g.item && ITEMS[g.item];
+    if(it) ensureThemeArt(it.theme);
+    const thumb = it ? `<img class="cl-thumb" data-id="${g.item}" src="${it.art.url||it.art.src}" alt="">`
+                     : '<div class="cl-thumb none">그림 준비 중</div>';
+    return `<li class="cl-item">${thumb}<div>
+      <b>${g.name}</b> <span class="cl-tag ${g.type}">${g.type==='reward' ? '학습 보상' : '장터'}</span>
+      <div class="cl-phrase small">${g.basis}</div>
+      ${it ? `<div class="cl-note">장터의 「${it.name}」${g.type==='shop' ? ` · ${it.amt}전` : ''}</div>` : ''}
+    </div></li>`;
+  };
+  // 보기는 섞어서 보인다. data-o는 원래 보기의 순서다
+  const quizHTML = x.quiz.map((q,qi)=>`
+      <li class="cl-quiz" data-q="${qi}">
+        <div class="hint">${qi+1} / ${x.quiz.length}</div>
+        <div class="cl-mean">${q.q}</div>
+        <div class="choices">${shuffle(q.opts.map((o,i)=>i)).map(i=>
+          `<button class="choice" data-o="${i}">${q.opts[i]}</button>`).join('')}</div>
+        <div class="after"></div>
+      </li>`).join('');
+  sheetTitle.textContent = x.title;
+  sheetBody.innerHTML = `
+    <div class="cl-head">
+      <div class="cl-title">${x.title}</div>
+      <div class="cl-ko">${x.titleKo}</div>
+      <div class="cl-meta">${x.source}</div>
+      <div class="cl-tags">${x.level ? `<span class="cl-tag">${x.level}</span>` : ''}${x.draft ? '<span class="cl-tag draft">원문 검토 중</span>' : ''}</div>
+    </div>
+    <h2 class="cl-h">원문</h2>
+    <div class="cl-orig">${paras(x.original)}</div>
+    <h2 class="cl-h">핵심 구문 연습</h2>
+    <ul class="cl-list">${x.keyPhrases.filter(k=>!k.isRecitation).map(k=>`<li>${phraseHTML(k)}</li>`).join('')}</ul>
+    <h2 class="cl-h">전체 번역</h2>
+    <div class="cl-tr">${paras(x.translation)}</div>
+    <h2 class="cl-h">배송 관문</h2>
+    <ul class="cl-list">${recite.map(k=>`<li class="recite">${phraseHTML(k)}</li>`).join('')}</ul>
+    <h2 class="cl-h">퀴즈</h2>
+    <ul class="cl-list">${quizHTML}</ul>
+    <h2 class="cl-h">받을 수 있는 정원 아이템</h2>
+    <ul class="cl-list">${x.gardenItems.map(itemHTML).join('')}</ul>
+    <div id="clPrize"></div>
+    <h2 class="cl-h">샘플 정원 「${x.sampleGarden.name}」</h2>
+    <div class="cl-tr">${paras(x.sampleGarden.description)}</div>
+    <button class="subbtn" id="menuBack">← ${catTitle} 목록으로</button>`;
+  sheetBody.scrollTop = 0;
+  document.getElementById('menuBack').addEventListener('click', ()=>renderCategory(x.category));
+
+  // 퀴즈: 틀리면 그 보기만 잠그고 다시 고른다. 다 맞혀야 아이템을 받는다
+  const solved = new Set();
+  const drawPrize = ()=>{
+    const box = document.getElementById('clPrize');
+    if(S.classicDone[x.id]){ box.innerHTML = '<p class="note">이 글의 정원 아이템을 이미 받았습니다.</p>'; return; }
+    if(solved.size<x.quiz.length){ box.innerHTML = `<p class="note">퀴즈를 다 풀면 학습 보상을 받을 수 있습니다 (${solved.size} / ${x.quiz.length}).</p>`; return; }
+    if(!prizes.length){ box.innerHTML = '<p class="note">퀴즈를 다 풀었습니다. 받을 아이템의 그림은 아직 준비 중입니다.</p>'; return; }
+    box.innerHTML = '<button class="bigbtn" id="clGet">정원 아이템 받기</button>';
+    document.getElementById('clGet').addEventListener('click', ()=>{
+      prizes.forEach(g=>{ S.owned[g.item]=(S.owned[g.item]||0)+1; });
+      S.classicDone[x.id]=true;
+      save(); syncHUD();
+      toast(`${prizes.map(g=>`「${ITEMS[g.item].name}」`).join(' ')} — 정원보따리에 넣었습니다`);
+      drawPrize();
+    });
+  };
+  sheetBody.querySelectorAll('.cl-quiz').forEach(li=>{
+    const qi=+li.dataset.q, q=x.quiz[qi], ans=q.opts.indexOf(q.answer);
+    li.querySelectorAll('.choice').forEach(b=>b.addEventListener('click', ()=>{
+      const after=li.querySelector('.after');
+      if(+b.dataset.o===ans){
+        li.querySelectorAll('.choice').forEach(c=>c.disabled=true);
+        b.classList.add('right');
+        after.innerHTML = `<div class="verdict right">맞습니다</div><p class="note">${q.note}</p>`;
+        solved.add(qi); drawPrize();
+      } else {
+        b.disabled=true; b.classList.add('wrong');
+        after.innerHTML = '<div class="verdict wrong">아닙니다 — 다시 골라 보세요</div>';
+      }
+    }));
+  });
+  drawPrize();
 }
 function openScrolls(){
   openSheetRaw('두루마리');
@@ -2272,8 +2492,10 @@ function doAct(act){
   }
   if(act==='study-cheonja')   return openGujeolList();
   if(act==='study-jok')       return openJok();
-  if(act==='study-myeongsim') return toast('명심보감은 곧 문을 엽니다');
   if(act.startsWith('story:')) return openStory(act.slice(6));
+  if(act.startsWith('branch:'))  return renderBranch(act.slice(7));
+  if(act.startsWith('cat:'))     return renderCategory(act.slice(4));
+  if(act.startsWith('classic:')) return renderClassic(act.slice(8));
   if(act==='shop-flower')  return openGrowShop();
   if(act==='shop-stone')   return openShop();
   if(act==='sr-quotes')  return toast('곧 열립니다');
@@ -3464,7 +3686,7 @@ const BH_QUIZ = {
       note:`'잘못을 뉘우치다'처럼 씁니다.` },
     { q:`'명심하다'는 어떤 뜻입니까?`,
       opts:[`마음에 깊이 새겨 두다`,`곧 잊어버리다`,`크게 소리치다`,`멀리 떠나다`], answer:`마음에 깊이 새겨 두다`,
-      note:`'명심보감'의 '명심'도 같은 뜻입니다.` },
+      note:`'선생님 말씀을 명심하다'처럼 씁니다.` },
     { q:`'우애'는 누구 사이의 정을 이릅니까?`,
       opts:[`형제 사이`,`부모와 자식 사이`,`임금과 신하 사이`,`스승과 제자 사이`], answer:`형제 사이`,
       note:`'우애가 깊다'처럼 씁니다.` }
@@ -4741,7 +4963,7 @@ function syncHUD(){
   gt.textContent = rk.name; gt.style.background = rk.color;
   document.querySelector('#who .name').textContent = myName();
   syncNickTxt();
-  document.getElementById('navDot').style.display=(P.gu<GUJEOL.length||dueChars(P).length)?'block':'none';
+  document.getElementById('navDot').style.display=(SHOW_CHEONJAMUN&&(P.gu<GUJEOL.length||dueChars(P).length))?'block':'none';
 }
 let toastTimer;
 function toast(msg){
