@@ -511,6 +511,8 @@ const AVATAR_SCALE = 1.45;
 /* 공간마다 학동만 더 키우는 배율. 서재는 방 안을 가까이서 본 그림이라 학동이 작아 보여 키운다 */
 const ROOM_AVATAR_SCALE = { study:1.7 };
 function roomAvatarScale(){ return ROOM_AVATAR_SCALE[where] || 1; }
+/* 공간마다 놓은 물건을 줄이거나 키우는 배율. 정원 배경(운교 마을)이 예전보다 멀리 보이는 그림이라 물건을 조금 줄인다 */
+const ROOM_ITEM_SCALE = { garden:0.85 };
 
 /* ── 정원 크기·원근 — 화면을 보면서 여기 숫자만 바꿔 맞춘다 ──────────
    ITEM_SCALE        정원 물건(꽃·나무·담…)의 기준 크기 배율. 1.5면 예전의 1.5배.
@@ -1977,7 +1979,7 @@ function posFor(w){ return (visiting && w==='garden') ? visitPos : S.pos[w]; }
 /* 땅에 깔리는 것끼리의 겹치는 차례: 깔개(cover) → 보통(연못·잔디·디딤돌) → 물 위(onWater, 물고기) */
 function groundLayer(it){ return it.gkind==='cover' ? 0 : it.onWater ? 2 : 1; }
 function itemScale(it, y){
-  return (it.slot==='ground' ? 1 : SIZE_SCALE*ITEM_SCALE) * depthScale(y);
+  return (it.slot==='ground' ? 1 : SIZE_SCALE*ITEM_SCALE) * depthScale(y) * (ROOM_ITEM_SCALE[where] || 1);
 }
 /* 씨앗·묘목은 물을 줄수록 자라서 그림과 크기가 바뀐다. 아직 국화
    (씨앗 대표)와 매화나무(묘목 대표)만 제 그림이 있어서, 나머지
