@@ -1,0 +1,74 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 720" width="800" height="720">
+  <!-- 五柳先生傳: 작은 초가 둘레에 버드나무 다섯 그루. 낮은 울타리, 국화, 툇마루의 책과 술병 -->
+  <defs>
+    <linearGradient id="sky" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#BFDCE8"/>
+      <stop offset="1" stop-color="#EEF0DC"/>
+    </linearGradient>
+  </defs>
+  <rect width="800" height="720" fill="url(#sky)"/>
+  <!-- 구름 -->
+  <g fill="#FFFFFF" opacity=".85">
+    <ellipse cx="110" cy="110" rx="70" ry="22"/><ellipse cx="160" cy="96" rx="44" ry="20"/>
+    <ellipse cx="660" cy="80" rx="80" ry="22"/><ellipse cx="610" cy="70" rx="40" ry="18"/>
+  </g>
+  <!-- 먼 산 -->
+  <path d="M0 330 C100 260 180 280 260 300 C340 250 420 240 500 290 C580 260 680 250 800 300 L800 420 L0 420 Z" fill="#9DB8A2"/>
+  <path d="M0 380 C120 340 220 350 330 370 C440 340 560 340 680 365 C730 355 770 352 800 356 L800 440 L0 440 Z" fill="#86A584"/>
+  <!-- 마당 -->
+  <path d="M0 430 C200 410 600 410 800 430 L800 720 L0 720 Z" fill="#CDB98A"/>
+  <path d="M0 560 C200 540 600 545 800 565 L800 720 L0 720 Z" fill="#BFAA76"/>
+  <!-- 버드나무 하나 그리기 -->
+  <defs>
+    <g id="willow">
+      <path d="M0 0 C-4 -40 4 -80 -6 -130" stroke="#5B4530" stroke-width="12" fill="none" stroke-linecap="round"/>
+      <path d="M-4 -100 C-30 -120 -50 -130 -70 -128 M0 -110 C24 -130 48 -136 66 -130" stroke="#5B4530" stroke-width="6" fill="none" stroke-linecap="round"/>
+      <ellipse cx="-4" cy="-150" rx="80" ry="42" fill="#7FA34E"/>
+      <g stroke="#8DB45A" stroke-width="3" fill="none" stroke-linecap="round">
+        <path d="M-70 -140 C-74 -110 -72 -80 -64 -54"/><path d="M-52 -128 C-56 -96 -54 -66 -48 -40"/>
+        <path d="M-34 -124 C-36 -96 -34 -70 -30 -50"/><path d="M-14 -120 C-16 -92 -14 -66 -12 -44"/>
+        <path d="M8 -122 C8 -94 10 -68 12 -48"/><path d="M28 -126 C30 -98 32 -72 36 -52"/>
+        <path d="M48 -130 C52 -102 54 -76 58 -56"/><path d="M68 -138 C72 -110 72 -84 70 -64"/>
+      </g>
+      <g stroke="#A6C96E" stroke-width="2" fill="none" stroke-linecap="round" opacity=".9">
+        <path d="M-62 -150 C-64 -126 -62 -104 -58 -86"/><path d="M-24 -156 C-26 -128 -24 -104 -22 -84"/>
+        <path d="M18 -156 C18 -130 20 -108 22 -88"/><path d="M56 -150 C58 -126 60 -104 62 -86"/>
+      </g>
+    </g>
+  </defs>
+  <!-- 뒤쪽 버드나무 둘 -->
+  <use href="#willow" transform="translate(120 470) scale(.95)"/>
+  <use href="#willow" transform="translate(690 465) scale(.95)"/>
+  <!-- 초가 -->
+  <g transform="translate(400 530)">
+    <rect x="-130" y="-70" width="260" height="80" fill="#E8D9B8" stroke="#5B4530" stroke-width="3"/>
+    <rect x="-130" y="4" width="260" height="14" fill="#8A6A48"/>
+    <path d="M-160 -64 C-150 -120 -60 -150 0 -150 C60 -150 150 -120 160 -64 C100 -54 -100 -54 -160 -64 Z" fill="#C9A35E" stroke="#7A5A30" stroke-width="3"/>
+    <g stroke="#A9843F" stroke-width="2" fill="none" opacity=".7">
+      <path d="M-120 -76 C-60 -90 60 -90 120 -76"/><path d="M-90 -110 C-40 -122 40 -122 90 -110"/>
+    </g>
+    <rect x="-30" y="-58" width="60" height="62" fill="#7A5A3C" stroke="#5B4530" stroke-width="2"/>
+    <rect x="-108" y="-50" width="50" height="34" fill="#F4ECD8" stroke="#5B4530" stroke-width="2"/>
+    <path d="M-83 -50 L-83 -16 M-108 -33 L-58 -33" stroke="#5B4530" stroke-width="2"/>
+    <rect x="62" y="-50" width="46" height="34" fill="#F4ECD8" stroke="#5B4530" stroke-width="2"/>
+    <!-- 툇마루의 책과 술병 -->
+    <rect x="56" y="-6" width="30" height="8" fill="#3E5A7A"/>
+    <rect x="58" y="-12" width="26" height="6" fill="#6B3A33"/>
+    <path d="M100 2 q-8 -6 -5 -16 q2 -8 5 -10 q3 2 5 10 q3 10 -5 16 Z" fill="#B5652F"/>
+  </g>
+  <!-- 앞쪽 버드나무 셋 -->
+  <use href="#willow" transform="translate(220 600) scale(1.05)"/>
+  <use href="#willow" transform="translate(585 605) scale(1.05)"/>
+  <use href="#willow" transform="translate(760 660) scale(.9)"/>
+  <!-- 낮은 싸리 울타리 -->
+  <g stroke="#7A5A30" stroke-width="4" stroke-linecap="round">
+    <path d="M0 650 L330 640"/><path d="M0 670 L330 660"/>
+    <path d="M20 640 v40"/><path d="M60 638 v40"/><path d="M100 637 v40"/><path d="M140 636 v40"/><path d="M180 635 v40"/><path d="M220 634 v40"/><path d="M260 633 v40"/><path d="M300 632 v40"/>
+  </g>
+  <!-- 국화 -->
+  <g>
+    <g fill="#F2C33A"><circle cx="360" cy="670" r="8"/><circle cx="385" cy="660" r="7"/><circle cx="410" cy="672" r="8"/><circle cx="470" cy="668" r="7"/><circle cx="495" cy="678" r="8"/></g>
+    <g fill="#C9841F"><circle cx="360" cy="670" r="3"/><circle cx="385" cy="660" r="3"/><circle cx="410" cy="672" r="3"/><circle cx="470" cy="668" r="3"/><circle cx="495" cy="678" r="3"/></g>
+    <g stroke="#5E7A3E" stroke-width="3"><path d="M360 678 v30"/><path d="M385 667 v40"/><path d="M410 680 v28"/><path d="M470 675 v32"/><path d="M495 686 v24"/></g>
+  </g>
+</svg>
