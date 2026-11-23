@@ -183,6 +183,50 @@ body{font-family:'Gaegu',system-ui,sans-serif;color:var(--ink);-webkit-font-smoo
 #nav button .dot{position:absolute;top:2px;right:calc(50% - 18px);width:9px;height:9px;
   border-radius:50%;background:#D9463F;border:2px solid var(--hanji)}
 
+/* 운교서당 서가 — 책가 칸에 선장본이 서 있고, 누르면 광곽 두른 면으로 펼쳐진다 */
+.sg-case{background:linear-gradient(180deg,#94664A,#7A5236 30%,#7A5236);border-radius:8px;padding:10px;
+  box-shadow:inset 0 0 0 2.5px var(--ink);display:flex;flex-direction:column;gap:8px;box-sizing:border-box}
+.sg-bay{position:relative;background:linear-gradient(180deg,rgba(0,0,0,.38),rgba(0,0,0,.18) 40%,rgba(0,0,0,.26));
+  border-radius:4px;padding:22px 14px 0;flex:1;display:flex;flex-direction:column;box-shadow:inset 0 6px 14px rgba(0,0,0,.35)}
+.sg-baylabel{position:absolute;top:3px;left:12px;font-size:14px;color:#F2E8D5;letter-spacing:.08em}
+.sg-row{display:flex;align-items:flex-end;gap:6px;flex:1;min-height:116px;border-bottom:8px solid #4E3322;
+  margin:0 -14px;padding:0 14px;overflow-x:auto}
+.sg-book{flex:0 0 auto;position:relative;border:0;padding:0;margin:0;border-radius:2px 2px 0 0;cursor:pointer;
+  background:repeating-linear-gradient(135deg,rgba(255,255,255,.05) 0 3px,transparent 3px 7px),
+    linear-gradient(90deg,var(--c2),var(--c) 22%,var(--c) 78%,var(--c2));
+  box-shadow:inset -2px 0 0 rgba(0,0,0,.18),2px 0 3px rgba(0,0,0,.25);
+  transition:transform 260ms cubic-bezier(.2,.8,.2,1),opacity 200ms;transform-origin:50% 100%}
+.sg-book:hover{transform:translateY(-6px)}
+.sg-book.out{transform:translateY(-46px) rotate(-3deg);opacity:0}
+.sg-thread{position:absolute;left:0;right:0;height:2px;background:#EFE6D2;opacity:.85;box-shadow:0 1px 0 rgba(0,0,0,.2)}
+.sg-label{position:absolute;top:9px;left:50%;transform:translateX(-50%);width:22px;padding:4px 0;z-index:1;
+  background:#FBF7EE;border:1px solid rgba(0,0,0,.25);font-family:"Noto Serif KR","Batang",serif;font-weight:700;
+  font-size:13px;line-height:1.1;color:#2A221C;writing-mode:vertical-rl;text-orientation:upright;
+  display:flex;align-items:center}
+.sg-ribbon{position:absolute;bottom:0;right:8px;width:7px;height:20px;background:#9C3B2B;z-index:2;
+  clip-path:polygon(0 0,100% 0,100% 100%,50% 78%,0 100%)}
+.sg-prop{flex:0 0 auto;align-self:flex-end;margin-left:auto;line-height:0}
+.sg-spread{background:#F7F2E6;border-radius:6px;padding:12px;box-shadow:0 0 0 5px #E6DCC6,0 14px 24px -12px rgba(0,0,0,.4)}
+.sg-frame{border:3px solid #9C3B2B;outline:1px solid #9C3B2B;outline-offset:-8px;padding:18px 16px}
+.sg-head{margin:0;font-size:15px;color:#9C3B2B;letter-spacing:.16em}
+.sg-title{margin:4px 0 0;font-family:"Noto Serif KR","Batang",serif;font-weight:900;font-size:34px;line-height:1.15}
+.sg-ko{margin:2px 0 0;font-size:18px;color:#5E564E}
+.sg-desc{margin:10px 0 0;font-size:16px;line-height:1.5}
+.sg-count{margin:12px 0 0;font-size:15px;color:#5E564E}
+.sg-count b{font-size:26px;color:#2F6B4F}
+.sg-bar{margin-top:4px;height:6px;border-radius:3px;background:#ECE6DC;overflow:hidden}
+.sg-bar i{display:block;height:100%;background:#2F6B4F}
+.sg-toc{list-style:none;margin:8px 0 0;padding:0}
+.sg-toc li+li{border-top:1px dotted rgba(156,59,43,.45)}
+.sg-entry{width:100%;text-align:left;background:none;border:0;padding:10px 4px;cursor:pointer;font:inherit;color:var(--ink);
+  display:grid;grid-template-columns:minmax(0,1fr) auto;gap:0 10px;align-items:center;border-radius:4px}
+.sg-entry:hover{background:rgba(156,59,43,.07)}
+.sg-eh{font-family:"Noto Serif KR","Batang",serif;font-weight:700;font-size:19px;overflow-wrap:anywhere}
+.sg-ek{grid-column:1;font-size:15px;color:#5E564E;overflow-wrap:anywhere}
+.sg-chip{grid-column:2;grid-row:1/span 2;font-size:14px;padding:2px 10px;border-radius:999px;background:#ECE6DC;color:#7B6F62}
+.sg-chip.done{background:#DCEDE3;color:#2F6B4F}
+.sg-group{display:flex;flex-direction:column;padding:10px 4px 2px}
+.sg-part .sg-entry{padding-left:20px}
 #overlay{position:absolute;inset:0;z-index:40;display:none;flex-direction:column;background:var(--hanji)}
 #overlay.on{display:flex}
 .sheet-top{display:flex;align-items:center;gap:10px;padding:calc(env(safe-area-inset-top) + 10px) 12px 10px;
@@ -509,7 +553,7 @@ const SIZE_SCALE = 0.7;
 /* 학동(아바타)만 따로 키우는 배율. 정원 물건 크기는 SIZE_SCALE 그대로 두고 학동만 이만큼 더 크게 그린다. */
 const AVATAR_SCALE = 1.45;
 /* 공간마다 학동만 더 키우는 배율. 서재는 방 안을 가까이서 본 그림이라 학동이 작아 보여 키운다 */
-const ROOM_AVATAR_SCALE = { study:1.7 };
+const ROOM_AVATAR_SCALE = { study:1.7, garden:0.85 }; // 정원은 배경이 멀리 보이는 그림이라 물건(ROOM_ITEM_SCALE)과 같이 줄인다
 function roomAvatarScale(){ return ROOM_AVATAR_SCALE[where] || 1; }
 /* 공간마다 놓은 물건을 줄이거나 키우는 배율. 정원 배경(운교 마을)이 예전보다 멀리 보이는 그림이라 물건을 조금 줄인다 */
 const ROOM_ITEM_SCALE = { garden:0.85 };
@@ -2105,90 +2149,132 @@ function drawSeodang(){
 }
 
 /* ── 장면 3 · 서당 안 ───────────────────── */
-/* 두루마리는 갈래 → 분류 → 이야기 순으로 들어간다. 갈래와 분류는 이 표에
-   있고, 이야기는 CLASSICS(한문 고전)와 STORIES(옛이야기)에서 가져온다.
-   분류에 이야기가 하나도 없으면 "준비 중"으로 잠근다.
-   「글자 익힘책」은 천자문 진도가 쌓이면 다시 열 것이라 목록에서만
-   빼 두었다. 관련 코드(openJok 등)는 그대로 남아 있다.
-   천자문도 메뉴에서만 숨겼다. 코드·자료·진도 기록은 그대로이고,
-   SHOW_CHEONJAMUN을 true로 바꾸면 한문 고전 안에 다시 보인다. */
+/* 학동 책상 위 책을 누르면 「운교서당 서가」가 열린다. 책가 칸마다 책이 꽂혀 있고,
+   책을 누르면 펼쳐져 목차가 보인다. 천자문만은 누르면 곧장 천자문 공부로 들어간다.
+     古文眞寶     CLASSICS의 긴 이야기(category long). 여러 편으로 나눈 글(group)은 한 편으로 센다
+     교과서 성어  CLASSICS의 짧은 이야기(category short)
+     옛이야기     STORIES(박흥보전·심청전)
+   책 두께는 목차에 든 글 수를 따른다. 마지막으로 꺼낸 책에는 책갈피(S.shelfLast)를 꽂는다.
+   「글자 익힘책」은 천자문 진도가 쌓이면 다시 열 것이라 서가에서 빼 두었다.
+   관련 코드(openJok 등)는 그대로 남아 있다.
+   SHOW_CHEONJAMUN은 아래 메뉴의 천자문 알림 점만 켜고 끈다. */
 const SHOW_CHEONJAMUN = false;
-const SEODANG_MENU = [
-  { branch:'hanmun', title:'한문 고전', cats:[
-    { cat:'short', title:'짧은 이야기' },
-    { cat:'long',  title:'긴 이야기' }
-  ]},
-  { branch:'hangeul', title:'한글 고전', cats:[
-    { cat:'old',    title:'옛이야기' },
-    { cat:'modern', title:'요즘 이야기' }
-  ]}
-];
-const CHEONJA_ITEM = { act:'study-cheonja', title:'천자문', ready:true, sub:()=>`${P.gu} / 125마디`, current:()=>P.gu<GUJEOL.length };
-/* 긴 글을 여러 편으로 나눈 것은 group(묶음 이름)·part(편 차례)를 적는다. 분류 목록에는
-   묶음 하나(groupTitle)로 보이고, 열면 그 안에 편들이 있다 */
+/* 긴 글을 여러 편으로 나눈 것은 group(묶음 이름)·part(편 차례)를 적는다. 목차에는
+   묶음 이름 아래에 편들이 들어간다 */
 function groupParts(g){ return CLASSICS.filter(x=>x.group===g).sort((a,b)=>a.part-b.part); }
-function catItems(cat){
-  const items = [], seen = new Set();
+/* 고전 한 갈래(cat)의 목차: 한 편이면 { x }, 여러 편으로 나눈 글이면 { group, parts } */
+function classicToc(cat){
+  const out = [], seen = new Set();
   CLASSICS.filter(x=>x.category===cat).sort((a,b)=>a.order-b.order).forEach(x=>{
-    if(!x.group) return items.push({ act:`classic:${x.id}`, title:x.title, ready:true, sub:()=>x.titleKo });
+    if(!x.group) return out.push({ x });
     if(seen.has(x.group)) return;
     seen.add(x.group);
-    const parts = groupParts(x.group);
-    items.push({ act:`cgroup:${x.group}`, title:x.groupTitle, ready:true, badge:'열기',
-      sub:()=>`${x.groupKo} · ${parts.filter(p=>S.classicDone[p.id]).length} / ${parts.length}편` });
+    out.push({ group:x, parts:groupParts(x.group) });
   });
-  if(cat==='old') Object.entries(STORIES).forEach(([id, st])=>items.push(
-    { act:`story:${id}`, title:st.title, ready:true, sub:()=>`${storyProg(st).done.length} / ${st.sections.length}대목` }
-  ));
-  return items;
+  return out;
 }
-function scrollRowHTML(it){
-  const badge = !it.ready ? LOCK_SVG
-    : (it.current && it.current()) ? '<span class="badge2 now">지금</span>'
-    : `<span class="badge2 done">${it.badge||'읽기'}</span>`;
-  return `<button class="gurow ${it.ready?'done':'locked'}" data-act="${it.act}">
-    <span class="gutext"><b>${it.title}</b><br><small>${it.sub()}</small></span>
-    ${badge}</button>`;
+/* hgt는 책 높이(칸 높이에 대한 %), w는 책 두께(px) */
+const SHELF_BOOKS = {
+  cheonja: { h:'千字文', k:'천자문', c:'#3E5A7A', c2:'#2E4560', hgt:89, w:44, act:'study-cheonja' },
+  gomun:   { h:'古文眞寶', k:'고문진보', c:'#2F5446', c2:'#234034', hgt:96, cat:'long',
+             desc:'옛 문장가들의 이름난 글을 모은 책입니다. 정원과 꽃과 나무가 나오는 글부터 차례로 엽니다.' },
+  seongeo: { h:'교과서 성어', k:'교과서 성어', c:'#B9975C', c2:'#9C7C45', hgt:84, cat:'short',
+             desc:'한문 교과서에 실린 성어의 바탕 이야기를 모았습니다. 짧은 글 한 편에 성어 하나가 들어 있습니다.' },
+  yet:     { h:'옛이야기', k:'옛이야기', c:'#6B3A33', c2:'#552B25', hgt:92, stories:true,
+             desc:'우리 옛이야기를 대목마다 나누어 읽고, 어휘 퀴즈로 낱말을 익힙니다.' },
+  /* 아래 넷은 아직 글이 들어가지 않은 책이다. 서가에 꽂아만 두고, 펼치면 준비 중이라고 알린다 */
+  myeongsim:{ h:'明心寶鑑', k:'명심보감', c:'#7A4E2D', c2:'#5E3B21', hgt:93, w:40, desc:'마음을 밝히는 옛 성현의 말씀을 모은 책입니다.' },
+  gyemong: { h:'啓蒙篇', k:'계몽편', c:'#5C6B3A', c2:'#46522B', hgt:82, w:36, desc:'처음 글을 배우는 아이에게 하늘과 땅, 사람의 이치를 일러 주는 책입니다.' },
+  chungmu: { h:'李忠武公全書', k:'이충무공전서', c:'#8A3A2E', c2:'#6C2C22', hgt:98, w:42, desc:'충무공 이순신의 글과 일기, 행적을 모은 책입니다.' },
+  mandeok: { h:'萬德傳', k:'만덕전', c:'#9A6A3A', c2:'#7C532B', hgt:85, w:36, desc:'굶주린 제주 백성을 구한 김만덕의 이야기입니다.' }
+};
+const SHELF_BAYS = [
+  { name:'서당 교재', books:['cheonja','myeongsim','gyemong'] },
+  { name:'문장',      books:['gomun'], prop:'brush' },
+  { name:'인물전',    books:['chungmu','mandeok'], prop:'yeonjeok' },
+  { name:'옛이야기와 교과서 성어', books:['yet','seongeo'] }
+];
+/* 서가 빈 자리에 놓는 장식(필통·연적). 누를 수 없다 */
+const SHELF_PROPS = {
+  brush:'<svg width="45" height="80" viewBox="0 0 54 96"><rect x="6" y="40" width="42" height="56" rx="4" fill="#3B4F45"/><rect x="6" y="40" width="42" height="7" fill="#2C3C34"/><path d="M16 42 L12 6" stroke="#C9A86A" stroke-width="4" stroke-linecap="round"/><path d="M27 42 L27 2" stroke="#B08E52" stroke-width="4" stroke-linecap="round"/><path d="M38 42 L43 10" stroke="#C9A86A" stroke-width="4" stroke-linecap="round"/><path d="M12 6 l-2 -5 l4 1 z M27 2 l-2 -2 l4 0 z" fill="#26221F"/></svg>',
+  yeonjeok:'<svg width="60" height="44" viewBox="0 0 60 44"><ellipse cx="30" cy="36" rx="26" ry="7" fill="rgba(0,0,0,0.25)"/><path d="M8 34 C8 14 52 14 52 34 Z" fill="#DCE4E8"/><path d="M14 30 C20 22 40 22 46 30" stroke="#7E9DB0" stroke-width="2" fill="none"/><circle cx="30" cy="16" r="4" fill="#DCE4E8"/></svg>'
+};
+function shelfCount(b){
+  if(b.cat) return classicToc(b.cat).length;
+  if(b.stories) return Object.keys(STORIES).length;
+  return 0;
 }
-/* 두루마리 화면 한 칸을 그린다. back이 있으면 맨 아래에 뒤로 단추를 둔다. */
-function renderMenu(title, items, back){
-  sheetTitle.textContent = title;
-  sheetBody.innerHTML = `<div class="gulist">${items.map(scrollRowHTML).join('')}</div>`
-    + (back ? `<button class="subbtn" id="menuBack">← ${back.label}</button>` : '');
+function shelfBookHTML(key){
+  const b = SHELF_BOOKS[key];
+  const w = b.w || (30 + shelfCount(b)*4);
+  const threads = [0.08,0.27,0.5,0.73,0.92].map(p=>`<i class="sg-thread" style="top:${Math.round(p*100)}%"></i>`).join('');
+  return `<button class="sg-book" data-book="${key}" aria-label="${b.k} 꺼내기"
+    style="--c:${b.c};--c2:${b.c2};height:${b.hgt}%;width:${w}px">${threads}
+    <span class="sg-label">${b.h}</span>${S.shelfLast===key ? '<i class="sg-ribbon"></i>' : ''}</button>`;
+}
+function renderShelf(){
+  sheetTitle.textContent = '운교서당 서가';
+  sheetBody.innerHTML = `
+    <button class="subbtn" id="shelfBack" style="margin:0 0 12px">← 서당 교실로 돌아가기</button>
+    <div class="sg-case">${SHELF_BAYS.map(bay=>`
+      <div class="sg-bay"><span class="sg-baylabel">${bay.name}</span>
+        <div class="sg-row">${bay.books.map(shelfBookHTML).join('')}${bay.prop ? `<span class="sg-prop" aria-hidden="true">${SHELF_PROPS[bay.prop]}</span>` : ''}</div>
+      </div>`).join('')}
+    </div>`;
   sheetBody.scrollTop = 0;
-  sheetBody.querySelectorAll('.gurow[data-act]').forEach(el=>
-    el.addEventListener('click', ()=>{
-      const it = items.find(x=>x.act===el.dataset.act);
-      if(!it.ready) return toast('준비 중입니다');
-      doAct(it.act);
-    }));
-  if(back) document.getElementById('menuBack').addEventListener('click', back.go);
+  /* 서가가 시트 아래 끝까지 차도록 높이를 잡는다(작은 화면에서는 560px 아래로 줄이지 않고 스크롤) */
+  const sc = sheetBody.querySelector('.sg-case');
+  const padB = parseFloat(getComputedStyle(sheetBody).paddingBottom) || 0;
+  sc.style.height = Math.max(560, sheetBody.getBoundingClientRect().bottom - sc.getBoundingClientRect().top - padB - 2) + 'px';
+  document.getElementById('shelfBack').addEventListener('click', closeSheet);
+  sheetBody.querySelectorAll('.sg-book').forEach(el=>el.addEventListener('click', ()=>{
+    const key = el.dataset.book;
+    S.shelfLast = key; save();
+    el.classList.add('out');
+    setTimeout(()=>SHELF_BOOKS[key].act ? doAct(SHELF_BOOKS[key].act) : openShelfBook(key), 240);
+  }));
 }
-function renderScrollList(){
-  renderMenu('두루마리', SEODANG_MENU.map(b=>(
-    { act:`branch:${b.branch}`, title:b.title, ready:true, badge:'열기', sub:()=>b.cats.map(c=>c.title).join(' · ') }
-  )));
+/* 펼친 책: 위에 책 이름·소개, 아래에 목차 */
+function shelfEntryHTML(act, title, sub, done, cls){
+  return `<li${cls ? ` class="${cls}"` : ''}><button class="sg-entry" data-act="${act}">
+    <span class="sg-eh">${title}</span><span class="sg-chip${done?' done':''}">${done?'마침':'읽기'}</span>
+    <span class="sg-ek">${sub}</span></button></li>`;
 }
-function renderBranch(branch){
-  const b = SEODANG_MENU.find(x=>x.branch===branch);
-  const items = b.cats.map(c=>{
-    const n = catItems(c.cat).length;
-    return { act:`cat:${c.cat}`, title:c.title, ready:n>0, badge:'열기', sub:()=>n ? `${n}편` : '준비 중' };
+function openShelfBook(key){
+  const b = SHELF_BOOKS[key];
+  let toc = '', n = 0, fin = 0;
+  if(b.cat) classicToc(b.cat).forEach(o=>{
+    n++;
+    if(o.x){
+      const d = !!S.classicDone[o.x.id]; if(d) fin++;
+      toc += shelfEntryHTML(`classic:${o.x.id}`, o.x.title, o.x.titleKo, d);
+    } else {
+      if(o.parts.every(p=>S.classicDone[p.id])) fin++;
+      toc += `<li class="sg-group"><span class="sg-eh">${o.group.groupTitle}</span><span class="sg-ek">${o.group.groupKo} · ${o.parts.length}편으로 나눔</span></li>`
+        + o.parts.map(p=>shelfEntryHTML(`classic:${p.id}`, p.title, p.titleKo, !!S.classicDone[p.id], 'sg-part')).join('');
+    }
   });
-  if(branch==='hanmun' && SHOW_CHEONJAMUN) items.push(CHEONJA_ITEM);
-  renderMenu(b.title, items, { label:'두 갈래로', go:renderScrollList });
-}
-function renderClassicGroup(g){
-  const parts = groupParts(g), x = parts[0];
-  const catTitle = SEODANG_MENU.flatMap(b=>b.cats).find(c=>c.cat===x.category).title;
-  renderMenu(x.groupTitle, parts.map(p=>(
-    { act:`classic:${p.id}`, title:p.title, ready:true, badge:S.classicDone[p.id] ? '마침' : '읽기', sub:()=>p.titleKo }
-  )), { label:`${catTitle} 목록으로`, go:()=>renderCategory(x.category) });
-}
-function renderCategory(cat){
-  const b = SEODANG_MENU.find(x=>x.cats.some(c=>c.cat===cat));
-  renderMenu(b.cats.find(c=>c.cat===cat).title, catItems(cat),
-    { label:`${b.title}으로`, go:()=>renderBranch(b.branch) });
+  if(b.stories) Object.entries(STORIES).forEach(([id, st])=>{
+    n++;
+    const got = storyProg(st).done.length, d = got>=st.sections.length; if(d) fin++;
+    toc += shelfEntryHTML(`story:${id}`, st.title, `${got} / ${st.sections.length}대목`, d);
+  });
+  sheetTitle.textContent = b.k;
+  sheetBody.innerHTML = `
+    <button class="subbtn" id="shelfBack" style="margin:0 0 12px">← 서가로</button>
+    <div class="sg-spread"><div class="sg-frame">
+      <p class="sg-head">${SHELF_BAYS.find(x=>x.books.includes(key)).name} 칸</p>
+      <h2 class="sg-title">${b.h}</h2>
+      ${b.h!==b.k ? `<p class="sg-ko">${b.k}</p>` : ''}
+      <p class="sg-desc">${b.desc}</p>
+      ${n ? `<p class="sg-count"><b>${fin}</b> / ${n}편 마침</p>
+      <div class="sg-bar"><i style="width:${Math.round(fin/n*100)}%"></i></div>
+      <p class="sg-head" style="margin-top:18px">목 차</p>
+      <ul class="sg-toc">${toc}</ul>` : `<p class="sg-count">아직 글을 넣는 중입니다. 곧 펼쳐 읽을 수 있습니다.</p>`}
+    </div></div>`;
+  sheetBody.scrollTop = 0;
+  document.getElementById('shelfBack').addEventListener('click', renderShelf);
+  sheetBody.querySelectorAll('.sg-entry').forEach(el=>el.addEventListener('click', ()=>doAct(el.dataset.act)));
 }
 /* 한문 고전 이야기 보기 — 원문 일독, 구문 백독(독음·의미·한자 풀이), 구문 강독(퀴즈),
    구문 배강(글자 배열), 배강 선물을 차례로 보여준다.
@@ -2198,7 +2284,7 @@ function renderCategory(cat){
 function renderClassic(id){
   const x = CLASSICS.find(s=>s.id===id);
   const paras = t => t.split('\n\n').map(p=>`<p>${p}</p>`).join('');
-  const catTitle = SEODANG_MENU.flatMap(b=>b.cats).find(c=>c.cat===x.category).title;
+  const bookKey = x.category==='short' ? 'seongeo' : 'gomun';
   // 구문에서 어휘(hanja) 글자는 cl-v, 문법(grammar.pat, …로 끊긴 조각) 글자는 cl-g 색으로 칠한다.
   // 현토(hyeonto)가 있으면 표점 대신 그것을 보이고, 토(한글)는 cl-to로 작게 둔다
   const colorPhrase = k=>{
@@ -2278,9 +2364,9 @@ function renderClassic(id){
     <h2 class="cl-h">배강 선물</h2>
     <ul class="cl-list">${x.gardenItems.filter(g=>g.type==='reward').map(itemHTML).join('')}</ul>
     <div id="clPrize"></div>
-    <button class="subbtn" id="menuBack">← ${x.group ? x.groupTitle : catTitle} 목록으로</button>`;
+    <button class="subbtn" id="menuBack">← ${SHELF_BOOKS[bookKey].k} 목차로</button>`;
   sheetBody.scrollTop = 0;
-  document.getElementById('menuBack').addEventListener('click', ()=>x.group ? renderClassicGroup(x.group) : renderCategory(x.category));
+  document.getElementById('menuBack').addEventListener('click', ()=>openShelfBook(bookKey));
 
   // 퀴즈: 틀리면 그 보기만 잠그고 다시 고른다. 강독과 배강을 다 맞혀야 아이템을 받는다
   const solved = new Set(), recited = new Set();
@@ -2402,10 +2488,10 @@ function bagDrop(ids){
   });
 }
 function openScrolls(){
-  openSheetRaw('두루마리');
-  renderScrollList();
+  openSheetRaw('운교서당 서가');
+  renderShelf();
 }
-/* 서안 위에 펼쳐 놓은 책 — 두루마리 목록을 여는 자리다. 배경 그림 속
+/* 서안 위에 펼쳐 놓은 책 — 운교서당 서가를 여는 자리다. 배경 그림 속
    훈장님 책상 위 책과 같은 꼴로 그린다(가로로 넓게 펼치고, 가로줄을
    그은 면). x,y는 책의 왼쪽 위 자리다. */
 function deskBookSVG(x,y){
@@ -2712,10 +2798,7 @@ function doAct(act){
   if(act==='study-cheonja')   return openGujeolList();
   if(act==='study-jok')       return openJok();
   if(act.startsWith('story:')) return openStory(act.slice(6));
-  if(act.startsWith('branch:'))  return renderBranch(act.slice(7));
-  if(act.startsWith('cat:'))     return renderCategory(act.slice(4));
   if(act.startsWith('classic:')) return renderClassic(act.slice(8));
-  if(act.startsWith('cgroup:'))  return renderClassicGroup(act.slice(7));
   if(act==='shop-flower')  return openGrowShop();
   if(act==='shop-stone')   return openShop();
   if(act==='sr-quotes')  return toast('곧 열립니다');
@@ -3177,13 +3260,13 @@ function openSeodangIntro(force){
   sheetBody.innerHTML = `
     <div class="hanja-card" style="text-align:left">
       <p class="note" style="margin:0 0 12px;font-size:18px;color:var(--ink)">
-        "어서 오너라. 여기가 운교서당의 글방이다. 두루마리를 골라 그날 공부할 것을 정하거라."</p>
+        "어서 오너라. 여기가 운교서당의 글방이다. 서안 위 책을 펼치면 서가가 열리니, 그날 공부할 책을 골라라."</p>
       <ul style="margin:0;padding-left:20px;font-size:16px;line-height:1.7">
         <li><b>한문 고전</b>은 한 마디씩 다섯 걸음을 밟아 익히고, <b>배송</b>을 통과해야 다음 마디로 간다</li>
         <li><b>옛이야기</b>는 대목을 읽고 어휘 퀴즈를 풀어 낱말을 익힌다</li>
         <li>어느 쪽이든 공부를 마치면 전과 성장수를 받는다</li>
         <li>성장수로는 정원의 화초와 나무를 키운다</li>
-        <li>두루마리 한 권을 끝까지 마치면 배움이 쌓여 급이 오른다</li>
+        <li>책 한 권을 끝까지 마치면 배움이 쌓여 급이 오른다</li>
       </ul>
       <p class="note" style="margin:12px 0 0;font-size:18px;color:var(--ink)">
         "서두르지 말거라. 하루에 조금씩이면 충분하니라."</p>
@@ -3394,8 +3477,10 @@ function bhRowHTML(s){
 }
 function renderStoryList(id){
   sheetBody.innerHTML = resBarHTML() + `
-    <p class="note" style="margin:0 2px 12px">두루마리를 펼쳐 대목을 골라 읽습니다. 다시 읽어도 됩니다.</p>
-    <div class="gulist">${STORIES[id].sections.map(bhRowHTML).join('')}</div>`;
+    <p class="note" style="margin:0 2px 12px">대목을 골라 읽습니다. 다시 읽어도 됩니다.</p>
+    <div class="gulist">${STORIES[id].sections.map(bhRowHTML).join('')}</div>
+    <button class="subbtn" id="menuBack">← 옛이야기 목차로</button>`;
+  document.getElementById('menuBack').addEventListener('click', ()=>openShelfBook('yet'));
   sheetBody.querySelectorAll('.gurow[data-n]').forEach(el=>
     el.addEventListener('click', ()=>enterStorySection(id, +el.dataset.n)));
 }
