@@ -252,6 +252,9 @@ body{font-family:'Gaegu',system-ui,sans-serif;color:var(--ink);-webkit-font-smoo
 .subbtn{width:100%;margin-top:12px;padding:11px;border:2.5px solid var(--ink);border-radius:14px;
   background:var(--hanji-2);font-family:inherit;font-size:18px;cursor:pointer;
   display:flex;align-items:center;justify-content:center;gap:6px}
+/* 글 화면 맨 아래: 왼쪽 목차, 오른쪽 다음 편을 한 줄에 */
+.cl-foot{display:flex;gap:8px}
+.cl-foot .subbtn{flex:1;padding:9px 8px;font-size:15px}
 .subbtn svg{width:19px;height:19px;flex:0 0 auto}
 .subbtn.listening{background:#BFE3F5;color:#1B5E82}
 .subbtn.done{background:#DCEAC8;cursor:default}
@@ -2402,8 +2405,10 @@ function renderClassic(id){
     <h2 class="cl-h">배강 선물</h2>
     <ul class="cl-list">${x.gardenItems.filter(g=>g.type==='reward').map(itemHTML).join('')}</ul>
     <div id="clPrize"></div>
-    ${next ? `<button class="bigbtn" id="clNext">${next.title} 「${next.titleKo}」로 넘어가기 →</button>` : ''}
-    <button class="subbtn menuBack">← ${SHELF_BOOKS[bookKey].k} 목차로</button>`;
+    <div class="cl-foot">
+      <button class="subbtn menuBack">← ${SHELF_BOOKS[bookKey].k} 목차로</button>
+      ${next ? `<button class="subbtn" id="clNext">${next.title} →</button>` : ''}
+    </div>`;
   sheetBody.scrollTop = 0;
   sheetBody.querySelectorAll('.menuBack').forEach(el=>el.addEventListener('click', ()=>openShelfBook(bookKey, x.group)));
   if(next) document.getElementById('clNext').addEventListener('click', ()=>renderClassic(next.id));
